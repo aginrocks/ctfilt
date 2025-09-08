@@ -6,6 +6,7 @@ mod mongo_id;
 mod routes;
 mod settings;
 mod state;
+mod utils;
 
 use std::{net::SocketAddr, ops::Deref, sync::Arc};
 
@@ -41,6 +42,7 @@ use crate::{
     routes::RouteProtectionLevel,
     settings::Settings,
     state::AppState,
+    utils::FlagGenerator,
 };
 
 #[derive(OpenApi)]
@@ -71,10 +73,16 @@ async fn main() -> Result<()> {
 
     let kube_client = Arc::new(init_kubernetes(&settings).await?);
 
+    let flags = Arc::new(FlagGenerator::new(
+        settings.flags.secret.clone(),
+        settings.flags.length,
+    ));
+
     let app_state = AppState {
         database,
         settings: settings.clone(),
         kube: kube_client,
+        flags,
     };
 
     let session_layer = init_session_store(&settings).await?;

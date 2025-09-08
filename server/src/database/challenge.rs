@@ -36,21 +36,33 @@ pub enum ChallengeFlagMeta {
 #[derive(Debug, Serialize, Deserialize, ToSchema, Clone, JsonSchema)]
 pub struct ChallengeFlag {
     points: i32,
+    
+    /// A short description where the flag can be found.
+    /// Can be revealed in courses.
+    /// Visible only after solving the challenge in contests.
+    description: Option<String>,
 
     #[serde(flatten)]
     meta: ChallengeFlagMeta,
 }
 
-#[derive(Debug, Serialize, Deserialize, ToSchema, Clone, JsonSchema)]
+#[derive(Debug, Serialize, Deserialize, ToSchema, Clone)]
 #[serde(tag = "type", rename_all = "lowercase")]
 pub enum ChallengeParent {
     Course {
         #[serde(with = "object_id_as_string_required")]
-        #[schemars(with = "String")]
         #[schema(value_type = String)]
         course_id: ObjectId,
+
+        #[serde(with = "object_id_as_string_required")]
+        #[schema(value_type = String)]
+        lesson_id: ObjectId,
     },
-    Contest {},
+    Contest {
+        #[serde(with = "object_id_as_string_required")]
+        #[schema(value_type = String)]
+        contest_id: ObjectId,
+    },
 }
 
 #[derive(Debug, Serialize, Deserialize, ToSchema, Clone, JsonSchema)]
@@ -68,9 +80,6 @@ pub struct ChallengeMetadata {
     spec: ChallengeSpec,
 
     flags: Vec<ChallengeFlag>,
-
-    /// The parent of the challenge, either a course or a contest
-    parent: ChallengeParent,
 }
 
 #[derive(Debug, Serialize, Deserialize, ToSchema, Clone, JsonSchema)]
@@ -91,4 +100,9 @@ database_object!(Challenge {
 
     #[serde(flatten)]
     metadata: ChallengeMetadata,
+
+    /// The parent of the challenge, either a course or a contest
+    /// It's not included in the metadata because its course or contest
+    /// will be inferred from the context of the file
+    parent: ChallengeParent,
 });

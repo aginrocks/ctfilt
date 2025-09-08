@@ -4,6 +4,7 @@ use color_eyre::{Section as _, eyre::Context as _};
 use config::{Config, ConfigError, Environment, File};
 use http::Uri;
 use openidconnect::{ClientId, ClientSecret, IssuerUrl};
+use rand::{Rng, distr::Alphanumeric, rngs::ThreadRng};
 use serde::{Deserialize, Serialize};
 use strum::{AsRefStr, Display, EnumString, IntoStaticStr};
 use tracing::warn;
@@ -78,12 +79,33 @@ pub struct Kubernetes {
 }
 
 #[derive(Debug, Deserialize, Serialize)]
+pub struct Flags {
+    pub secret: String,
+    pub length: usize,
+}
+
+impl Default for Flags {
+    fn default() -> Self {
+        let rng = ThreadRng::default();
+
+        let secret = rng
+            .sample_iter(&Alphanumeric)
+            .take(64)
+            .map(char::from)
+            .collect();
+
+        Self { secret, length: 12 }
+    }
+}
+
+#[derive(Debug, Deserialize, Serialize)]
 pub struct Settings {
     pub general: General,
     pub db: Db,
     pub oidc: Oidc,
     pub redis: Redis,
     pub kubernetes: Kubernetes,
+    pub flags: Flags,
 }
 
 impl Settings {
@@ -164,6 +186,9 @@ impl Settings {
             },
             kubernetes: Kubernetes {
                 mode: KubernetesMode::Kubeconfig,
+            },
+            flags: Flags {
+                ..Default::default()
             },
         }
     }

@@ -54,3 +54,4 @@ utoipa-redoc = { version = "6.0.0", features = ["axum"] }
 utoipa-scalar = { version = "0.3.0", features = ["axum"] }
 visible = "0.0.1"
 schemars = { version = "1.0.4", features = ["derive", "preserve_order"] }
+sha2 = "0.10.9"

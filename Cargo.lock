@@ -3318,6 +3318,7 @@ dependencies = [
  "schemars 1.0.4",
  "serde",
  "serde_json",
+ "sha2",
  "strum",
  "tokio",
  "toml 0.8.23",
