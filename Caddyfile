@@ -1,0 +1,8 @@
+:3030 {
+	reverse_proxy /api/* localhost:8080
+	reverse_proxy /socket.io/* localhost:8080
+	reverse_proxy /apidoc/* localhost:8080
+	reverse_proxy /auth/* localhost:8080
+	reverse_proxy /oidc* localhost:8080
+	reverse_proxy /* localhost:3000
+}

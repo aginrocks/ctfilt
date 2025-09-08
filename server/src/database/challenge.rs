@@ -14,12 +14,11 @@ pub enum ChallengeType {
     Static,
 
     /// A challenge with a custom validator
-    // Dynamic,
+    Dynamic,
 
     /// A challenge that requires VPN use and is created per user
     Container,
 }
-
 // Had to use untagged enums for JsonSchema compatibility
 #[derive(Debug, Serialize, Deserialize, ToSchema, Clone, JsonSchema)]
 #[serde(untagged)]
@@ -37,24 +36,30 @@ pub struct ChallengeFlag {
 }
 
 #[derive(Debug, Serialize, Deserialize, ToSchema, Clone, JsonSchema)]
-#[serde(rename = "static")]
-pub struct Static;
+pub enum StaticFlag {
+    /// A static flag (the same for all users)
+    #[serde(rename = "static")]
+    Value,
+}
 
 #[derive(Debug, Serialize, Deserialize, ToSchema, Clone, JsonSchema)]
 pub struct ChallengeFlagStatic {
-    r#type: Static,
+    r#type: StaticFlag,
 
     /// The static flag for the challenge
     flag: String,
 }
 
 #[derive(Debug, Serialize, Deserialize, ToSchema, Clone, JsonSchema)]
-#[serde(rename = "dynamic")]
-pub struct Dynamic;
+pub enum DynamicFlag {
+    /// A flag that is different for
+    #[serde(rename = "dynamic")]
+    Value,
+}
 
 #[derive(Debug, Serialize, Deserialize, ToSchema, Clone, JsonSchema)]
 pub struct ChallengeFlagDynamic {
-    r#type: Dynamic,
+    r#type: DynamicFlag,
 
     /// Where the flag should be mounted inside the container
     mount_path: String,
