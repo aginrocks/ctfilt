@@ -19,12 +19,18 @@ pub enum ChallengeType {
     /// A challenge that requires VPN use and is created per user
     Container,
 }
-// Had to use untagged enums for JsonSchema compatibility
+
 #[derive(Debug, Serialize, Deserialize, ToSchema, Clone, JsonSchema)]
-#[serde(untagged)]
+#[serde(tag = "type", rename_all = "lowercase")]
 pub enum ChallengeFlagMeta {
-    Static(ChallengeFlagStatic),
-    Dynamic(ChallengeFlagDynamic),
+    Static {
+        /// The static flag for the challenge
+        flag: String,
+    },
+    Dynamic {
+        /// Where the flag should be mounted inside the container
+        mount_path: String,
+    },
 }
 
 #[derive(Debug, Serialize, Deserialize, ToSchema, Clone, JsonSchema)]
@@ -36,33 +42,15 @@ pub struct ChallengeFlag {
 }
 
 #[derive(Debug, Serialize, Deserialize, ToSchema, Clone, JsonSchema)]
-pub enum StaticFlag {
-    /// A static flag (the same for all users)
-    #[serde(rename = "static")]
-    Value,
-}
-
-#[derive(Debug, Serialize, Deserialize, ToSchema, Clone, JsonSchema)]
-pub struct ChallengeFlagStatic {
-    r#type: StaticFlag,
-
-    /// The static flag for the challenge
-    flag: String,
-}
-
-#[derive(Debug, Serialize, Deserialize, ToSchema, Clone, JsonSchema)]
-pub enum DynamicFlag {
-    /// A flag that is different for
-    #[serde(rename = "dynamic")]
-    Value,
-}
-
-#[derive(Debug, Serialize, Deserialize, ToSchema, Clone, JsonSchema)]
-pub struct ChallengeFlagDynamic {
-    r#type: DynamicFlag,
-
-    /// Where the flag should be mounted inside the container
-    mount_path: String,
+#[serde(tag = "type", rename_all = "lowercase")]
+pub enum ChallengeParent {
+    Course {
+        #[serde(with = "object_id_as_string_required")]
+        #[schemars(with = "String")]
+        #[schema(value_type = String)]
+        course_id: ObjectId,
+    },
+    Contest {},
 }
 
 #[derive(Debug, Serialize, Deserialize, ToSchema, Clone, JsonSchema)]
@@ -76,9 +64,24 @@ pub struct ChallengeMetadata {
     /// Markdown description of the challenge
     description: String,
 
-    r#type: ChallengeType,
+    #[serde(flatten)]
+    spec: ChallengeSpec,
 
     flags: Vec<ChallengeFlag>,
+
+    /// The parent of the challenge, either a course or a contest
+    parent: ChallengeParent,
+}
+
+#[derive(Debug, Serialize, Deserialize, ToSchema, Clone, JsonSchema)]
+#[serde(tag = "type", rename_all = "lowercase")]
+pub enum ChallengeSpec {
+    Static {},
+    Dynamic {},
+    Container {
+        /// The container image for the container challenge
+        image: String,
+    },
 }
 
 database_object!(Challenge {
