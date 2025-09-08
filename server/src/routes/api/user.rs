@@ -1,9 +1,8 @@
 use axum::{Extension, Json, response::IntoResponse};
-use axum_oidc::OidcClaims;
 use serde_json::json;
 use utoipa_axum::routes;
 
-use crate::{GroupClaims, middlewares::require_auth::UserData, routes::RouteProtectionLevel};
+use crate::{middlewares::require_auth::UserData, routes::RouteProtectionLevel};
 
 use super::Route;
 

@@ -66,11 +66,24 @@ pub struct Oidc {
 }
 
 #[derive(Debug, Deserialize, Serialize)]
+#[serde(rename_all = "lowercase")]
+pub enum KubernetesMode {
+    InCluster,
+    Kubeconfig,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct Kubernetes {
+    pub mode: KubernetesMode,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
 pub struct Settings {
     pub general: General,
     pub db: Db,
     pub oidc: Oidc,
     pub redis: Redis,
+    pub kubernetes: Kubernetes,
 }
 
 impl Settings {
@@ -148,6 +161,9 @@ impl Settings {
             },
             redis: Redis {
                 connection_string: "redis://localhost:6379".to_string(),
+            },
+            kubernetes: Kubernetes {
+                mode: KubernetesMode::Kubeconfig,
             },
         }
     }

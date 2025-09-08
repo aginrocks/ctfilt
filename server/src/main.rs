@@ -1,5 +1,6 @@
 mod axum_error;
 mod database;
+mod kubernetes;
 mod middlewares;
 mod mongo_id;
 mod routes;
@@ -35,10 +36,11 @@ use utoipa_scalar::{Scalar, Servable as _};
 
 use crate::{
     database::{init_database, init_session_store},
+    kubernetes::init_kubernetes,
     middlewares::require_auth::require_auth,
     routes::RouteProtectionLevel,
     settings::Settings,
-    state::{AppState, InnerState},
+    state::AppState,
 };
 
 #[derive(OpenApi)]
@@ -67,10 +69,13 @@ async fn main() -> Result<()> {
 
     let database = init_database(&settings).await?;
 
-    let app_state = AppState::new(InnerState {
+    let kube_client = Arc::new(init_kubernetes(&settings).await?);
+
+    let app_state = AppState {
         database,
         settings: settings.clone(),
-    });
+        kube: kube_client,
+    };
 
     let session_layer = init_session_store(&settings).await?;
     let app = init_axum(app_state, session_layer).await?;
