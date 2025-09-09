@@ -22,15 +22,15 @@ pub enum ChallengeFlagMeta {
 
 #[derive(Debug, Serialize, Deserialize, ToSchema, Clone, JsonSchema)]
 pub struct ChallengeFlag {
-    points: i32,
+    pub points: i32,
 
     /// A short description where the flag can be found.
     /// Can be revealed in courses.
     /// Visible only after solving the challenge in contests.
-    description: Option<String>,
+    pub description: Option<String>,
 
     #[serde(flatten)]
-    meta: ChallengeFlagMeta,
+    pub meta: ChallengeFlagMeta,
 }
 
 #[derive(Debug, Serialize, Deserialize, ToSchema, Clone)]
@@ -55,18 +55,18 @@ pub enum ChallengeParent {
 #[derive(Debug, Serialize, Deserialize, ToSchema, Clone, JsonSchema)]
 pub struct ChallengeMetadata {
     /// A short unique name for the challenge
-    name: String,
+    pub name: String,
 
     /// A URL-friendly unique identifier for the challenge
-    slug: String,
+    pub slug: String,
 
     /// Markdown description of the challenge
-    description: String,
+    pub description: String,
 
     #[serde(flatten)]
-    spec: ChallengeSpec,
+    pub spec: ChallengeSpec,
 
-    flags: Vec<ChallengeFlag>,
+    pub flags: Vec<ChallengeFlag>,
 }
 
 #[derive(Debug, Serialize, Deserialize, ToSchema, Clone, JsonSchema)]

@@ -1,5 +1,6 @@
 use std::{ops::Deref, sync::Arc};
 
+use headscale::apis::configuration::Configuration;
 use mongodb::Database;
 
 use crate::{orchestrator::ChallengeOrchestrator, settings::Settings, utils::FlagGenerator};
@@ -11,4 +12,5 @@ pub struct AppState {
     pub kube: Arc<kube::Client>,
     pub flags: Arc<FlagGenerator>,
     pub orchestrator: Arc<ChallengeOrchestrator>,
+    pub headscale_config: Arc<Configuration>,
 }

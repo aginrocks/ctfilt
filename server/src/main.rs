@@ -1,5 +1,6 @@
 mod axum_error;
 mod database;
+mod headscale_client;
 mod kubernetes;
 mod middlewares;
 mod mongo_id;
@@ -37,7 +38,7 @@ use utoipa_redoc::{Redoc, Servable};
 use utoipa_scalar::{Scalar, Servable as _};
 
 use crate::{
-    database::{init_database, init_session_store},
+    database::{ChallengeMetadata, ChallengeSpec, init_database, init_session_store},
     kubernetes::init_kubernetes,
     middlewares::require_auth::require_auth,
     orchestrator::ChallengeOrchestrator,
@@ -75,6 +76,8 @@ async fn main() -> Result<()> {
 
     let kube_client = Arc::new(init_kubernetes(&settings).await?);
 
+    let headscale_config = Arc::new(headscale_client::init_headscale(&settings)?);
+
     let flags = Arc::new(FlagGenerator::new(
         settings.flags.secret.clone(),
         settings.flags.length,
@@ -83,6 +86,7 @@ async fn main() -> Result<()> {
     let orchestrator = Arc::new(ChallengeOrchestrator::new(
         kube_client.clone(),
         flags.clone(),
+        headscale_config.clone(),
     ));
 
     let app_state = AppState {
@@ -90,12 +94,28 @@ async fn main() -> Result<()> {
         settings: settings.clone(),
         kube: kube_client,
         flags,
-        orchestrator,
+        orchestrator: orchestrator.clone(),
+        headscale_config,
     };
 
     let session_layer = init_session_store(&settings).await?;
     let app = init_axum(app_state, session_layer).await?;
     let listener = init_listener(&settings).await?;
+
+    orchestrator
+        .start_challenge(
+            &ChallengeMetadata {
+                name: "test".to_string(),
+                slug: "test".to_string(),
+                description: "test".to_string(),
+                spec: ChallengeSpec::Container {
+                    image: "test".to_string(),
+                },
+                flags: vec![],
+            },
+            "c12bcde279cba76bba97bdcdaf9f8651abc5d0757cdf94419c282eec4f3a5afa",
+        )
+        .await?;
 
     info!(
         "listening on {} ({})",

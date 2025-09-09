@@ -79,6 +79,13 @@ pub struct Kubernetes {
 }
 
 #[derive(Debug, Deserialize, Serialize)]
+pub struct Headscale {
+    pub url: String,
+    pub public_url: String,
+    pub api_key: String,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
 pub struct Flags {
     pub secret: String,
     pub length: usize,
@@ -105,6 +112,7 @@ pub struct Settings {
     pub oidc: Oidc,
     pub redis: Redis,
     pub kubernetes: Kubernetes,
+    pub headscale: Headscale,
     pub flags: Flags,
 }
 
@@ -186,6 +194,11 @@ impl Settings {
             },
             kubernetes: Kubernetes {
                 mode: KubernetesMode::Kubeconfig,
+            },
+            headscale: Headscale {
+                url: "http://headscale".to_string(),
+                public_url: "https://headscale.example.com".to_string(),
+                api_key: "api_key".to_string(),
             },
             flags: Flags {
                 ..Default::default()

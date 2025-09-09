@@ -13,8 +13,15 @@ impl ChallengeOrchestrator {
         metadata: &ChallengeMetadata,
         subject: &str,
     ) -> Result<RunningChallenge> {
-        let provisioner =
-            ResourceProvisisoner::new(self.kube.clone(), metadata.clone(), subject.to_string());
+        let provisioner = ResourceProvisisoner::new(
+            self.kube.clone(),
+            self.headscale_config.clone(),
+            metadata.clone(),
+            subject.to_string(),
+        );
+
+        let key = provisioner.generate_preauth_key().await?;
+        dbg!(key);
 
         let response = RunningChallengeBuilder::default().build()?;
         Ok(response)
