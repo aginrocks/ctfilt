@@ -9,7 +9,7 @@ use crate::{orchestrator::ChallengeOrchestrator, settings::Settings, utils::Flag
 pub struct AppState {
     pub database: Database,
     pub settings: Arc<Settings>,
-    pub kube: Arc<kube::Client>,
+    pub kube: kube::Client,
     pub flags: Arc<FlagGenerator>,
     pub orchestrator: Arc<ChallengeOrchestrator>,
     pub headscale_config: Arc<Configuration>,

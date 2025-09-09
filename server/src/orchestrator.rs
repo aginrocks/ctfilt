@@ -12,14 +12,14 @@ pub use lifecycle::*;
 pub use types::*;
 
 pub struct ChallengeOrchestrator {
-    pub kube: Arc<Client>,
+    pub kube: Client,
     pub flags: Arc<FlagGenerator>,
     pub headscale_config: Arc<Configuration>,
 }
 
 impl ChallengeOrchestrator {
     pub fn new(
-        kube: Arc<Client>,
+        kube: Client,
         flags: Arc<FlagGenerator>,
         headscale_config: Arc<Configuration>,
     ) -> Self {

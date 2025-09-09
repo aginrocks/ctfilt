@@ -1,7 +1,8 @@
-use std::sync::Arc;
+use std::{collections::BTreeMap, sync::Arc};
 
 use chrono::{Duration, Utc};
 use color_eyre::eyre::{Context, ContextCompat, Result};
+use derive_builder::Builder;
 use headscale::{
     apis::{
         configuration::Configuration,
@@ -11,30 +12,33 @@ use headscale::{
     },
     models::V1CreatePreAuthKeyRequest,
 };
-use kube::Client;
+use k8s_openapi::api::{
+    core::v1::{Secret, ServiceAccount},
+    rbac::v1::{PolicyRule, Role, RoleBinding, RoleRef, Subject},
+};
+use kube::{Api, Client, api::ObjectMeta};
+use mongodb::bson::oid::ObjectId;
 
 use crate::database::ChallengeMetadata;
 
+#[derive(Builder, Clone)]
 pub struct ResourceProvisisoner {
-    pub kube: Arc<Client>,
+    pub kube: Client,
     pub headscale_config: Arc<Configuration>,
     pub metadata: ChallengeMetadata,
     pub subject: String,
+    pub challenge_id: ObjectId,
+    pub user_id: ObjectId,
 }
 
 impl ResourceProvisisoner {
-    pub fn new(
-        kube: Arc<Client>,
-        headscale_config: Arc<Configuration>,
-        metadata: ChallengeMetadata,
-        subject: String,
-    ) -> Self {
-        Self {
-            kube,
-            headscale_config,
-            metadata,
-            subject,
-        }
+    pub fn get_labels(&self) -> BTreeMap<String, String> {
+        BTreeMap::from([
+            ("app".to_string(), "ctfilt-challenge".to_string()),
+            ("user".to_string(), self.user_id.to_string()),
+            ("user-sub".to_string(), self.subject.clone()),
+            ("challenge".to_string(), self.challenge_id.to_string()),
+        ])
     }
 
     pub async fn generate_preauth_key(&self) -> Result<String> {
@@ -74,5 +78,111 @@ impl ResourceProvisisoner {
             .wrap_err("Missing preauth key")?;
 
         Ok(key)
+    }
+
+    /// Creates a Tailscale secret in the cluster and returns its name
+    pub async fn provision_tailscale_secret(
+        &self,
+        hostname: &str,
+        preauth_key: &str,
+    ) -> Result<String> {
+        let secret_name = format!("ts-secret-{}", hostname);
+
+        let secrets: Api<Secret> = Api::default_namespaced(self.kube.clone());
+        let secret = Secret {
+            metadata: ObjectMeta {
+                name: Some(secret_name.clone()),
+                labels: Some(self.get_labels()),
+                ..Default::default()
+            },
+            string_data: Some(BTreeMap::from([(
+                "TS_AUTHKEY".to_string(),
+                preauth_key.to_string(),
+            )])),
+            ..Default::default()
+        };
+
+        secrets
+            .create(&Default::default(), &secret)
+            .await
+            .wrap_err("Failed to create Tailscale secret")?;
+
+        Ok(secret_name)
+    }
+
+    /// Provisions a ServiceAccount for Tailscale access
+    pub async fn provision_tailscale_sa(
+        &self,
+        hostname: &str,
+        secret_name: &str,
+    ) -> Result<String> {
+        let sa_name = format!("ts-secret-{}", hostname);
+        let role_name = format!("ts-role-{}", hostname);
+        let binding_name = format!("ts-binding-{}", hostname);
+
+        // Create a ServiceAccount
+        let service_accounts: Api<ServiceAccount> = Api::default_namespaced(self.kube.clone());
+        let sa = ServiceAccount {
+            metadata: ObjectMeta {
+                name: Some(sa_name.clone()),
+                labels: Some(self.get_labels()),
+                ..Default::default()
+            },
+            ..Default::default()
+        };
+
+        service_accounts
+            .create(&Default::default(), &sa)
+            .await
+            .wrap_err("Failed to create Tailscale sa")?;
+
+        // Create a role
+        let roles: Api<Role> = Api::default_namespaced(self.kube.clone());
+        let role = Role {
+            metadata: ObjectMeta {
+                name: Some(role_name.clone()),
+                labels: Some(self.get_labels()),
+                ..Default::default()
+            },
+            rules: Some(vec![PolicyRule {
+                api_groups: Some(vec!["".to_string()]),
+                resources: Some(vec!["secrets".to_string()]),
+                resource_names: Some(vec![secret_name.to_string()]),
+                verbs: vec!["get".to_string(), "patch".to_string(), "update".to_string()],
+                ..Default::default()
+            }]),
+        };
+
+        roles
+            .create(&Default::default(), &role)
+            .await
+            .wrap_err("Failed to create Tailscale role")?;
+
+        // Create a RoleBinding
+        let bindings: Api<RoleBinding> = Api::default_namespaced(self.kube.clone());
+        let binding = RoleBinding {
+            metadata: ObjectMeta {
+                name: Some(binding_name.clone()),
+                labels: Some(self.get_labels()),
+                ..Default::default()
+            },
+            subjects: Some(vec![Subject {
+                kind: "ServiceAccount".to_string(),
+                name: sa_name.clone(),
+                ..Default::default()
+            }]),
+            role_ref: RoleRef {
+                kind: "Rolet".to_string(),
+                name: role_name,
+                api_group: "rbac.authorization.k8s.io".to_string(),
+            },
+        };
+
+        bindings
+            .create(&Default::default(), &binding)
+            .await
+            .wrap_err("Failed to create Tailscale role binding")?;
+
+        Ok(sa_name)
     }
 }

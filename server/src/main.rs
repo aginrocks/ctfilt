@@ -21,6 +21,7 @@ use axum_oidc::{
 };
 use color_eyre::Result;
 use color_eyre::eyre::WrapErr;
+use mongodb::bson::oid::ObjectId;
 use serde::{Deserialize, Serialize};
 use tokio::net::TcpListener;
 use tower::ServiceBuilder;
@@ -74,7 +75,7 @@ async fn main() -> Result<()> {
 
     let database = init_database(&settings).await?;
 
-    let kube_client = Arc::new(init_kubernetes(&settings).await?);
+    let kube_client = init_kubernetes(&settings).await?;
 
     let headscale_config = Arc::new(headscale_client::init_headscale(&settings)?);
 
@@ -104,6 +105,7 @@ async fn main() -> Result<()> {
 
     orchestrator
         .start_challenge(
+            ObjectId::new(),
             &ChallengeMetadata {
                 name: "test".to_string(),
                 slug: "test".to_string(),
@@ -113,7 +115,8 @@ async fn main() -> Result<()> {
                 },
                 flags: vec![],
             },
-            "c12bcde279cba76bba97bdcdaf9f8651abc5d0757cdf94419c282eec4f3a5afa",
+            ObjectId::new(),
+            "ce24e0c8-cd22-4e2c-9698-dd2a21c17b9b",
         )
         .await?;
 
