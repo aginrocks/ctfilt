@@ -1,4 +1,6 @@
 mod lifecycle;
+mod resources;
+mod types;
 
 use kube::Client;
 use std::sync::Arc;
@@ -6,6 +8,7 @@ use std::sync::Arc;
 use crate::utils::FlagGenerator;
 
 pub use lifecycle::*;
+pub use types::*;
 
 pub struct ChallengeOrchestrator {
     pub kube: Arc<Client>,

@@ -47,7 +47,7 @@ tracing-subscriber = { version = "0.3.19", features = [
     "serde_json",
     "time",
 ] }
-utoipa = { version = "5.3.1", features = ["axum_extras"] }
+utoipa = { version = "5.3.1", features = ["axum_extras", "chrono"] }
 utoipa-axum = "0.2.0"
 utoipa-rapidoc = { version = "6.0.0", features = ["axum"] }
 utoipa-redoc = { version = "6.0.0", features = ["axum"] }
@@ -55,3 +55,6 @@ utoipa-scalar = { version = "0.3.0", features = ["axum"] }
 visible = "0.0.1"
 schemars = { version = "1.0.4", features = ["derive", "preserve_order"] }
 sha2 = "0.10.9"
+chrono = { version = "0.4.42", features = ["serde"] }
+derive_builder = "0.20.2"
+names = { version = "0.14.0", default-features = false }

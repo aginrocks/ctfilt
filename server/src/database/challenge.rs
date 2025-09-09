@@ -8,19 +8,6 @@ use visible::StructFields;
 use crate::mongo_id::object_id_as_string_required;
 
 #[derive(Debug, Serialize, Deserialize, ToSchema, Clone, JsonSchema)]
-#[serde(rename_all = "lowercase")]
-pub enum ChallengeType {
-    /// A fully static challenge with one answer
-    Static,
-
-    /// A challenge with a custom validator
-    Dynamic,
-
-    /// A challenge that requires VPN use and is created per user
-    Container,
-}
-
-#[derive(Debug, Serialize, Deserialize, ToSchema, Clone, JsonSchema)]
 #[serde(tag = "type", rename_all = "lowercase")]
 pub enum ChallengeFlagMeta {
     Static {
@@ -36,7 +23,7 @@ pub enum ChallengeFlagMeta {
 #[derive(Debug, Serialize, Deserialize, ToSchema, Clone, JsonSchema)]
 pub struct ChallengeFlag {
     points: i32,
-    
+
     /// A short description where the flag can be found.
     /// Can be revealed in courses.
     /// Visible only after solving the challenge in contests.
@@ -85,8 +72,13 @@ pub struct ChallengeMetadata {
 #[derive(Debug, Serialize, Deserialize, ToSchema, Clone, JsonSchema)]
 #[serde(tag = "type", rename_all = "lowercase")]
 pub enum ChallengeSpec {
+    /// A fully static challenge with one answer
     Static {},
+
+    /// A challenge with a custom validator
     Dynamic {},
+
+    /// A challenge that requires VPN use and is created per user
     Container {
         /// The container image for the container challenge
         image: String,
