@@ -2,7 +2,7 @@ use std::{ops::Deref, sync::Arc};
 
 use mongodb::Database;
 
-use crate::{settings::Settings, utils::FlagGenerator};
+use crate::{orchestrator::ChallengeOrchestrator, settings::Settings, utils::FlagGenerator};
 
 #[derive(Clone)]
 pub struct AppState {
@@ -10,4 +10,5 @@ pub struct AppState {
     pub settings: Arc<Settings>,
     pub kube: Arc<kube::Client>,
     pub flags: Arc<FlagGenerator>,
+    pub orchestrator: Arc<ChallengeOrchestrator>,
 }

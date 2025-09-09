@@ -3,6 +3,7 @@ mod database;
 mod kubernetes;
 mod middlewares;
 mod mongo_id;
+mod orchestrator;
 mod routes;
 mod settings;
 mod state;
@@ -39,6 +40,7 @@ use crate::{
     database::{init_database, init_session_store},
     kubernetes::init_kubernetes,
     middlewares::require_auth::require_auth,
+    orchestrator::ChallengeOrchestrator,
     routes::RouteProtectionLevel,
     settings::Settings,
     state::AppState,
@@ -78,11 +80,17 @@ async fn main() -> Result<()> {
         settings.flags.length,
     ));
 
+    let orchestrator = Arc::new(ChallengeOrchestrator::new(
+        kube_client.clone(),
+        flags.clone(),
+    ));
+
     let app_state = AppState {
         database,
         settings: settings.clone(),
         kube: kube_client,
         flags,
+        orchestrator,
     };
 
     let session_layer = init_session_store(&settings).await?;
