@@ -43,7 +43,7 @@ impl ChallengeOrchestrator {
 
         dbg!(key);
 
-        let response = RunningChallengeBuilder::default().build()?;
+        let response = RunningChallengeBuilder::default().id(id).build()?;
         Ok(response)
     }
 }

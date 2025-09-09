@@ -116,7 +116,7 @@ impl ResourceProvisisoner {
         hostname: &str,
         secret_name: &str,
     ) -> Result<String> {
-        let sa_name = format!("ts-secret-{}", hostname);
+        let sa_name = format!("ts-sa-{}", hostname);
         let role_name = format!("ts-role-{}", hostname);
         let binding_name = format!("ts-binding-{}", hostname);
 
@@ -172,7 +172,7 @@ impl ResourceProvisisoner {
                 ..Default::default()
             }]),
             role_ref: RoleRef {
-                kind: "Rolet".to_string(),
+                kind: "Role".to_string(),
                 name: role_name,
                 api_group: "rbac.authorization.k8s.io".to_string(),
             },
