@@ -194,7 +194,7 @@ impl ResourceProvisisoner {
     }
 
     /// Provisions a Secret with flags for the challenge
-    pub async fn provision_flags_secret(&self, flags: &Vec<DynamicFlag>) -> Result<String> {
+    pub async fn provision_flags_secret(&self, flags: Vec<DynamicFlag>) -> Result<String> {
         let secret_name = format!("flags-{}", self.hostname);
         let secrets: Api<Secret> = Api::default_namespaced(self.kube.clone());
 
@@ -260,13 +260,14 @@ impl ResourceProvisisoner {
             },
             EnvVar {
                 name: "POD_NAME".to_string(),
-                value_from: Some(EnvVarSource {
-                    field_ref: Some(ObjectFieldSelector {
-                        field_path: "metadata.name".to_string(),
-                        ..Default::default()
-                    }),
-                    ..Default::default()
-                }),
+                // value_from: Some(EnvVarSource {
+                //     field_ref: Some(ObjectFieldSelector {
+                //         field_path: "metadata.name".to_string(),
+                //         ..Default::default()
+                //     }),
+                //     ..Default::default()
+                // }),
+                value: Some(self.hostname.clone()),
                 ..Default::default()
             },
             EnvVar {
@@ -306,6 +307,8 @@ impl ResourceProvisisoner {
     ) -> Result<String> {
         let deployments: Api<Deployment> = Api::default_namespaced(self.kube.clone());
 
+        // TODO: Add a challenge container and mount flags
+
         let deployment = Deployment {
             metadata: ObjectMeta {
                 name: Some(self.hostname.clone()),
@@ -324,7 +327,14 @@ impl ResourceProvisisoner {
                     }),
                     spec: Some(PodSpec {
                         service_account_name: Some(sa_name.to_string()),
-                        containers: vec![self.get_tailscale_sidecar(ts_secret_name)],
+                        containers: vec![
+                            Container {
+                                name: "nginx".to_string(),
+                                image: Some("nginx:latest".to_string()),
+                                ..Default::default()
+                            },
+                            self.get_tailscale_sidecar(ts_secret_name),
+                        ],
                         ..Default::default()
                     }),
                 },

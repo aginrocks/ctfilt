@@ -1,11 +1,12 @@
+use chrono::Utc;
 use color_eyre::eyre::Result;
 use mongodb::bson::oid::ObjectId;
 
 use crate::{
     database::{ChallengeFlagMeta, ChallengeMetadata},
     orchestrator::{
-        RunningChallenge, RunningChallengeBuilder,
-        resources::{DynamicFlag, ResourceProvisisoner, ResourceProvisisonerBuilder},
+        ChallengeStatus, RunningChallenge, RunningChallengeBuilder,
+        resources::{DynamicFlag, ResourceProvisisonerBuilder},
     },
     utils::generate_hostname,
 };
@@ -43,11 +44,22 @@ impl ChallengeOrchestrator {
 
         // Generating flags
         let flags = self.generate_flags(id, metadata, user_id);
-        let secret_name = provisioner.provision_flags_secret(&flags).await?;
+        let secret_name = provisioner.provision_flags_secret(flags).await?;
+
+        // TODO: Add expiry
 
         // Creating a Deployment
+        let hostname = provisioner
+            .provision_challenge_deployment(&ts_secret_name, &secret_name, &sa_name)
+            .await?;
 
-        let response = RunningChallengeBuilder::default().id(id).build()?;
+        let response = RunningChallengeBuilder::default()
+            .id(id)
+            .ip(None)
+            .expires_at(Utc::now())
+            .hostname(Some(hostname))
+            .status(ChallengeStatus::Starting)
+            .build()?;
         Ok(response)
     }
 
