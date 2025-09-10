@@ -15,7 +15,11 @@ use headscale::{
 use k8s_openapi::{
     api::{
         apps::v1::{Deployment, DeploymentSpec},
-        core::v1::{PodSpec, PodTemplateSpec, Secret, ServiceAccount},
+        core::v1::{
+            Capabilities, Container, EnvVar, EnvVarSource, ObjectFieldSelector, PodSpec,
+            PodTemplateSpec, ResourceFieldSelector, Secret, SecretKeySelector, SecurityContext,
+            ServiceAccount,
+        },
         rbac::v1::{PolicyRule, Role, RoleBinding, RoleRef, Subject},
     },
     apimachinery::pkg::apis::meta::v1::LabelSelector,
@@ -29,6 +33,7 @@ use crate::database::ChallengeMetadata;
 pub struct ResourceProvisisoner {
     pub kube: Client,
     pub headscale_config: Arc<Configuration>,
+    pub headscale_public_url: String,
     pub metadata: ChallengeMetadata,
     pub subject: String,
     pub challenge_id: ObjectId,
@@ -217,13 +222,88 @@ impl ResourceProvisisoner {
         Ok(secret_name)
     }
 
+    /// Crestes a Tailscale sidecar container spec
+    pub fn get_tailscale_sidecar(&self, ts_secret_name: &str) -> Container {
+        // TODO: Migrate to configmaps
+        let env = vec![
+            EnvVar {
+                name: "TS_KUBE_SECRET".to_string(),
+                value: Some(ts_secret_name.to_string()),
+                ..Default::default()
+            },
+            EnvVar {
+                name: "TS_USERSPACE".to_string(),
+                value: Some("false".to_string()),
+                ..Default::default()
+            },
+            EnvVar {
+                name: "TS_DEBUG_FIREWALL_MODE".to_string(),
+                value: Some("auto".to_string()),
+                ..Default::default()
+            },
+            EnvVar {
+                name: "TS_AUTHKEY".to_string(),
+                value_from: Some(EnvVarSource {
+                    secret_key_ref: Some(SecretKeySelector {
+                        name: ts_secret_name.to_string(),
+                        key: "TS_AUTHKEY".to_string(),
+                        optional: Some(true),
+                    }),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            },
+            EnvVar {
+                name: "TS_EXTRA_ARGS".to_string(),
+                value: Some(format!("--login-server={}", self.headscale_public_url)),
+                ..Default::default()
+            },
+            EnvVar {
+                name: "POD_NAME".to_string(),
+                value_from: Some(EnvVarSource {
+                    field_ref: Some(ObjectFieldSelector {
+                        field_path: "metadata.name".to_string(),
+                        ..Default::default()
+                    }),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            },
+            EnvVar {
+                name: "POD_UID".to_string(),
+                value_from: Some(EnvVarSource {
+                    field_ref: Some(ObjectFieldSelector {
+                        field_path: "metadata.uid".to_string(),
+                        ..Default::default()
+                    }),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            },
+        ];
+
+        Container {
+            name: "ts-sidecar".to_string(),
+            image: Some("ghcr.io/tailscale/tailscale:latest".to_string()),
+            env: Some(env),
+            security_context: Some(SecurityContext {
+                capabilities: Some(Capabilities {
+                    add: Some(vec!["NET_ADMIN".to_string()]),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            }),
+            ..Default::default()
+        }
+    }
+
     /// Provisisons a Deployment for the challenge
     pub async fn provision_challenge_deployment(
         &self,
         ts_secret_name: &str,
         flags_secret_name: &str,
         sa_name: &str,
-    ) {
+    ) -> Result<String> {
         let deployments: Api<Deployment> = Api::default_namespaced(self.kube.clone());
 
         let deployment = Deployment {
@@ -244,6 +324,7 @@ impl ResourceProvisisoner {
                     }),
                     spec: Some(PodSpec {
                         service_account_name: Some(sa_name.to_string()),
+                        containers: vec![self.get_tailscale_sidecar(ts_secret_name)],
                         ..Default::default()
                     }),
                 },
@@ -251,5 +332,12 @@ impl ResourceProvisisoner {
             }),
             ..Default::default()
         };
+
+        deployments
+            .create(&Default::default(), &deployment)
+            .await
+            .wrap_err("Failed to create challenge deployment")?;
+
+        Ok(self.hostname.clone())
     }
 }

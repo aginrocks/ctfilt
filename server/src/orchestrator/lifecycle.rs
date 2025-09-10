@@ -30,6 +30,7 @@ impl ChallengeOrchestrator {
             .challenge_id(id)
             .user_id(user_id)
             .hostname(hostname)
+            .headscale_public_url(self.headscale_public_url.clone())
             .build()?;
 
         // Setting up Tailscale access

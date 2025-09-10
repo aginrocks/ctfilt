@@ -88,6 +88,7 @@ async fn main() -> Result<()> {
         kube_client.clone(),
         flags.clone(),
         headscale_config.clone(),
+        settings.headscale.public_url.clone(),
     ));
 
     let app_state = AppState {

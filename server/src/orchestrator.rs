@@ -15,6 +15,7 @@ pub struct ChallengeOrchestrator {
     pub kube: Client,
     pub flags: Arc<FlagGenerator>,
     pub headscale_config: Arc<Configuration>,
+    pub headscale_public_url: String,
 }
 
 impl ChallengeOrchestrator {
@@ -22,11 +23,13 @@ impl ChallengeOrchestrator {
         kube: Client,
         flags: Arc<FlagGenerator>,
         headscale_config: Arc<Configuration>,
+        headscale_public_url: String,
     ) -> Self {
         Self {
             kube,
             flags,
             headscale_config,
+            headscale_public_url,
         }
     }
 }
