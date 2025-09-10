@@ -12,9 +12,13 @@ use headscale::{
     },
     models::V1CreatePreAuthKeyRequest,
 };
-use k8s_openapi::api::{
-    core::v1::{Secret, ServiceAccount},
-    rbac::v1::{PolicyRule, Role, RoleBinding, RoleRef, Subject},
+use k8s_openapi::{
+    api::{
+        apps::v1::{Deployment, DeploymentSpec},
+        core::v1::{PodSpec, PodTemplateSpec, Secret, ServiceAccount},
+        rbac::v1::{PolicyRule, Role, RoleBinding, RoleRef, Subject},
+    },
+    apimachinery::pkg::apis::meta::v1::LabelSelector,
 };
 use kube::{Api, Client, api::ObjectMeta};
 use mongodb::bson::oid::ObjectId;
@@ -29,6 +33,12 @@ pub struct ResourceProvisisoner {
     pub subject: String,
     pub challenge_id: ObjectId,
     pub user_id: ObjectId,
+    pub hostname: String,
+}
+
+pub struct DynamicFlag {
+    pub flag: String,
+    pub mount_path: String,
 }
 
 impl ResourceProvisisoner {
@@ -81,12 +91,8 @@ impl ResourceProvisisoner {
     }
 
     /// Creates a Tailscale secret in the cluster and returns its name
-    pub async fn provision_tailscale_secret(
-        &self,
-        hostname: &str,
-        preauth_key: &str,
-    ) -> Result<String> {
-        let secret_name = format!("ts-secret-{}", hostname);
+    pub async fn provision_tailscale_secret(&self, preauth_key: &str) -> Result<String> {
+        let secret_name = format!("ts-secret-{}", self.hostname);
 
         let secrets: Api<Secret> = Api::default_namespaced(self.kube.clone());
         let secret = Secret {
@@ -111,14 +117,10 @@ impl ResourceProvisisoner {
     }
 
     /// Provisions a ServiceAccount for Tailscale access
-    pub async fn provision_tailscale_sa(
-        &self,
-        hostname: &str,
-        secret_name: &str,
-    ) -> Result<String> {
-        let sa_name = format!("ts-sa-{}", hostname);
-        let role_name = format!("ts-role-{}", hostname);
-        let binding_name = format!("ts-binding-{}", hostname);
+    pub async fn provision_tailscale_sa(&self, secret_name: &str) -> Result<String> {
+        let sa_name = format!("ts-sa-{}", self.hostname);
+        let role_name = format!("ts-role-{}", self.hostname);
+        let binding_name = format!("ts-binding-{}", self.hostname);
 
         // Create a ServiceAccount
         let service_accounts: Api<ServiceAccount> = Api::default_namespaced(self.kube.clone());
@@ -184,5 +186,70 @@ impl ResourceProvisisoner {
             .wrap_err("Failed to create Tailscale role binding")?;
 
         Ok(sa_name)
+    }
+
+    /// Provisions a Secret with flags for the challenge
+    pub async fn provision_flags_secret(&self, flags: &Vec<DynamicFlag>) -> Result<String> {
+        let secret_name = format!("flags-{}", self.hostname);
+        let secrets: Api<Secret> = Api::default_namespaced(self.kube.clone());
+
+        let flags_data = flags
+            .iter()
+            .enumerate()
+            .map(|(index, flag)| (index.to_string(), flag.flag.clone()))
+            .collect::<BTreeMap<_, _>>();
+
+        let secret = Secret {
+            metadata: ObjectMeta {
+                name: Some(secret_name.clone()),
+                labels: Some(self.get_labels()),
+                ..Default::default()
+            },
+            string_data: Some(flags_data),
+            ..Default::default()
+        };
+
+        secrets
+            .create(&Default::default(), &secret)
+            .await
+            .wrap_err("Failed to create flags secret")?;
+
+        Ok(secret_name)
+    }
+
+    /// Provisisons a Deployment for the challenge
+    pub async fn provision_challenge_deployment(
+        &self,
+        ts_secret_name: &str,
+        flags_secret_name: &str,
+        sa_name: &str,
+    ) {
+        let deployments: Api<Deployment> = Api::default_namespaced(self.kube.clone());
+
+        let deployment = Deployment {
+            metadata: ObjectMeta {
+                name: Some(self.hostname.clone()),
+                labels: Some(self.get_labels()),
+                ..Default::default()
+            },
+            spec: Some(DeploymentSpec {
+                selector: LabelSelector {
+                    match_labels: Some(self.get_labels()),
+                    ..Default::default()
+                },
+                template: PodTemplateSpec {
+                    metadata: Some(ObjectMeta {
+                        labels: Some(self.get_labels()),
+                        ..Default::default()
+                    }),
+                    spec: Some(PodSpec {
+                        service_account_name: Some(sa_name.to_string()),
+                        ..Default::default()
+                    }),
+                },
+                ..Default::default()
+            }),
+            ..Default::default()
+        };
     }
 }
