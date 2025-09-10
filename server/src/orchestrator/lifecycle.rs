@@ -38,8 +38,6 @@ impl ChallengeOrchestrator {
         let key = provisioner.generate_preauth_key().await?;
         let ts_secret_name = provisioner.provision_tailscale_secret(&key).await?;
 
-        let sa_name = provisioner.provision_tailscale_sa(&ts_secret_name).await?;
-
         dbg!(key);
 
         // Generating flags
@@ -50,7 +48,7 @@ impl ChallengeOrchestrator {
 
         // Creating a Deployment
         let hostname = provisioner
-            .provision_challenge_deployment(&ts_secret_name, &secret_name, &sa_name)
+            .provision_challenge_pod(&ts_secret_name, &secret_name)
             .await?;
 
         let response = RunningChallengeBuilder::default()

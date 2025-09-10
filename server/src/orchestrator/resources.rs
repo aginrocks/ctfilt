@@ -16,7 +16,7 @@ use k8s_openapi::{
     api::{
         apps::v1::{Deployment, DeploymentSpec},
         core::v1::{
-            Capabilities, Container, EnvVar, EnvVarSource, ObjectFieldSelector, PodSpec,
+            Capabilities, Container, EnvVar, EnvVarSource, ObjectFieldSelector, Pod, PodSpec,
             PodTemplateSpec, ResourceFieldSelector, Secret, SecretKeySelector, SecurityContext,
             ServiceAccount,
         },
@@ -121,78 +121,6 @@ impl ResourceProvisisoner {
         Ok(secret_name)
     }
 
-    /// Provisions a ServiceAccount for Tailscale access
-    pub async fn provision_tailscale_sa(&self, secret_name: &str) -> Result<String> {
-        let sa_name = format!("ts-sa-{}", self.hostname);
-        let role_name = format!("ts-role-{}", self.hostname);
-        let binding_name = format!("ts-binding-{}", self.hostname);
-
-        // Create a ServiceAccount
-        let service_accounts: Api<ServiceAccount> = Api::default_namespaced(self.kube.clone());
-        let sa = ServiceAccount {
-            metadata: ObjectMeta {
-                name: Some(sa_name.clone()),
-                labels: Some(self.get_labels()),
-                ..Default::default()
-            },
-            ..Default::default()
-        };
-
-        service_accounts
-            .create(&Default::default(), &sa)
-            .await
-            .wrap_err("Failed to create Tailscale sa")?;
-
-        // Create a role
-        let roles: Api<Role> = Api::default_namespaced(self.kube.clone());
-        let role = Role {
-            metadata: ObjectMeta {
-                name: Some(role_name.clone()),
-                labels: Some(self.get_labels()),
-                ..Default::default()
-            },
-            rules: Some(vec![PolicyRule {
-                api_groups: Some(vec!["".to_string()]),
-                resources: Some(vec!["secrets".to_string()]),
-                resource_names: Some(vec![secret_name.to_string()]),
-                verbs: vec!["get".to_string(), "patch".to_string(), "update".to_string()],
-                ..Default::default()
-            }]),
-        };
-
-        roles
-            .create(&Default::default(), &role)
-            .await
-            .wrap_err("Failed to create Tailscale role")?;
-
-        // Create a RoleBinding
-        let bindings: Api<RoleBinding> = Api::default_namespaced(self.kube.clone());
-        let binding = RoleBinding {
-            metadata: ObjectMeta {
-                name: Some(binding_name.clone()),
-                labels: Some(self.get_labels()),
-                ..Default::default()
-            },
-            subjects: Some(vec![Subject {
-                kind: "ServiceAccount".to_string(),
-                name: sa_name.clone(),
-                ..Default::default()
-            }]),
-            role_ref: RoleRef {
-                kind: "Role".to_string(),
-                name: role_name,
-                api_group: "rbac.authorization.k8s.io".to_string(),
-            },
-        };
-
-        bindings
-            .create(&Default::default(), &binding)
-            .await
-            .wrap_err("Failed to create Tailscale role binding")?;
-
-        Ok(sa_name)
-    }
-
     /// Provisions a Secret with flags for the challenge
     pub async fn provision_flags_secret(&self, flags: Vec<DynamicFlag>) -> Result<String> {
         let secret_name = format!("flags-{}", self.hostname);
@@ -228,7 +156,17 @@ impl ResourceProvisisoner {
         let env = vec![
             EnvVar {
                 name: "TS_KUBE_SECRET".to_string(),
-                value: Some(ts_secret_name.to_string()),
+                value: Some("".to_string()),
+                ..Default::default()
+            },
+            EnvVar {
+                name: "TS_STATE_DIR".to_string(),
+                value: Some("/tmp".to_string()),
+                ..Default::default()
+            },
+            EnvVar {
+                name: "TS_EPHEMERAL".to_string(),
+                value: Some("true".to_string()),
                 ..Default::default()
             },
             EnvVar {
@@ -260,14 +198,13 @@ impl ResourceProvisisoner {
             },
             EnvVar {
                 name: "POD_NAME".to_string(),
-                // value_from: Some(EnvVarSource {
-                //     field_ref: Some(ObjectFieldSelector {
-                //         field_path: "metadata.name".to_string(),
-                //         ..Default::default()
-                //     }),
-                //     ..Default::default()
-                // }),
-                value: Some(self.hostname.clone()),
+                value_from: Some(EnvVarSource {
+                    field_ref: Some(ObjectFieldSelector {
+                        field_path: "metadata.name".to_string(),
+                        ..Default::default()
+                    }),
+                    ..Default::default()
+                }),
                 ..Default::default()
             },
             EnvVar {
@@ -299,52 +236,37 @@ impl ResourceProvisisoner {
     }
 
     /// Provisisons a Deployment for the challenge
-    pub async fn provision_challenge_deployment(
+    pub async fn provision_challenge_pod(
         &self,
         ts_secret_name: &str,
         flags_secret_name: &str,
-        sa_name: &str,
     ) -> Result<String> {
-        let deployments: Api<Deployment> = Api::default_namespaced(self.kube.clone());
+        let pods: Api<Pod> = Api::default_namespaced(self.kube.clone());
 
         // TODO: Add a challenge container and mount flags
 
-        let deployment = Deployment {
+        let pod = Pod {
             metadata: ObjectMeta {
                 name: Some(self.hostname.clone()),
                 labels: Some(self.get_labels()),
                 ..Default::default()
             },
-            spec: Some(DeploymentSpec {
-                selector: LabelSelector {
-                    match_labels: Some(self.get_labels()),
-                    ..Default::default()
-                },
-                template: PodTemplateSpec {
-                    metadata: Some(ObjectMeta {
-                        labels: Some(self.get_labels()),
+            spec: Some(PodSpec {
+                containers: vec![
+                    Container {
+                        name: "nginx".to_string(),
+                        image: Some("nginx:latest".to_string()),
                         ..Default::default()
-                    }),
-                    spec: Some(PodSpec {
-                        service_account_name: Some(sa_name.to_string()),
-                        containers: vec![
-                            Container {
-                                name: "nginx".to_string(),
-                                image: Some("nginx:latest".to_string()),
-                                ..Default::default()
-                            },
-                            self.get_tailscale_sidecar(ts_secret_name),
-                        ],
-                        ..Default::default()
-                    }),
-                },
+                    },
+                    self.get_tailscale_sidecar(ts_secret_name),
+                ],
                 ..Default::default()
             }),
+
             ..Default::default()
         };
 
-        deployments
-            .create(&Default::default(), &deployment)
+        pods.create(&Default::default(), &pod)
             .await
             .wrap_err("Failed to create challenge deployment")?;
 
