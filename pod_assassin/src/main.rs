@@ -1,4 +1,4 @@
-mod killer;
+mod exterminator;
 mod kubernetes;
 mod settings;
 mod state;
