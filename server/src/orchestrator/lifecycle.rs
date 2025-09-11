@@ -26,7 +26,6 @@ impl ChallengeOrchestrator {
         let provisioner = ResourceProvisisonerBuilder::default()
             .kube(self.kube.clone())
             .headscale_config(self.headscale_config.clone())
-            .metadata(metadata.clone())
             .subject(subject.to_string())
             .challenge_id(id)
             .user_id(user_id)

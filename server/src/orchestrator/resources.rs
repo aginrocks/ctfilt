@@ -26,7 +26,6 @@ pub struct ResourceProvisisoner {
     pub kube: Client,
     pub headscale_config: Arc<Configuration>,
     pub headscale_public_url: String,
-    pub metadata: ChallengeMetadata,
     pub subject: String,
     pub challenge_id: ObjectId,
     pub user_id: ObjectId,
@@ -39,22 +38,41 @@ pub struct DynamicFlag {
     pub mount_path: String,
 }
 
+pub enum LabelResourceType {
+    Pod,
+    Other,
+}
+
 impl ResourceProvisisoner {
-    pub fn get_labels(&self) -> BTreeMap<String, String> {
-        BTreeMap::from([
-            ("app".to_string(), "ctfilt-challenge".to_string()),
-            ("user".to_string(), self.user_id.to_string()),
-            ("user-sub".to_string(), self.subject.clone()),
-            ("challenge".to_string(), self.challenge_id.to_string()),
-            (
-                "pod-assassin.agin.rocks/enable".to_string(),
-                "true".to_string(),
-            ),
-            (
-                "pod-assassin.agin.rocks/expires-at".to_string(),
-                (Utc::now() + Duration::hours(1)).timestamp().to_string(),
-            ),
-        ])
+    pub fn get_labels(&self, r#type: LabelResourceType) -> BTreeMap<String, String> {
+        let mut labels = BTreeMap::new();
+
+        labels.insert("app".to_string(), "ctfilt-challenge".to_string());
+        labels.insert("user".to_string(), self.user_id.to_string());
+        labels.insert("user-sub".to_string(), self.subject.clone());
+        labels.insert("challenge".to_string(), self.challenge_id.to_string());
+        // TODO: Make labels dynamic
+        labels.insert(
+            "pod-assassin.agin.rocks/enable".to_string(),
+            "true".to_string(),
+        );
+
+        match r#type {
+            LabelResourceType::Pod => {
+                labels.insert(
+                    "pod-assassin.agin.rocks/expires-at".to_string(),
+                    (Utc::now() + Duration::hours(1)).timestamp().to_string(),
+                );
+            }
+            LabelResourceType::Other => {
+                labels.insert(
+                    "pod-assassin.agin.rocks/pod".to_string(),
+                    self.hostname.clone(),
+                );
+            }
+        }
+
+        labels
     }
 
     pub async fn generate_preauth_key(&self) -> Result<String> {
@@ -104,7 +122,7 @@ impl ResourceProvisisoner {
         let secret = Secret {
             metadata: ObjectMeta {
                 name: Some(secret_name.clone()),
-                labels: Some(self.get_labels()),
+                labels: Some(self.get_labels(LabelResourceType::Other)),
                 ..Default::default()
             },
             string_data: Some(BTreeMap::from([(
@@ -136,7 +154,7 @@ impl ResourceProvisisoner {
         let secret = Secret {
             metadata: ObjectMeta {
                 name: Some(secret_name.clone()),
-                labels: Some(self.get_labels()),
+                labels: Some(self.get_labels(LabelResourceType::Other)),
                 ..Default::default()
             },
             string_data: Some(flags_data),
@@ -262,7 +280,7 @@ impl ResourceProvisisoner {
         let pod = Pod {
             metadata: ObjectMeta {
                 name: Some(self.hostname.clone()),
-                labels: Some(self.get_labels()),
+                labels: Some(self.get_labels(LabelResourceType::Pod)),
                 ..Default::default()
             },
             spec: Some(PodSpec {
