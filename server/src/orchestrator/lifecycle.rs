@@ -42,13 +42,13 @@ impl ChallengeOrchestrator {
 
         // Generating flags
         let flags = self.generate_flags(id, metadata, user_id);
-        let secret_name = provisioner.provision_flags_secret(flags).await?;
+        let secret_name = provisioner.provision_flags_secret(flags.clone()).await?;
 
         // TODO: Add expiry
 
         // Creating a Deployment
         let hostname = provisioner
-            .provision_challenge_pod(&ts_secret_name, &secret_name)
+            .provision_challenge_pod(&ts_secret_name, &secret_name, flags)
             .await?;
 
         let response = RunningChallengeBuilder::default()
@@ -72,7 +72,7 @@ impl ChallengeOrchestrator {
             .iter()
             .enumerate()
             .filter_map(|(index, flag)| match flag.meta {
-                ChallengeFlagMeta::Dynamic { ref mount_path } => Some(DynamicFlag {
+                ChallengeFlagMeta::DynamicMount { ref mount_path } => Some(DynamicFlag {
                     flag: self.flags.generate(user_id, challenge_id, index),
                     mount_path: mount_path.clone(),
                 }),

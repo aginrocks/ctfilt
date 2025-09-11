@@ -8,13 +8,13 @@ use visible::StructFields;
 use crate::mongo_id::object_id_as_string_required;
 
 #[derive(Debug, Serialize, Deserialize, ToSchema, Clone, JsonSchema)]
-#[serde(tag = "type", rename_all = "lowercase")]
+#[serde(tag = "type", rename_all = "kebab-case")]
 pub enum ChallengeFlagMeta {
     Static {
         /// The static flag for the challenge
         flag: String,
     },
-    Dynamic {
+    DynamicMount {
         /// Where the flag should be mounted inside the container
         mount_path: String,
     },

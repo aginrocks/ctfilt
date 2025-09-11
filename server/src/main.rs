@@ -39,7 +39,10 @@ use utoipa_redoc::{Redoc, Servable};
 use utoipa_scalar::{Scalar, Servable as _};
 
 use crate::{
-    database::{ChallengeMetadata, ChallengeSpec, init_database, init_session_store},
+    database::{
+        ChallengeFlag, ChallengeFlagMeta, ChallengeMetadata, ChallengeSpec, init_database,
+        init_session_store,
+    },
     kubernetes::init_kubernetes,
     middlewares::require_auth::require_auth,
     orchestrator::ChallengeOrchestrator,
@@ -114,7 +117,22 @@ async fn main() -> Result<()> {
                 spec: ChallengeSpec::Container {
                     image: "test".to_string(),
                 },
-                flags: vec![],
+                flags: vec![
+                    ChallengeFlag {
+                        points: 100,
+                        description: None,
+                        meta: ChallengeFlagMeta::DynamicMount {
+                            mount_path: "/flag1".to_string(),
+                        },
+                    },
+                    ChallengeFlag {
+                        points: 200,
+                        description: None,
+                        meta: ChallengeFlagMeta::DynamicMount {
+                            mount_path: "/flag2".to_string(),
+                        },
+                    },
+                ],
             },
             ObjectId::new(),
             "ce24e0c8-cd22-4e2c-9698-dd2a21c17b9b",

@@ -12,17 +12,9 @@ use headscale::{
     },
     models::V1CreatePreAuthKeyRequest,
 };
-use k8s_openapi::{
-    api::{
-        apps::v1::{Deployment, DeploymentSpec},
-        core::v1::{
-            Capabilities, Container, EnvVar, EnvVarSource, ObjectFieldSelector, Pod, PodSpec,
-            PodTemplateSpec, ResourceFieldSelector, Secret, SecretKeySelector, SecurityContext,
-            ServiceAccount,
-        },
-        rbac::v1::{PolicyRule, Role, RoleBinding, RoleRef, Subject},
-    },
-    apimachinery::pkg::apis::meta::v1::LabelSelector,
+use k8s_openapi::api::core::v1::{
+    Capabilities, Container, EnvVar, EnvVarSource, ObjectFieldSelector, Pod, PodSpec, Secret,
+    SecretKeySelector, SecretVolumeSource, SecurityContext, Volume, VolumeMount,
 };
 use kube::{Api, Client, api::ObjectMeta};
 use mongodb::bson::oid::ObjectId;
@@ -41,6 +33,7 @@ pub struct ResourceProvisisoner {
     pub hostname: String,
 }
 
+#[derive(Clone)]
 pub struct DynamicFlag {
     pub flag: String,
     pub mount_path: String,
@@ -240,10 +233,23 @@ impl ResourceProvisisoner {
         &self,
         ts_secret_name: &str,
         flags_secret_name: &str,
+        flags: Vec<DynamicFlag>,
     ) -> Result<String> {
         let pods: Api<Pod> = Api::default_namespaced(self.kube.clone());
 
         // TODO: Add a challenge container and mount flags
+
+        let flag_mounts = flags
+            .iter()
+            .enumerate()
+            .map(|(index, flag)| VolumeMount {
+                name: "flag".to_string(),
+                mount_path: flag.mount_path.clone(),
+                sub_path: Some(index.to_string()),
+                read_only: Some(true),
+                ..Default::default()
+            })
+            .collect::<Vec<_>>();
 
         let pod = Pod {
             metadata: ObjectMeta {
@@ -256,10 +262,20 @@ impl ResourceProvisisoner {
                     Container {
                         name: "nginx".to_string(),
                         image: Some("nginx:latest".to_string()),
+                        volume_mounts: Some(flag_mounts),
                         ..Default::default()
                     },
                     self.get_tailscale_sidecar(ts_secret_name),
                 ],
+                volumes: Some(vec![Volume {
+                    name: "flag".to_string(),
+                    secret: Some(SecretVolumeSource {
+                        secret_name: Some(flags_secret_name.to_string()),
+                        default_mode: Some(0o600),
+                        ..Default::default()
+                    }),
+                    ..Default::default()
+                }]),
                 ..Default::default()
             }),
 
