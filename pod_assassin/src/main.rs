@@ -26,6 +26,8 @@ async fn main() -> Result<()> {
 
     let settings = Arc::new(Settings::try_load()?);
 
+    info!(prefix = settings.labels.prefix, "Using");
+
     let client = init_kubernetes(&settings).await?;
     watch_pods(client, &settings).await?;
 

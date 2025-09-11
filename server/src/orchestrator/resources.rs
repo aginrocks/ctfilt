@@ -46,6 +46,10 @@ impl ResourceProvisisoner {
             ("user".to_string(), self.user_id.to_string()),
             ("user-sub".to_string(), self.subject.clone()),
             ("challenge".to_string(), self.challenge_id.to_string()),
+            (
+                "pod-assassin.agin.rocks/enable".to_string(),
+                "true".to_string(),
+            ),
         ])
     }
 
