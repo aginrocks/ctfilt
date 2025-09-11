@@ -18,7 +18,7 @@ use tracing::{info, info_span, warn};
 
 use crate::{
     settings::Settings,
-    state::{TIMERS, TimerData},
+    state::{LOCKS, TIMERS, TimerData},
 };
 
 pub struct PodWatcher {
@@ -109,6 +109,7 @@ impl PodWatcher {
         let wait_time = duration_until(expires_at);
 
         let name = pod_name.clone();
+        let exterminator = self.exterminator.clone();
         let timer = tokio::spawn(async move {
             let span = info_span!("pod_killer", name);
             let _enter = span.enter();
@@ -118,14 +119,29 @@ impl PodWatcher {
                 sleep(duration).await;
             }
 
+            if !LOCKS.insert(name.clone()) {
+                // Already being handled
+                info!("Pod is already being handled, skipping");
+                return;
+            }
+
             info!("Deleting pod");
+            exterminator
+                .exterminate(name.clone())
+                .await
+                .map_err(|e| {
+                    warn!("Failed to exterminate pod: {}", e);
+                })
+                .ok();
+
+            LOCKS.remove(&name);
         });
 
         let data = TimerData {
             handle: timer,
             raw_value: expires_at,
         };
-        TIMERS.insert(pod_name, data);
+        TIMERS.insert(pod_name.clone(), data);
 
         Ok(())
     }
