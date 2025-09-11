@@ -28,7 +28,7 @@ impl Exterminator {
             ..Default::default()
         };
 
-        // Ensuring that the pod still is flagged for extermination
+        // Ensuring that the pod is still flagged for extermination
         let pod = pods.get(&pod_name).await?;
 
         let flag_label = format!("{}/enable", self.settings.labels_prefix);
@@ -46,7 +46,10 @@ impl Exterminator {
 
         // Delete related resources
         if self.settings.delete_related {
-            let selector = format!("{}/pod={pod_name}", self.settings.labels_prefix);
+            let selector = format!(
+                "{prefix}/enable=true,{prefix}/pod={pod_name}",
+                prefix = self.settings.labels_prefix
+            );
             let list_params = ListParams {
                 label_selector: Some(selector),
                 ..Default::default()

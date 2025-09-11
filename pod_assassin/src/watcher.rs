@@ -83,8 +83,6 @@ impl PodWatcher {
     async fn handle_pod(&self, pod: Pod) -> Result<()> {
         let pod_name = pod.metadata.name.wrap_err("Missing pod name")?;
 
-        info!("Handling pod");
-
         let expiry_label = format!("{}/expires-at", self.settings.extermination.labels_prefix);
         let expires_at = pod
             .metadata
