@@ -98,12 +98,15 @@ impl PodWatcher {
 
         let already_handled = TIMERS.get(&pod_name);
 
-        if let Some(handled) = already_handled
-            && handled.value().raw_value != expires_at
-        {
-            // Expiry time changed, we need to reset timer
-            info!("Resetting timer");
-            handled.value().handle.abort();
+        if let Some(handled) = already_handled {
+            if handled.value().raw_value != expires_at {
+                // Expiry time changed, we need to reset timer
+                info!("Resetting timer");
+                handled.value().handle.abort();
+            } else {
+                info!("Timer remains the same, skipping");
+                return Ok(());
+            }
         }
 
         let wait_time = duration_until(expires_at);
