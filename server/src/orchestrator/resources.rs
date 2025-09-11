@@ -19,8 +19,6 @@ use k8s_openapi::api::core::v1::{
 use kube::{Api, Client, api::ObjectMeta};
 use mongodb::bson::oid::ObjectId;
 
-use crate::database::ChallengeMetadata;
-
 #[derive(Builder, Clone)]
 pub struct ResourceProvisisoner {
     pub kube: Client,

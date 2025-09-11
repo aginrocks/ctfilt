@@ -1,10 +1,11 @@
 use axum::Json;
+use manifests::ChallengeMetadata;
 use schemars::schema_for;
 use serde::Serialize;
 use serde_json::Value;
 use utoipa_axum::routes;
 
-use crate::{database::ChallengeMetadata, routes::RouteProtectionLevel};
+use crate::routes::RouteProtectionLevel;
 
 use super::Route;
 

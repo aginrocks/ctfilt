@@ -3435,6 +3435,7 @@ dependencies = [
  "http-serde-ext",
  "k8s-openapi",
  "kube",
+ "manifests",
  "mongodb",
  "names",
  "openidconnect",

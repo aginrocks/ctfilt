@@ -1,9 +1,9 @@
 use chrono::Utc;
 use color_eyre::eyre::Result;
+use manifests::{ChallengeFlagMeta, ChallengeMetadata};
 use mongodb::bson::oid::ObjectId;
 
 use crate::{
-    database::{ChallengeFlagMeta, ChallengeMetadata},
     orchestrator::{
         ChallengeStatus, RunningChallenge, RunningChallengeBuilder,
         resources::{DynamicFlag, ResourceProvisisonerBuilder},

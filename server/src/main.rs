@@ -21,6 +21,7 @@ use axum_oidc::{
 };
 use color_eyre::Result;
 use color_eyre::eyre::WrapErr;
+use manifests::{ChallengeFlag, ChallengeFlagMeta, ChallengeMetadata, ChallengeSpec};
 use mongodb::bson::oid::ObjectId;
 use serde::{Deserialize, Serialize};
 use tokio::net::TcpListener;
@@ -39,10 +40,7 @@ use utoipa_redoc::{Redoc, Servable};
 use utoipa_scalar::{Scalar, Servable as _};
 
 use crate::{
-    database::{
-        ChallengeFlag, ChallengeFlagMeta, ChallengeMetadata, ChallengeSpec, init_database,
-        init_session_store,
-    },
+    database::{init_database, init_session_store},
     kubernetes::init_kubernetes,
     middlewares::require_auth::require_auth,
     orchestrator::ChallengeOrchestrator,
