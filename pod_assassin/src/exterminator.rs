@@ -4,7 +4,7 @@ use kube::{Api, Client};
 
 use crate::settings::Settings;
 
-pub async fn kill_pod(client: Client, settings: &Settings, pod_name: &str) -> Result<()> {
+pub async fn exterminate_pod(client: Client, settings: &Settings, pod_name: &str) -> Result<()> {
     let pods: Api<Pod> = Api::default_namespaced(client);
 
     Ok(())

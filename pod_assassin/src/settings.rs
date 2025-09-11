@@ -22,13 +22,20 @@ pub struct Kubernetes {
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Labels {
     pub prefix: String,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct Extermination {
     pub delete_related: bool,
+    pub grace_period: Option<u32>,
+    pub force_delete: Option<bool>,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Settings {
     pub kubernetes: Kubernetes,
     pub labels: Labels,
+    pub extermination: Extermination,
 }
 
 impl Settings {
@@ -94,7 +101,11 @@ impl Settings {
             },
             labels: Labels {
                 prefix: "pod-assassin.agin.rocks".to_string(),
+            },
+            extermination: Extermination {
                 delete_related: true,
+                grace_period: Some(30),
+                force_delete: Some(false),
             },
         }
     }
