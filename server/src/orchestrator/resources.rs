@@ -50,6 +50,10 @@ impl ResourceProvisisoner {
                 "pod-assassin.agin.rocks/enable".to_string(),
                 "true".to_string(),
             ),
+            (
+                "pod-assassin.agin.rocks/expires-at".to_string(),
+                (Utc::now() + Duration::hours(1)).timestamp().to_string(),
+            ),
         ])
     }
 
