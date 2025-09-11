@@ -990,6 +990,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "exterminator"
+version = "0.1.0"
+dependencies = [
+ "color-eyre",
+ "k8s-openapi",
+ "kube",
+ "serde",
+]
+
+[[package]]
 name = "eyre"
 version = "0.6.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2625,6 +2635,7 @@ dependencies = [
  "config",
  "dashmap",
  "dotenvy",
+ "exterminator",
  "futures",
  "k8s-openapi",
  "kube",
@@ -3409,6 +3420,7 @@ dependencies = [
  "config",
  "derive_builder",
  "dotenvy",
+ "exterminator",
  "headscale",
  "http",
  "http-serde-ext",

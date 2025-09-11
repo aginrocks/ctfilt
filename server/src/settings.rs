@@ -2,6 +2,7 @@ use std::net::{Ipv4Addr, Ipv6Addr, SocketAddr};
 
 use color_eyre::{Section as _, eyre::Context as _};
 use config::{Config, ConfigError, Environment, File};
+use exterminator::Extermination;
 use http::Uri;
 use openidconnect::{ClientId, ClientSecret, IssuerUrl};
 use rand::{Rng, distr::Alphanumeric, rngs::ThreadRng};
@@ -113,6 +114,7 @@ pub struct Settings {
     pub redis: Redis,
     pub kubernetes: Kubernetes,
     pub headscale: Headscale,
+    pub extermination: Extermination,
     pub flags: Flags,
 }
 
@@ -200,6 +202,7 @@ impl Settings {
                 public_url: "https://headscale.example.com".to_string(),
                 api_key: "api_key".to_string(),
             },
+            extermination: Default::default(),
             flags: Flags {
                 ..Default::default()
             },

@@ -1,4 +1,3 @@
-mod exterminator;
 mod kubernetes;
 mod settings;
 mod state;
@@ -7,11 +6,12 @@ mod watcher;
 use std::sync::Arc;
 
 use color_eyre::eyre::{Context, Result};
+use exterminator::Exterminator;
 use tracing::{info, level_filters::LevelFilter};
 use tracing_error::ErrorLayer;
 use tracing_subscriber::{fmt::format::FmtSpan, layer::SubscriberExt, util::SubscriberInitExt};
 
-use crate::{kubernetes::init_kubernetes, settings::Settings, watcher::watch_pods};
+use crate::{kubernetes::init_kubernetes, settings::Settings, watcher::PodWatcher};
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -28,10 +28,17 @@ async fn main() -> Result<()> {
 
     let settings = Arc::new(Settings::try_load()?);
 
-    info!(prefix = settings.labels.prefix, "Using");
+    info!(prefix = settings.extermination.labels_prefix, "Using");
 
     let client = init_kubernetes(&settings).await?;
-    watch_pods(client, &settings).await?;
+
+    let exterminator = Arc::new(Exterminator::new(
+        client.clone(),
+        settings.extermination.clone(),
+    ));
+
+    let watcher = PodWatcher::new(client, settings, exterminator);
+    watcher.watch_pods().await?;
 
     Ok(())
 }

@@ -55,3 +55,4 @@ chrono = { version = "0.4.42", features = ["serde"] }
 derive_builder = "0.20.2"
 names = { version = "0.14.0", default-features = false }
 headscale = { version = "2.0.0", path = "../headscale" }
+exterminator = { version = "0.1.0", path = "../exterminator" }

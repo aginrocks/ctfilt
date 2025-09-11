@@ -1,5 +1,6 @@
 use color_eyre::{Section as _, eyre::Context as _};
 use config::{Config, ConfigError, Environment, File};
+use exterminator::Extermination;
 use serde::{Deserialize, Serialize};
 use strum::{AsRefStr, Display, EnumString, IntoStaticStr};
 use tracing::warn;
@@ -20,21 +21,8 @@ pub struct Kubernetes {
 }
 
 #[derive(Debug, Deserialize, Serialize)]
-pub struct Labels {
-    pub prefix: String,
-}
-
-#[derive(Debug, Deserialize, Serialize)]
-pub struct Extermination {
-    pub delete_related: bool,
-    pub grace_period: Option<u32>,
-    pub force_delete: Option<bool>,
-}
-
-#[derive(Debug, Deserialize, Serialize)]
 pub struct Settings {
     pub kubernetes: Kubernetes,
-    pub labels: Labels,
     pub extermination: Extermination,
 }
 
@@ -99,14 +87,7 @@ impl Settings {
             kubernetes: Kubernetes {
                 mode: KubernetesMode::Kubeconfig,
             },
-            labels: Labels {
-                prefix: "pod-assassin.agin.rocks".to_string(),
-            },
-            extermination: Extermination {
-                delete_related: true,
-                grace_period: Some(30),
-                force_delete: Some(false),
-            },
+            extermination: Default::default(),
         }
     }
 }
