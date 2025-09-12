@@ -12,11 +12,10 @@ use crate::{
 
 #[derive(Debug, Clone, Parser)]
 pub struct LoginArgs {
-    #[arg(short = 'u', long)]
-    url: String,
-
-    #[arg(short = 't', long)]
     token: String,
+
+    #[arg(short = 'u', long, default_value = "https://ctf.agin.rocks")]
+    url: String,
 }
 
 pub async fn run(args: LoginArgs) -> Result<()> {
@@ -24,18 +23,13 @@ pub async fn run(args: LoginArgs) -> Result<()> {
         warn!("You are already logged in. Overwriting your current credentials.",);
     }
 
-    let base_url = task::spawn_blocking(|| Text::new("Server URL").prompt())
-        .await
-        .into_diagnostic()?
-        .into_diagnostic()?;
-
-    let config = create_api_config(&base_url, &args.token)
+    let config = create_api_config(&args.url, &args.token)
         .wrap_err("Failed to create HTTP client. Ensure that the server URL is valid.")?;
 
     // TODO: Validate API key
 
     let config = AppConfig {
-        base_url: base_url.clone(),
+        base_url: args.url.clone(),
         token: args.token.clone(),
     };
 
