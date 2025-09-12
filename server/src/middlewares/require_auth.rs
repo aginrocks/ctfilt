@@ -1,20 +1,46 @@
+use std::ops::Deref;
+
 use axum::{Extension, extract::Request, middleware::Next, response::Response};
 use axum_oidc::OidcClaims;
-use color_eyre::eyre::{self, ContextCompat};
-use mongodb::{bson::doc, options::ReturnDocument};
+use color_eyre::eyre::{self, ContextCompat, eyre};
+use http::header::AUTHORIZATION;
+use mongodb::{
+    bson::{doc, oid::ObjectId},
+    options::ReturnDocument,
+};
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 
 use crate::{
     GroupClaims,
     axum_error::{AxumError, AxumResult},
-    database::User,
+    database::{AccessToken, User},
     state::AppState,
+    utils::hash_token,
 };
 
-/// User ID type for request extensions
+/// User data type for request extensions
 #[derive(Clone, Debug, Serialize, ToSchema, Deserialize)]
 pub struct UserData(pub User);
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct UserId(pub ObjectId);
+
+impl Deref for UserData {
+    type Target = User;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+impl Deref for UserId {
+    type Target = ObjectId;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
 
 /// Middleware that ensures the user is authenticated
 pub async fn require_auth(
@@ -52,7 +78,36 @@ pub async fn require_auth(
         .await?
         .wrap_err("User not found (wtf?")?;
 
-    request.extensions_mut().insert(UserData(user));
+    request.extensions_mut().insert(UserData(user.clone()));
+    request.extensions_mut().insert(UserId(user.id));
+
+    Ok(next.run(request).await)
+}
+
+pub async fn require_system_auth(
+    Extension(state): Extension<AppState>,
+    request: Request,
+    next: Next,
+) -> AxumResult<Response> {
+    let headers = request.headers();
+    let auth_header = headers
+        .get(AUTHORIZATION)
+        .ok_or_else(|| AxumError::unauthorized(eyre!("Missing Authorization header")))?;
+
+    let token = auth_header
+        .to_str()
+        .map_err(|_| AxumError::bad_request(eyre::eyre!("Invalid Authorization header")))?
+        .strip_prefix("Bearer ")
+        .ok_or_else(|| AxumError::unauthorized(eyre::eyre!("Invalid Authorization scheme")))?;
+
+    let hashed_token = hash_token(token);
+
+    state
+        .database
+        .collection::<AccessToken>("tokens")
+        .find_one(doc! { "hashed_token": hashed_token })
+        .await?
+        .ok_or_else(|| AxumError::unauthorized(eyre::eyre!("Unauthorized")))?;
 
     Ok(next.run(request).await)
 }

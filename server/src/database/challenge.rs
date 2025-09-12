@@ -1,7 +1,6 @@
 use manifests::ChallengeMetadata;
 use mongodb::bson::oid::ObjectId;
 use partial_struct::Partial;
-use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 use visible::StructFields;

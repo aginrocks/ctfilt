@@ -19,6 +19,7 @@ use axum::{
 use axum_oidc::{
     OidcAuthLayer, OidcClient, OidcLoginLayer, error::MiddlewareError, handle_oidc_redirect,
 };
+use clap::Parser;
 use color_eyre::Result;
 use color_eyre::eyre::WrapErr;
 use manifests::{ChallengeFlag, ChallengeFlagMeta, ChallengeMetadata, ChallengeSpec};
@@ -42,12 +43,12 @@ use utoipa_scalar::{Scalar, Servable as _};
 use crate::{
     database::{init_database, init_session_store},
     kubernetes::init_kubernetes,
-    middlewares::require_auth::require_auth,
+    middlewares::require_auth::{require_auth, require_system_auth},
     orchestrator::ChallengeOrchestrator,
     routes::RouteProtectionLevel,
     settings::Settings,
     state::AppState,
-    utils::FlagGenerator,
+    utils::{FlagGenerator, create_token},
 };
 
 #[derive(OpenApi)]
@@ -59,12 +60,25 @@ pub struct GroupClaims {}
 impl axum_oidc::AdditionalClaims for GroupClaims {}
 impl openidconnect::AdditionalClaims for GroupClaims {}
 
+#[derive(Parser)]
+struct Args {
+    #[arg(long = "generate-token")]
+    generate_token: bool,
+}
+
 #[tokio::main]
 async fn main() -> Result<()> {
     color_eyre::install()?;
 
+    let args = Args::parse();
+
     dotenvy::dotenv().ok();
-    init_tracing().wrap_err("failed to set global tracing subscriber")?;
+
+    let filter = match args.generate_token {
+        true => LevelFilter::ERROR,
+        false => LevelFilter::INFO,
+    };
+    init_tracing(filter).wrap_err("failed to set global tracing subscriber")?;
 
     info!(
         "Starting {} {}...",
@@ -75,6 +89,11 @@ async fn main() -> Result<()> {
     let settings = Arc::new(Settings::try_load()?);
 
     let database = init_database(&settings).await?;
+
+    if args.generate_token {
+        create_token(&database).await?;
+        return Ok(());
+    }
 
     let kube_client = init_kubernetes(&settings).await?;
 
@@ -152,13 +171,13 @@ async fn main() -> Result<()> {
     Ok(())
 }
 
-fn init_tracing() -> Result<()> {
+fn init_tracing(filter: LevelFilter) -> Result<()> {
     tracing_subscriber::Registry::default()
         .with(tracing_subscriber::fmt::layer().with_span_events(FmtSpan::NEW | FmtSpan::CLOSE))
         .with(ErrorLayer::default())
         .with(
             tracing_subscriber::EnvFilter::builder()
-                .with_default_directive(LevelFilter::INFO.into())
+                .with_default_directive(filter.into())
                 .with_env_var("RUST_LOG")
                 .from_env()?,
         )
@@ -219,6 +238,7 @@ async fn init_axum(
     let public_router = OpenApiRouter::with_openapi(ApiDoc::openapi());
     let redirect_router = OpenApiRouter::with_openapi(ApiDoc::openapi());
     let auth_router = OpenApiRouter::with_openapi(ApiDoc::openapi());
+    let system_router = OpenApiRouter::with_openapi(ApiDoc::openapi());
 
     // Add public routes (these don't need authentication)
     let public_router = routes
@@ -243,10 +263,20 @@ async fn init_axum(
         .fold(auth_router, |router, (route, _)| router.routes(route))
         .layer(middleware::from_fn(require_auth));
 
+    // Add system authenticated routes (for modifying challenges, etc.)
+    let system_router = routes
+        .clone()
+        .into_iter()
+        .filter(|(_, protected)| matches!(*protected, RouteProtectionLevel::SystemAuthenticated))
+        .fold(system_router, |router, (route, _)| router.routes(route))
+        .layer(middleware::from_fn(require_system_auth));
+
     // Combine the routers
     let router = public_router.merge(redirect_router);
 
     let router = router.merge(auth_router);
+
+    let router = router.merge(system_router);
 
     let router = router.layer(axum::extract::Extension(state.clone()));
 

@@ -3754,6 +3754,7 @@ dependencies = [
  "axum",
  "axum-oidc",
  "chrono",
+ "clap",
  "color-eyre",
  "config",
  "derive_builder",
