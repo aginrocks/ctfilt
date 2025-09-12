@@ -1,5 +1,5 @@
 use clap::Parser;
-use inquire::Text;
+use inquire::{Password, Text};
 use miette::{Context, IntoDiagnostic, Result};
 use tokio::task;
 use tracing::warn;
@@ -12,7 +12,7 @@ use crate::{
 
 #[derive(Debug, Clone, Parser)]
 pub struct LoginArgs {
-    token: String,
+    token: Option<String>,
 
     #[arg(short = 'u', long, default_value = "https://ctf.agin.rocks")]
     url: String,
@@ -23,14 +23,27 @@ pub async fn run(args: LoginArgs) -> Result<()> {
         warn!("You are already logged in. Overwriting your current credentials.",);
     }
 
-    let config = create_api_config(&args.url, &args.token)
+    let token = match args.token {
+        Some(token) => token,
+        None => task::spawn_blocking(|| {
+            Password::new("Token")
+                .without_confirmation()
+                .with_display_mode(inquire::PasswordDisplayMode::Masked)
+                .prompt()
+        })
+        .await
+        .into_diagnostic()?
+        .into_diagnostic()?,
+    };
+
+    let config = create_api_config(&args.url, &token)
         .wrap_err("Failed to create HTTP client. Ensure that the server URL is valid.")?;
 
     // TODO: Validate API key
 
     let config = AppConfig {
         base_url: args.url.clone(),
-        token: args.token.clone(),
+        token: token.clone(),
     };
 
     config.save().await?;
