@@ -32,7 +32,7 @@ pub async fn init_session_store(
     let session_layer = SessionManagerLayer::new(session_store)
         .with_secure(false)
         .with_same_site(SameSite::Lax)
-        .with_expiry(Expiry::OnInactivity(Duration::seconds(120)));
+        .with_expiry(Expiry::OnInactivity(Duration::days(7)));
 
     Ok(session_layer)
 }

@@ -59,3 +59,5 @@ exterminator = { version = "0.1.0", path = "../exterminator" }
 manifests = { version = "0.1.0", path = "../manifests", features = ["schemars", "utoipa", "validator"] }
 clap = { version = "4.5.47", features = ["derive"] }
 futures = "0.3.31"
+validator = { version = "0.20.0", features = ["derive"] }
+axum-valid = "0.24.0"

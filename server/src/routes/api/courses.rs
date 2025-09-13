@@ -1,3 +1,5 @@
+mod course_slug;
+
 use axum::{Extension, Json};
 use color_eyre::eyre::Context;
 use futures::TryStreamExt;
@@ -14,7 +16,11 @@ use super::Route;
 const PATH: &str = "/api/courses";
 
 pub fn routes() -> Vec<Route> {
-    vec![(routes!(get_courses), RouteProtectionLevel::Authenticated)]
+    [
+        vec![(routes!(get_courses), RouteProtectionLevel::Authenticated)],
+        course_slug::routes(),
+    ]
+    .concat()
 }
 
 /// Get all courses
