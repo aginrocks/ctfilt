@@ -50,7 +50,4 @@ pub struct CourseMetadata {
 
     /// The difficulty level of the course
     pub difficulty: CourseDifficulty,
-
-    /// Order of lessons in the course (by slug)
-    pub lessons: Vec<String>,
 }

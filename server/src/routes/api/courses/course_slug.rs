@@ -1,17 +1,18 @@
+mod lessons;
+
 use axum::{Extension, Json, extract::Path};
 use axum_valid::Valid;
 use color_eyre::eyre::{Context, eyre};
-use futures::TryStreamExt;
 use manifests::CourseMetadata;
 use mongodb::bson::doc;
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 use utoipa::ToSchema;
 use utoipa_axum::routes;
 use validator::Validate;
 
 use crate::{
     axum_error::{AxumError, AxumResult},
-    database::Course,
+    database::{Course, PartialCourse},
     middlewares::require_auth::UnauthorizedError,
     routes::{
         RouteProtectionLevel,
@@ -25,18 +26,17 @@ use super::Route;
 const PATH: &str = "/api/courses/{course_slug}";
 
 pub fn routes() -> Vec<Route> {
-    vec![
-        (routes!(get_course), RouteProtectionLevel::Authenticated),
-        (
-            routes!(update_course),
-            RouteProtectionLevel::SystemAuthenticated,
-        ),
+    [
+        vec![
+            (routes!(get_course), RouteProtectionLevel::Authenticated),
+            (
+                routes!(update_course),
+                RouteProtectionLevel::SystemAuthenticated,
+            ),
+        ],
+        lessons::routes(),
     ]
-}
-
-#[derive(Serialize, ToSchema)]
-pub struct DetailedCourse {
-    pub course: Course,
+    .concat()
 }
 
 /// Get course
@@ -47,7 +47,7 @@ pub struct DetailedCourse {
         ("course_slug" = String, Path, description = "Course slug"),
     ),
     responses(
-        (status = OK, description = "Success", body = DetailedCourse, content_type = "application/json"),
+        (status = OK, description = "Success", body = Course, content_type = "application/json"),
         (status = UNAUTHORIZED, description = "Unauthorized", body = UnauthorizedError, content_type = "application/json"),
         (status = NOT_FOUND, description = "Course not found", body = NotFoundError, content_type = "application/json")
     ),
@@ -56,18 +56,10 @@ pub struct DetailedCourse {
 async fn get_course(
     Extension(state): Extension<AppState>,
     Path(course_slug): Path<String>,
-) -> AxumResult<Json<DetailedCourse>> {
-    let course = state
-        .database
-        .collection::<Course>("courses")
-        .find_one(doc! { "slug": course_slug })
-        .await
-        .wrap_err("Failed to fetch courses")?
-        .ok_or_else(|| AxumError::not_found(eyre!("Course not found")))?;
+) -> AxumResult<Json<Course>> {
+    let course = state.store.courses.get_by_slug(&course_slug).await?;
 
-    let detailed = DetailedCourse { course };
-
-    Ok(Json(detailed))
+    Ok(Json(course))
 }
 
 #[derive(Deserialize, ToSchema, Validate)]
@@ -98,8 +90,25 @@ async fn update_course(
     Path(course_slug): Path<String>,
     Valid(Json(body)): Valid<Json<UpdateCourseRequest>>,
 ) -> AxumResult<Json<CreateSuccess>> {
-    todo!()
-    // Ok(Json(CreateSuccess {
-    //     success: true,
-    // }))
+    if body.metadata.slug != course_slug {
+        return Err(AxumError::bad_request(eyre!("Slugs are immutable")));
+    }
+
+    let new_course = PartialCourse {
+        metadata: body.metadata,
+        r#ref: body.r#ref,
+    };
+
+    state
+        .database
+        .collection::<PartialCourse>("courses")
+        .find_one_and_replace(doc! { "slug": course_slug.clone() }, new_course)
+        .upsert(true)
+        .await
+        .wrap_err("Failed to update course")?;
+
+    Ok(Json(CreateSuccess {
+        success: true,
+        id: course_slug,
+    }))
 }

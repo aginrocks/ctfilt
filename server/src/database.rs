@@ -13,4 +13,22 @@ pub use challenge::*;
 pub use course::*;
 pub use init::*;
 pub use lesson::*;
+use mongodb::{Client, Database};
 pub use user::*;
+
+#[derive(Clone)]
+pub struct DatabaseStore {
+    pub database: Database,
+    pub courses: CourseStore,
+    pub lessons: LessonStore,
+}
+
+impl DatabaseStore {
+    pub fn new(database: &Database) -> Self {
+        Self {
+            database: database.clone(),
+            courses: CourseStore::new(database),
+            lessons: LessonStore::new(database),
+        }
+    }
+}

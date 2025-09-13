@@ -7,7 +7,7 @@ use schemars::JsonSchema;
 use utoipa::ToSchema;
 
 #[cfg(feature = "validator")]
-use validator::Validate;
+use {crate::validators::slug_validator, validator::Validate};
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[cfg_attr(feature = "utoipa", derive(ToSchema))]
@@ -18,6 +18,10 @@ pub struct LessonMetadata {
     #[cfg_attr(feature = "validator", validate(length(min = 1, max = 32)))]
     pub name: String,
 
-    /// A list of challenge slugs included in the lesson
-    pub challenges: Vec<String>,
+    /// A URL-friendly unique identifier for the lesson
+    #[cfg_attr(
+        feature = "validator",
+        validate(custom(function = "slug_validator"), length(min = 1, max = 32))
+    )]
+    pub slug: String,
 }

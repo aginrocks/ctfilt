@@ -88,7 +88,7 @@ pub mod vec_oid_to_vec_string {
     {
         if serializer.is_human_readable() {
             id.iter()
-                .map(|id| id.to_string())
+                .map(std::string::ToString::to_string)
                 .collect::<Vec<String>>()
                 .serialize(serializer)
 

@@ -143,7 +143,7 @@ impl Settings {
     }
 
     pub fn try_load() -> color_eyre::Result<Self> {
-        let res = Settings::new();
+        let res = Self::new();
 
         let add_suggestion = matches!(
             &res,

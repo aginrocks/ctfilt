@@ -22,8 +22,6 @@ use axum_oidc::{
 use clap::Parser;
 use color_eyre::Result;
 use color_eyre::eyre::WrapErr;
-use manifests::{ChallengeFlag, ChallengeFlagMeta, ChallengeMetadata, ChallengeSpec};
-use mongodb::bson::oid::ObjectId;
 use serde::{Deserialize, Serialize};
 use tokio::net::TcpListener;
 use tower::ServiceBuilder;
@@ -41,7 +39,7 @@ use utoipa_redoc::{Redoc, Servable};
 use utoipa_scalar::{Scalar, Servable as _};
 
 use crate::{
-    database::{init_database, init_session_store},
+    database::{DatabaseStore, init_database, init_session_store},
     kubernetes::init_kubernetes,
     middlewares::require_auth::{require_auth, require_system_auth},
     orchestrator::ChallengeOrchestrator,
@@ -90,6 +88,8 @@ async fn main() -> Result<()> {
 
     let database = init_database(&settings).await?;
 
+    let store = DatabaseStore::new(&database);
+
     if args.generate_token {
         create_token(&database).await?;
         return Ok(());
@@ -113,6 +113,7 @@ async fn main() -> Result<()> {
 
     let app_state = AppState {
         database,
+        store,
         settings: settings.clone(),
         kube: kube_client,
         flags,
@@ -265,7 +266,6 @@ async fn init_axum(
 
     // Add system authenticated routes (for modifying challenges, etc.)
     let system_router = routes
-        .clone()
         .into_iter()
         .filter(|(_, protected)| matches!(*protected, RouteProtectionLevel::SystemAuthenticated))
         .fold(system_router, |router, (route, _)| router.routes(route))

@@ -1,9 +1,6 @@
 mod course_slug;
 
 use axum::{Extension, Json};
-use color_eyre::eyre::Context;
-use futures::TryStreamExt;
-use mongodb::bson::doc;
 use utoipa_axum::routes;
 
 use crate::{
@@ -34,14 +31,7 @@ pub fn routes() -> Vec<Route> {
     tag = "Courses"
 )]
 async fn get_courses(Extension(state): Extension<AppState>) -> AxumResult<Json<Vec<Course>>> {
-    let cursor = state
-        .database
-        .collection::<Course>("courses")
-        .find(doc! {})
-        .await
-        .wrap_err("Failed to fetch courses")?;
-
-    let courses = cursor.try_collect().await?;
+    let courses = state.store.courses.get_all().await?;
 
     Ok(Json(courses))
 }
