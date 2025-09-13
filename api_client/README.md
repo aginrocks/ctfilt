@@ -26,14 +26,21 @@ All URIs are relative to *http://localhost*
 
 Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
-*DefaultApi* | [**get_challenge_schema**](docs/DefaultApi.md#get_challenge_schema) | **GET** /api/schema/challenge | Get challenge manifest schema
-*DefaultApi* | [**get_health**](docs/DefaultApi.md#get_health) | **GET** /api/health | Get health of the service (returns \"ok\")
-*DefaultApi* | [**get_user**](docs/DefaultApi.md#get_user) | **GET** /api/user | Get user details
-*DefaultApi* | [**log_in**](docs/DefaultApi.md#log_in) | **GET** /api/login | Log in
+*AuthApi* | [**get_user**](docs/AuthApi.md#get_user) | **GET** /api/user | Get user details
+*AuthApi* | [**log_in**](docs/AuthApi.md#log_in) | **GET** /api/login | Log in
+*CoursesApi* | [**get_courses**](docs/CoursesApi.md#get_courses) | **GET** /api/courses | Get all courses
+*OtherApi* | [**get_health**](docs/OtherApi.md#get_health) | **GET** /api/health | Check server health
+*SchemaApi* | [**get_challenge_schema**](docs/SchemaApi.md#get_challenge_schema) | **GET** /api/schema/challenge | Get challenge manifest schema
+*SchemaApi* | [**get_course_schema**](docs/SchemaApi.md#get_course_schema) | **GET** /api/schema/course | Get course manifest schema
 
 
 ## Documentation For Models
 
+ - [Course](docs/Course.md)
+ - [CourseDifficulty](docs/CourseDifficulty.md)
+ - [CourseMetadata](docs/CourseMetadata.md)
+ - [UnauthorizedError](docs/UnauthorizedError.md)
+ - [User](docs/User.md)
 
 
 To get access to the crate's generated documentation, use:

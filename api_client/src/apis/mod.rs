@@ -111,6 +111,9 @@ impl From<&str> for ContentType {
     }
 }
 
-pub mod default_api;
+pub mod auth_api;
+pub mod courses_api;
+pub mod other_api;
+pub mod schema_api;
 
 pub mod configuration;
