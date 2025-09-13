@@ -6,8 +6,10 @@ edition = "2024"
 [features]
 utoipa = ["dep:utoipa"]
 schemars = ["dep:schemars"]
+validator = ["dep:validator"]
 
 [dependencies]
 schemars = { version = "1.0.4", features = ["derive", "preserve_order"], optional = true }
 serde = { version = "1.0.219", features = ["derive"] }
 utoipa = { version = "5.4.0", features = ["chrono"], optional = true }
+validator = { version = "0.20.0", features = ["derive"], optional = true }

@@ -6,6 +6,9 @@ use schemars::JsonSchema;
 #[cfg(feature = "utoipa")]
 use utoipa::ToSchema;
 
+#[cfg(feature = "validator")]
+use {crate::validators::slug_validator, validator::Validate};
+
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[cfg_attr(feature = "utoipa", derive(ToSchema))]
 #[cfg_attr(feature = "schemars", derive(JsonSchema))]
@@ -39,15 +42,25 @@ pub struct ChallengeFlag {
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[cfg_attr(feature = "utoipa", derive(ToSchema))]
 #[cfg_attr(feature = "schemars", derive(JsonSchema))]
+#[cfg_attr(feature = "validator", derive(Validate))]
 pub struct ChallengeMetadata {
     /// A short unique name for the challenge
+    #[cfg_attr(feature = "validator", validate(length(min = 1, max = 32)))]
     pub name: String,
 
     /// A URL-friendly unique identifier for the challenge
+    #[cfg_attr(
+        feature = "validator",
+        validate(custom(function = "slug_validator"), length(min = 1, max = 32))
+    )]
     pub slug: String,
 
-    /// Markdown description of the challenge
+    /// A short description, Markdown not supported
+    #[cfg_attr(feature = "validator", validate(length(min = 1, max = 128)))]
     pub description: String,
+
+    /// Markdown description of the challenge
+    pub details: String,
 
     #[serde(flatten)]
     pub spec: ChallengeSpec,
