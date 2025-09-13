@@ -15,7 +15,7 @@ pub fn routes() -> Vec<Route> {
     vec![(routes!(get_challenge_schema), RouteProtectionLevel::Public)]
 }
 
-/// Get challenge manifest schema
+/// Challenge schema
 ///
 /// This endpoint returns JSON schema for the challenge manifest.
 #[utoipa::path(

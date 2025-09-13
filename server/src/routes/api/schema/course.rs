@@ -15,7 +15,7 @@ pub fn routes() -> Vec<Route> {
     vec![(routes!(get_course_schema), RouteProtectionLevel::Public)]
 }
 
-/// Get course manifest schema
+/// Course schema
 ///
 /// This endpoint returns JSON schema for the course manifest.
 #[utoipa::path(
