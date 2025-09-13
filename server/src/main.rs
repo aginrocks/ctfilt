@@ -124,37 +124,37 @@ async fn main() -> Result<()> {
     let app = init_axum(app_state, session_layer).await?;
     let listener = init_listener(&settings).await?;
 
-    orchestrator
-        .start_challenge(
-            ObjectId::new(),
-            &ChallengeMetadata {
-                name: "test".to_string(),
-                slug: "test".to_string(),
-                description: "test".to_string(),
-                spec: ChallengeSpec::Container {
-                    image: "test".to_string(),
-                },
-                flags: vec![
-                    ChallengeFlag {
-                        points: 100,
-                        description: None,
-                        meta: ChallengeFlagMeta::DynamicMount {
-                            mount_path: "/flag1".to_string(),
-                        },
-                    },
-                    ChallengeFlag {
-                        points: 200,
-                        description: None,
-                        meta: ChallengeFlagMeta::DynamicMount {
-                            mount_path: "/flag2".to_string(),
-                        },
-                    },
-                ],
-            },
-            ObjectId::new(),
-            "ce24e0c8-cd22-4e2c-9698-dd2a21c17b9b",
-        )
-        .await?;
+    // orchestrator
+    //     .start_challenge(
+    //         ObjectId::new(),
+    //         &ChallengeMetadata {
+    //             name: "test".to_string(),
+    //             slug: "test".to_string(),
+    //             description: "test".to_string(),
+    //             spec: ChallengeSpec::Container {
+    //                 image: "test".to_string(),
+    //             },
+    //             flags: vec![
+    //                 ChallengeFlag {
+    //                     points: 100,
+    //                     description: None,
+    //                     meta: ChallengeFlagMeta::DynamicMount {
+    //                         mount_path: "/flag1".to_string(),
+    //                     },
+    //                 },
+    //                 ChallengeFlag {
+    //                     points: 200,
+    //                     description: None,
+    //                     meta: ChallengeFlagMeta::DynamicMount {
+    //                         mount_path: "/flag2".to_string(),
+    //                     },
+    //                 },
+    //             ],
+    //         },
+    //         ObjectId::new(),
+    //         "ce24e0c8-cd22-4e2c-9698-dd2a21c17b9b",
+    //     )
+    //     .await?;
 
     info!(
         "listening on {} ({})",

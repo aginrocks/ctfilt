@@ -24,6 +24,7 @@ pub fn routes() -> Vec<Route> {
     responses(
         (status = OK, description = "Success", body = String, content_type = "application/json")
     ),
+    tag = "Schema"
 )]
 pub async fn get_course_schema() -> Json<Value> {
     let schema = schema_for!(CourseMetadata);

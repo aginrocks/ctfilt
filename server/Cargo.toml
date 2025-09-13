@@ -58,3 +58,4 @@ headscale = { version = "2.0.0", path = "../headscale" }
 exterminator = { version = "0.1.0", path = "../exterminator" }
 manifests = { version = "0.1.0", path = "../manifests", features = ["schemars", "utoipa"] }
 clap = { version = "4.5.47", features = ["derive"] }
+futures = "0.3.31"

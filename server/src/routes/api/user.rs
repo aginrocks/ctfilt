@@ -1,8 +1,11 @@
-use axum::{Extension, Json, response::IntoResponse};
-use serde_json::json;
+use axum::{Extension, Json};
 use utoipa_axum::routes;
 
-use crate::{middlewares::require_auth::UserData, routes::RouteProtectionLevel};
+use crate::{
+    database::User,
+    middlewares::require_auth::{UnauthorizedError, UserData},
+    routes::RouteProtectionLevel,
+};
 
 use super::Route;
 
@@ -17,12 +20,11 @@ pub fn routes() -> Vec<Route> {
     method(get),
     path = PATH,
     responses(
-        (status = OK, description = "Success", body = str)
-    )
+        (status = OK, description = "Success", body = User, content_type = "application/json"),
+        (status = UNAUTHORIZED, description = "Unauthorized", body = UnauthorizedError, content_type = "application/json")
+    ),
+    tag = "Auth"
 )]
-async fn get_user(Extension(user): Extension<UserData>) -> impl IntoResponse {
-    Json(json!({
-        "id": user.0
-        // "id": claims.subject().to_string(),
-    }))
+async fn get_user(Extension(user): Extension<UserData>) -> Json<User> {
+    Json(user.0)
 }

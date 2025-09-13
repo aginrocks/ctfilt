@@ -3760,6 +3760,7 @@ dependencies = [
  "derive_builder",
  "dotenvy",
  "exterminator",
+ "futures",
  "headscale",
  "http",
  "http-serde-ext",
