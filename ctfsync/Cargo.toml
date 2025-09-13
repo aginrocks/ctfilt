@@ -9,6 +9,7 @@ clap = { version = "4.5.47", features = ["derive"] }
 directories = "6.0.0"
 indicatif = { version = "0.18.0", features = ["tokio"] }
 inquire = "0.7.5"
+manifests = { version = "0.1.0", path = "../manifests" }
 miette = "7.6.0"
 owo-colors = "4.2.2"
 reqwest =  { version = "0.12.23", default-features = false, features = [
