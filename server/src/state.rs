@@ -1,4 +1,4 @@
-use std::{ops::Deref, sync::Arc};
+use std::sync::Arc;
 
 use headscale::apis::configuration::Configuration;
 use mongodb::Database;

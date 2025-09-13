@@ -1,15 +1,10 @@
 use axum::{Extension, Json, extract::Path};
-use color_eyre::eyre::Context;
-use manifests::{ChallengeMetadata, LessonMetadata};
-use mongodb::bson::doc;
-use schemars::schema_for;
-use serde::Serialize;
+use manifests::LessonMetadata;
 use serde_json::Value;
 use utoipa_axum::routes;
 
 use crate::{
     axum_error::AxumResult,
-    database::Lesson,
     middlewares::require_auth::UnauthorizedError,
     routes::{RouteProtectionLevel, api::NotFoundError},
     state::AppState,
