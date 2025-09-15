@@ -1,3 +1,4 @@
+mod auth;
 mod courses;
 mod health;
 mod login;
@@ -16,6 +17,7 @@ pub fn routes() -> Vec<Route> {
         login::routes(),
         schema::routes(),
         courses::routes(),
+        auth::routes(),
     ]
     .concat()
 }
