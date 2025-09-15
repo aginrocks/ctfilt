@@ -21,6 +21,11 @@ pub async fn run(repo: Repository, directory: &Path) -> Result<()> {
 
     let config = init_api_config().await?;
 
+    let latest_ref = courses_api::get_course(config, &manifest.slug)
+        .await
+        .into_diagnostic()?
+        .r#ref;
+
     let update_request = UpdateCourseRequest::new(manifest.clone(), r#ref);
     let update_response = courses_api::update_course(config, &manifest.slug, update_request)
         .await

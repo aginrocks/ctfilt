@@ -42,3 +42,11 @@ pub struct NoGitWorkdir;
     help("Ensure that 'course.yaml' or 'challenge.yaml' exists in the repository root")
 )]
 pub struct NoManifest;
+
+#[derive(Error, Debug, Diagnostic)]
+#[error("Your repository has uncommitted changes")]
+#[diagnostic(
+    code(repo::dirty),
+    help("Commit or stash your changes before applying configuration")
+)]
+pub struct DityWorktree;
