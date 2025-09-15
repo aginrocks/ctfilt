@@ -54,8 +54,8 @@ async fn main() -> Result<()> {
     let cli = Cli::parse();
 
     let result = match cli.clone().command {
-        Commands::Auth { subcommand } => commands::auth::handle_auth(&cli, subcommand).await,
-        Commands::Apply => commands::apply::handle_apply(&cli).await,
+        Commands::Auth { subcommand } => commands::auth::handle_auth(subcommand).await,
+        Commands::Apply => commands::apply::handle_apply().await,
     };
 
     if let Err(e) = result {

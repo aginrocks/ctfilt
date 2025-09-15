@@ -3,11 +3,10 @@ pub mod course;
 use std::convert::Infallible;
 
 use clap::Subcommand;
-use gix::{Progress, Repository, ThreadSafeRepository, progress, status};
+use gix::{Repository, ThreadSafeRepository, status};
 use miette::{IntoDiagnostic, Result};
 
 use crate::{
-    Cli,
     errors::{DityWorktree, NoGitRepo, NoGitWorkdir, NoManifest},
     git::{RepoType, detect_repo_type},
 };
@@ -18,7 +17,7 @@ pub enum SyncCommands {
     Course,
 }
 
-pub async fn handle_apply(cli: &Cli) -> Result<()> {
+pub async fn handle_apply() -> Result<()> {
     let repo: Repository = ThreadSafeRepository::discover(".")
         .map_err(|_| NoGitRepo)?
         .into();
