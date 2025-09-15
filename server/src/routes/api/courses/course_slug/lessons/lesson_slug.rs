@@ -1,11 +1,10 @@
-mod lesson_slug;
-
 use axum::{Extension, Json, extract::Path};
 use manifests::LessonMetadata;
 use utoipa_axum::routes;
 
 use crate::{
     axum_error::AxumResult,
+    database::Lesson,
     middlewares::require_auth::UnauthorizedError,
     routes::{RouteProtectionLevel, api::NotFoundError},
     state::AppState,
@@ -13,42 +12,40 @@ use crate::{
 
 use super::Route;
 
-const PATH: &str = "/api/courses/{course_slug}/lessons";
+const PATH: &str = "/api/courses/{course_slug}/lessons/{lesson_slug}";
 
 pub fn routes() -> Vec<Route> {
-    [
-        vec![(
-            routes!(get_course_lessons),
-            RouteProtectionLevel::Authenticated,
-        )],
-        lesson_slug::routes(),
-    ]
-    .concat()
+    vec![(
+        routes!(get_course_lesson),
+        RouteProtectionLevel::Authenticated,
+    )]
 }
 
-/// Get lessons
+/// Get lesson
 #[utoipa::path(
     method(get),
     path = PATH,
     params(
         ("course_slug" = String, Path, description = "Course slug"),
+        ("lesson_slug" = String, Path, description = "Lesson slug"),
     ),
     responses(
         (status = OK, description = "Success", body = Vec<LessonMetadata>, content_type = "application/json"),
         (status = UNAUTHORIZED, description = "Unauthorized", body = UnauthorizedError, content_type = "application/json"),
-        (status = NOT_FOUND, description = "Course not found", body = NotFoundError, content_type = "application/json")
+        (status = NOT_FOUND, description = "Course or lesson not found", body = NotFoundError, content_type = "application/json")
     ),
     tag = "Course"
 )]
-pub async fn get_course_lessons(
+pub async fn get_course_lesson(
     Extension(state): Extension<AppState>,
-    Path(course_slug): Path<String>,
-) -> AxumResult<Json<Vec<LessonMetadata>>> {
+    Path((course_slug, lesson_slug)): Path<(String, String)>,
+) -> AxumResult<Json<Lesson>> {
     let course = state.store.courses.get_by_slug(&course_slug).await?;
-    let lessons = state.store.lessons.get_by_course_id(course.id).await?;
-    let lessons = lessons.into_iter().map(|l| l.metadata).collect::<Vec<_>>();
+    let lesson = state
+        .store
+        .lessons
+        .get_by_slug(course.id, &lesson_slug)
+        .await?;
 
-    // TODO: Add completion details
-
-    Ok(Json(lessons))
+    Ok(Json(lesson))
 }
