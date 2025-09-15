@@ -1,4 +1,4 @@
-use api_client::apis::other_api;
+use api_client::apis::auth_api;
 use clap::Parser;
 use inquire::Password;
 use miette::{Context, IntoDiagnostic, Result};
@@ -42,7 +42,7 @@ pub async fn run(args: LoginArgs) -> Result<()> {
         .wrap_err("Failed to create HTTP client. Ensure that the server URL is valid.")?;
 
     // TODO: Validate API key
-    other_api::check_system_auth(&config)
+    auth_api::check_system_auth(&config)
         .await
         .map_err(|_| InvalidToken)?;
 

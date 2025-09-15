@@ -33,7 +33,7 @@ pub struct AuthCheckSuccess {
         (status = OK, description = "Success", body = AuthCheckSuccess, content_type = "application/json"),
         (status = UNAUTHORIZED, description = "Unauthorized", body = UnauthorizedError, content_type = "application/json")
     ),
-    tag = "Other"
+    tag = "Auth"
 )]
 async fn check_system_auth() -> Json<AuthCheckSuccess> {
     Json(AuthCheckSuccess { success: true })
