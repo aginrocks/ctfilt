@@ -23,8 +23,8 @@ pub struct Course {
     #[serde(rename = "name")]
     pub name: String,
     /// A list of learning objectives for the course
-    #[serde(rename = "objectives")]
-    pub objectives: Vec<String>,
+    #[serde(rename = "objectives", skip_serializing_if = "Option::is_none")]
+    pub objectives: Option<Vec<String>>,
     /// A list of course slugs that are prerequisites for this course
     #[serde(rename = "prerequisites", skip_serializing_if = "Option::is_none")]
     pub prerequisites: Option<Vec<String>>,
@@ -41,12 +41,12 @@ pub struct Course {
 }
 
 impl Course {
-    pub fn new(description: String, difficulty: models::CourseDifficulty, name: String, objectives: Vec<String>, slug: String, _id: String, r#ref: String) -> Course {
+    pub fn new(description: String, difficulty: models::CourseDifficulty, name: String, slug: String, _id: String, r#ref: String) -> Course {
         Course {
             description,
             difficulty,
             name,
-            objectives,
+            objectives: None,
             prerequisites: None,
             slug,
             tags: None,

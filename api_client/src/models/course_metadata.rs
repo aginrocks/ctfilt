@@ -23,8 +23,8 @@ pub struct CourseMetadata {
     #[serde(rename = "name")]
     pub name: String,
     /// A list of learning objectives for the course
-    #[serde(rename = "objectives")]
-    pub objectives: Vec<String>,
+    #[serde(rename = "objectives", default, with = "::serde_with::rust::double_option", skip_serializing_if = "Option::is_none")]
+    pub objectives: Option<Option<Vec<String>>>,
     /// A list of course slugs that are prerequisites for this course
     #[serde(rename = "prerequisites", default, with = "::serde_with::rust::double_option", skip_serializing_if = "Option::is_none")]
     pub prerequisites: Option<Option<Vec<String>>>,
@@ -37,12 +37,12 @@ pub struct CourseMetadata {
 }
 
 impl CourseMetadata {
-    pub fn new(description: String, difficulty: models::CourseDifficulty, name: String, objectives: Vec<String>, slug: String) -> CourseMetadata {
+    pub fn new(description: String, difficulty: models::CourseDifficulty, name: String, slug: String) -> CourseMetadata {
         CourseMetadata {
             description,
             difficulty,
             name,
-            objectives,
+            objectives: None,
             prerequisites: None,
             slug,
             tags: None,
