@@ -1,3 +1,4 @@
+use api_client::apis::other_api;
 use clap::Parser;
 use inquire::{Password, Text};
 use miette::{Context, IntoDiagnostic, Result};
@@ -7,6 +8,7 @@ use tracing::warn;
 use crate::{
     api::create_api_config,
     config::{AppConfig, init_config},
+    errors::InvalidToken,
     success,
 };
 
@@ -40,6 +42,9 @@ pub async fn run(args: LoginArgs) -> Result<()> {
         .wrap_err("Failed to create HTTP client. Ensure that the server URL is valid.")?;
 
     // TODO: Validate API key
+    other_api::check_system_auth(&config)
+        .await
+        .map_err(|_| InvalidToken)?;
 
     let config = AppConfig {
         base_url: args.url.clone(),

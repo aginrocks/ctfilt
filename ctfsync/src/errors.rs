@@ -13,3 +13,32 @@ pub struct ConfigSavingFailed;
     help("Use the 'ctfsync auth login' command to log in")
 )]
 pub struct NotLoggedIn;
+
+#[derive(Error, Debug, Diagnostic)]
+#[error("Failed to fetch token information")]
+#[diagnostic(
+    code(auth::invalid_token),
+    help("Ensure that the base URL and token is valid")
+)]
+pub struct InvalidToken;
+
+#[derive(Error, Debug, Diagnostic)]
+#[error("Failed to read Git data")]
+#[diagnostic(
+    code(git::no_repo),
+    help("Ensure that you are inside a Git repository")
+)]
+pub struct NoGitRepo;
+
+#[derive(Error, Debug, Diagnostic)]
+#[error("Git working directory could not be found")]
+#[diagnostic(code(git::no_workidr))]
+pub struct NoGitWorkdir;
+
+#[derive(Error, Debug, Diagnostic)]
+#[error("Manifest could not be found")]
+#[diagnostic(
+    code(course::no_manifest),
+    help("Ensure that 'course.yaml' exists in the repository root")
+)]
+pub struct NoCourseManifest;

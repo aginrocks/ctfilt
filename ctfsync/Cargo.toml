@@ -7,6 +7,7 @@ edition = "2024"
 api_client = { version = "2.0.0", path = "../api_client" }
 clap = { version = "4.5.47", features = ["derive"] }
 directories = "6.0.0"
+gix = "0.73.0"
 indicatif = { version = "0.18.0", features = ["tokio"] }
 inquire = "0.7.5"
 manifests = { version = "0.1.0", path = "../manifests" }
@@ -16,6 +17,7 @@ reqwest =  { version = "0.12.23", default-features = false, features = [
     "rustls-tls",
 ] }
 serde = { version = "1.0.219", features = ["derive"] }
+serde_yaml = "0.9.34"
 thiserror = "2.0.16"
 tokio = { version = "1.47.1", features = ["full"] }
 toml = "0.9.5"

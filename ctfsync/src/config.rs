@@ -36,7 +36,7 @@ impl AppConfig {
 static APP_CONFIG: OnceCell<Arc<AppConfig>> = OnceCell::const_new();
 
 pub fn get_config_directory() -> PathBuf {
-    if let Some(proj_dirs) = ProjectDirs::from("rocks", "agin", "aginci-cli") {
+    if let Some(proj_dirs) = ProjectDirs::from("rocks", "agin", "ctf") {
         return proj_dirs.config_dir().to_path_buf();
     };
 
