@@ -6,7 +6,7 @@ mod formatter;
 mod report_handler;
 mod utils;
 
-use clap::{Parser, Subcommand, ValueEnum};
+use clap::{Parser, Subcommand};
 use miette::Result;
 use std::process;
 use tracing::level_filters::LevelFilter;

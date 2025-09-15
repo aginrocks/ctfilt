@@ -1,6 +1,6 @@
 use api_client::apis::other_api;
 use clap::Parser;
-use inquire::{Password, Text};
+use inquire::Password;
 use miette::{Context, IntoDiagnostic, Result};
 use tokio::task;
 use tracing::warn;
