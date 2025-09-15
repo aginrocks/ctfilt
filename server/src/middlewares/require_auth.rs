@@ -49,39 +49,42 @@ pub async fn require_auth(
     mut request: Request,
     next: Next,
 ) -> AxumResult<Response> {
-    let claims = claims.ok_or_else(|| AxumError::unauthorized(eyre::eyre!("Unauthorized")))?;
+    match claims {
+        Some(claims) => {
+            let sub = claims.subject().to_string();
+            let name = claims
+                .name()
+                .wrap_err("Name is required")?
+                .get(None)
+                .wrap_err("Name is required")?
+                .to_string();
+            let email = claims.email().wrap_err("Email is required")?.to_string();
 
-    let sub = claims.subject().to_string();
-    let name = claims
-        .name()
-        .wrap_err("Name is required")?
-        .get(None)
-        .wrap_err("Name is required")?
-        .to_string();
-    let email = claims.email().wrap_err("Email is required")?.to_string();
+            let user = state
+                .database
+                .collection::<User>("users")
+                .find_one_and_update(
+                    doc! { "sub": &sub },
+                    doc! {
+                        "$set": {
+                            "subject": sub,
+                            "name": name,
+                            "email": email,
+                        }
+                    },
+                )
+                .upsert(true)
+                .return_document(ReturnDocument::After)
+                .await?
+                .wrap_err("User not found (wtf?")?;
 
-    let user = state
-        .database
-        .collection::<User>("users")
-        .find_one_and_update(
-            doc! { "sub": &sub },
-            doc! {
-                "$set": {
-                    "subject": sub,
-                    "name": name,
-                    "email": email,
-                }
-            },
-        )
-        .upsert(true)
-        .return_document(ReturnDocument::After)
-        .await?
-        .wrap_err("User not found (wtf?")?;
+            request.extensions_mut().insert(UserData(user.clone()));
+            request.extensions_mut().insert(UserId(user.id));
 
-    request.extensions_mut().insert(UserData(user.clone()));
-    request.extensions_mut().insert(UserId(user.id));
-
-    Ok(next.run(request).await)
+            Ok(next.run(request).await)
+        }
+        None => require_system_auth(Extension(state), request, next).await,
+    }
 }
 
 pub async fn require_system_auth(
@@ -92,13 +95,13 @@ pub async fn require_system_auth(
     let headers = request.headers();
     let auth_header = headers
         .get(AUTHORIZATION)
-        .ok_or_else(|| AxumError::unauthorized(eyre!("Missing Authorization header")))?;
+        .ok_or_else(|| AxumError::unauthorized(eyre!("Unauthorized")))?;
 
     let token = auth_header
         .to_str()
-        .map_err(|_| AxumError::bad_request(eyre::eyre!("Invalid Authorization header")))?
+        .map_err(|_| AxumError::bad_request(eyre::eyre!("Unauthorized")))?
         .strip_prefix("Bearer ")
-        .ok_or_else(|| AxumError::unauthorized(eyre::eyre!("Invalid Authorization scheme")))?;
+        .ok_or_else(|| AxumError::unauthorized(eyre::eyre!("Unauthorized")))?;
 
     let hashed_token = hash_token(token);
 
