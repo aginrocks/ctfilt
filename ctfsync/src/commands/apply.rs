@@ -2,9 +2,13 @@ pub mod course;
 
 use clap::Subcommand;
 use gix::{Repository, ThreadSafeRepository};
-use miette::Result;
+use miette::{IntoDiagnostic, Result};
 
-use crate::{Cli, errors::NoGitRepo};
+use crate::{
+    Cli,
+    errors::{NoGitRepo, NoGitWorkdir, NoManifest},
+    git::{RepoType, detect_repo_type},
+};
 
 #[derive(Subcommand, Debug, Clone)]
 pub enum SyncCommands {
@@ -12,13 +16,18 @@ pub enum SyncCommands {
     Course,
 }
 
-pub async fn handle_apply(cli: &Cli, cmd: SyncCommands) -> Result<()> {
-    let repo = ThreadSafeRepository::discover(".")
+pub async fn handle_apply(cli: &Cli) -> Result<()> {
+    let repo: Repository = ThreadSafeRepository::discover(".")
         .map_err(|_| NoGitRepo)?
         .into();
 
-    match cmd {
-        SyncCommands::Course => course::run(repo).await,
-        // AuthCommands::Logout => logout::run(cli).await,
+    let local_repo = repo.clone();
+    let directory = local_repo.workdir().ok_or(NoGitWorkdir)?;
+    let repo_type = detect_repo_type(directory).await;
+
+    match repo_type {
+        RepoType::Course => course::run(repo, directory).await,
+        RepoType::Challenge => todo!(),
+        RepoType::Unknown => Err(NoManifest.into()),
     }
 }

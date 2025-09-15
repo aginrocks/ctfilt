@@ -38,7 +38,7 @@ pub struct NoGitWorkdir;
 #[derive(Error, Debug, Diagnostic)]
 #[error("Manifest could not be found")]
 #[diagnostic(
-    code(course::no_manifest),
-    help("Ensure that 'course.yaml' exists in the repository root")
+    code(repo::no_manifest),
+    help("Ensure that 'course.yaml' or 'challenge.yaml' exists in the repository root")
 )]
-pub struct NoCourseManifest;
+pub struct NoManifest;

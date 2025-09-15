@@ -3,6 +3,7 @@ mod commands;
 mod config;
 mod errors;
 mod formatter;
+mod git;
 mod report_handler;
 mod utils;
 
@@ -30,10 +31,7 @@ enum Commands {
         subcommand: commands::auth::AuthCommands,
     },
     /// Synchronize this Git repo with the CTF platform
-    Apply {
-        #[command(subcommand)]
-        subcommand: commands::apply::SyncCommands,
-    },
+    Apply,
 }
 
 #[tokio::main]
@@ -57,7 +55,7 @@ async fn main() -> Result<()> {
 
     let result = match cli.clone().command {
         Commands::Auth { subcommand } => commands::auth::handle_auth(&cli, subcommand).await,
-        Commands::Apply { subcommand } => commands::apply::handle_apply(&cli, subcommand).await,
+        Commands::Apply => commands::apply::handle_apply(&cli).await,
     };
 
     if let Err(e) = result {
