@@ -28,18 +28,28 @@ Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
 *AuthApi* | [**get_user**](docs/AuthApi.md#get_user) | **GET** /api/user | Get user details
 *AuthApi* | [**log_in**](docs/AuthApi.md#log_in) | **GET** /api/login | Log in
+*CourseApi* | [**get_course_lesson**](docs/CourseApi.md#get_course_lesson) | **GET** /api/courses/{course_slug}/lessons/{lesson_slug} | Get lesson
+*CourseApi* | [**get_course_lessons**](docs/CourseApi.md#get_course_lessons) | **GET** /api/courses/{course_slug}/lessons | Get lessons
+*CoursesApi* | [**get_course**](docs/CoursesApi.md#get_course) | **GET** /api/courses/{course_slug} | Get course
 *CoursesApi* | [**get_courses**](docs/CoursesApi.md#get_courses) | **GET** /api/courses | Get all courses
+*CoursesApi* | [**update_course**](docs/CoursesApi.md#update_course) | **PUT** /api/courses/{course_slug} | Update course
+*OtherApi* | [**check_system_auth**](docs/OtherApi.md#check_system_auth) | **GET** /api/auth/check | Check system auth
 *OtherApi* | [**get_health**](docs/OtherApi.md#get_health) | **GET** /api/health | Check server health
-*SchemaApi* | [**get_challenge_schema**](docs/SchemaApi.md#get_challenge_schema) | **GET** /api/schema/challenge | Get challenge manifest schema
-*SchemaApi* | [**get_course_schema**](docs/SchemaApi.md#get_course_schema) | **GET** /api/schema/course | Get course manifest schema
+*SchemaApi* | [**get_challenge_schema**](docs/SchemaApi.md#get_challenge_schema) | **GET** /api/schema/challenge | Challenge schema
+*SchemaApi* | [**get_course_schema**](docs/SchemaApi.md#get_course_schema) | **GET** /api/schema/course | Course schema
 
 
 ## Documentation For Models
 
+ - [AuthCheckSuccess](docs/AuthCheckSuccess.md)
  - [Course](docs/Course.md)
  - [CourseDifficulty](docs/CourseDifficulty.md)
  - [CourseMetadata](docs/CourseMetadata.md)
+ - [CreateSuccess](docs/CreateSuccess.md)
+ - [LessonMetadata](docs/LessonMetadata.md)
+ - [NotFoundError](docs/NotFoundError.md)
  - [UnauthorizedError](docs/UnauthorizedError.md)
+ - [UpdateCourseRequest](docs/UpdateCourseRequest.md)
  - [User](docs/User.md)
 
 

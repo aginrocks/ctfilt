@@ -15,26 +15,31 @@ use crate::{apis::ResponseContent, models};
 use super::{Error, configuration, ContentType};
 
 
-/// struct for typed errors of method [`check_system_auth`]
+/// struct for typed errors of method [`get_course_lesson`]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(untagged)]
-pub enum CheckSystemAuthError {
+pub enum GetCourseLessonError {
     Status401(models::UnauthorizedError),
+    Status404(models::NotFoundError),
     UnknownValue(serde_json::Value),
 }
 
-/// struct for typed errors of method [`get_health`]
+/// struct for typed errors of method [`get_course_lessons`]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(untagged)]
-pub enum GetHealthError {
+pub enum GetCourseLessonsError {
+    Status401(models::UnauthorizedError),
+    Status404(models::NotFoundError),
     UnknownValue(serde_json::Value),
 }
 
 
-/// Checks if your API key is valid  This endpoint is only avaliable to users authenticating with a system-wide API key
-pub async fn check_system_auth(configuration: &configuration::Configuration, ) -> Result<models::AuthCheckSuccess, Error<CheckSystemAuthError>> {
+pub async fn get_course_lesson(configuration: &configuration::Configuration, course_slug: &str, lesson_slug: &str) -> Result<Vec<models::LessonMetadata>, Error<GetCourseLessonError>> {
+    // add a prefix to parameters to efficiently prevent name collisions
+    let p_path_course_slug = course_slug;
+    let p_path_lesson_slug = lesson_slug;
 
-    let uri_str = format!("{}/api/auth/check", configuration.base_path);
+    let uri_str = format!("{}/api/courses/{course_slug}/lessons/{lesson_slug}", configuration.base_path, course_slug=crate::apis::urlencode(p_path_course_slug), lesson_slug=crate::apis::urlencode(p_path_lesson_slug));
     let mut req_builder = configuration.client.request(reqwest::Method::GET, &uri_str);
 
     if let Some(ref user_agent) = configuration.user_agent {
@@ -56,20 +61,21 @@ pub async fn check_system_auth(configuration: &configuration::Configuration, ) -
         let content = resp.text().await?;
         match content_type {
             ContentType::Json => serde_json::from_str(&content).map_err(Error::from),
-            ContentType::Text => return Err(Error::from(serde_json::Error::custom("Received `text/plain` content type response that cannot be converted to `models::AuthCheckSuccess`"))),
-            ContentType::Unsupported(unknown_type) => return Err(Error::from(serde_json::Error::custom(format!("Received `{unknown_type}` content type response that cannot be converted to `models::AuthCheckSuccess`")))),
+            ContentType::Text => return Err(Error::from(serde_json::Error::custom("Received `text/plain` content type response that cannot be converted to `Vec&lt;models::LessonMetadata&gt;`"))),
+            ContentType::Unsupported(unknown_type) => return Err(Error::from(serde_json::Error::custom(format!("Received `{unknown_type}` content type response that cannot be converted to `Vec&lt;models::LessonMetadata&gt;`")))),
         }
     } else {
         let content = resp.text().await?;
-        let entity: Option<CheckSystemAuthError> = serde_json::from_str(&content).ok();
+        let entity: Option<GetCourseLessonError> = serde_json::from_str(&content).ok();
         Err(Error::ResponseError(ResponseContent { status, content, entity }))
     }
 }
 
-/// This endpoint returns `ok`
-pub async fn get_health(configuration: &configuration::Configuration, ) -> Result<String, Error<GetHealthError>> {
+pub async fn get_course_lessons(configuration: &configuration::Configuration, course_slug: &str) -> Result<Vec<models::LessonMetadata>, Error<GetCourseLessonsError>> {
+    // add a prefix to parameters to efficiently prevent name collisions
+    let p_path_course_slug = course_slug;
 
-    let uri_str = format!("{}/api/health", configuration.base_path);
+    let uri_str = format!("{}/api/courses/{course_slug}/lessons", configuration.base_path, course_slug=crate::apis::urlencode(p_path_course_slug));
     let mut req_builder = configuration.client.request(reqwest::Method::GET, &uri_str);
 
     if let Some(ref user_agent) = configuration.user_agent {
@@ -91,12 +97,12 @@ pub async fn get_health(configuration: &configuration::Configuration, ) -> Resul
         let content = resp.text().await?;
         match content_type {
             ContentType::Json => serde_json::from_str(&content).map_err(Error::from),
-            ContentType::Text => return Ok(content),
-            ContentType::Unsupported(unknown_type) => return Err(Error::from(serde_json::Error::custom(format!("Received `{unknown_type}` content type response that cannot be converted to `String`")))),
+            ContentType::Text => return Err(Error::from(serde_json::Error::custom("Received `text/plain` content type response that cannot be converted to `Vec&lt;models::LessonMetadata&gt;`"))),
+            ContentType::Unsupported(unknown_type) => return Err(Error::from(serde_json::Error::custom(format!("Received `{unknown_type}` content type response that cannot be converted to `Vec&lt;models::LessonMetadata&gt;`")))),
         }
     } else {
         let content = resp.text().await?;
-        let entity: Option<GetHealthError> = serde_json::from_str(&content).ok();
+        let entity: Option<GetCourseLessonsError> = serde_json::from_str(&content).ok();
         Err(Error::ResponseError(ResponseContent { status, content, entity }))
     }
 }

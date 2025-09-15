@@ -4,15 +4,15 @@ All URIs are relative to *http://localhost*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**get_challenge_schema**](SchemaApi.md#get_challenge_schema) | **GET** /api/schema/challenge | Get challenge manifest schema
-[**get_course_schema**](SchemaApi.md#get_course_schema) | **GET** /api/schema/course | Get course manifest schema
+[**get_challenge_schema**](SchemaApi.md#get_challenge_schema) | **GET** /api/schema/challenge | Challenge schema
+[**get_course_schema**](SchemaApi.md#get_course_schema) | **GET** /api/schema/course | Course schema
 
 
 
 ## get_challenge_schema
 
 > String get_challenge_schema()
-Get challenge manifest schema
+Challenge schema
 
 This endpoint returns JSON schema for the challenge manifest.
 
@@ -39,7 +39,7 @@ No authorization required
 ## get_course_schema
 
 > String get_course_schema()
-Get course manifest schema
+Course schema
 
 This endpoint returns JSON schema for the course manifest.
 

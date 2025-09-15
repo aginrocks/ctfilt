@@ -6,7 +6,6 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **description** | **String** | A short description of the course | 
 **difficulty** | [**models::CourseDifficulty**](CourseDifficulty.md) | The difficulty level of the course | 
-**lessons** | **Vec<String>** | Order of lessons in the course (by slug) | 
 **name** | **String** | A short unique name for the course | 
 **objectives** | **Vec<String>** | A list of learning objectives for the course | 
 **prerequisites** | Option<**Vec<String>**> | A list of course slugs that are prerequisites for this course | [optional]

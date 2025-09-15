@@ -19,9 +19,6 @@ pub struct CourseMetadata {
     /// The difficulty level of the course
     #[serde(rename = "difficulty")]
     pub difficulty: models::CourseDifficulty,
-    /// Order of lessons in the course (by slug)
-    #[serde(rename = "lessons")]
-    pub lessons: Vec<String>,
     /// A short unique name for the course
     #[serde(rename = "name")]
     pub name: String,
@@ -40,11 +37,10 @@ pub struct CourseMetadata {
 }
 
 impl CourseMetadata {
-    pub fn new(description: String, difficulty: models::CourseDifficulty, lessons: Vec<String>, name: String, objectives: Vec<String>, slug: String) -> CourseMetadata {
+    pub fn new(description: String, difficulty: models::CourseDifficulty, name: String, objectives: Vec<String>, slug: String) -> CourseMetadata {
         CourseMetadata {
             description,
             difficulty,
-            lessons,
             name,
             objectives,
             prerequisites: None,
