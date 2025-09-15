@@ -44,7 +44,7 @@ pub struct CourseMetadata {
     pub description: String,
 
     /// A list of learning objectives for the course
-    pub objectives: Vec<String>,
+    pub objectives: Option<Vec<String>>,
 
     /// A list of course slugs that are prerequisites for this course
     pub prerequisites: Option<Vec<String>>,
