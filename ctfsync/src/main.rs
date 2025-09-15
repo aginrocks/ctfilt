@@ -30,9 +30,9 @@ enum Commands {
         subcommand: commands::auth::AuthCommands,
     },
     /// Synchronize this Git repo with the CTF platform
-    Sync {
+    Apply {
         #[command(subcommand)]
-        subcommand: commands::sync::SyncCommands,
+        subcommand: commands::apply::SyncCommands,
     },
 }
 
@@ -57,7 +57,7 @@ async fn main() -> Result<()> {
 
     let result = match cli.clone().command {
         Commands::Auth { subcommand } => commands::auth::handle_auth(&cli, subcommand).await,
-        Commands::Sync { subcommand } => commands::sync::handle_sync(&cli, subcommand).await,
+        Commands::Apply { subcommand } => commands::apply::handle_apply(&cli, subcommand).await,
     };
 
     if let Err(e) = result {

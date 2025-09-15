@@ -12,7 +12,7 @@ pub enum SyncCommands {
     Course,
 }
 
-pub async fn handle_sync(cli: &Cli, cmd: SyncCommands) -> Result<()> {
+pub async fn handle_apply(cli: &Cli, cmd: SyncCommands) -> Result<()> {
     let repo = ThreadSafeRepository::discover(".")
         .map_err(|_| NoGitRepo)?
         .into();
