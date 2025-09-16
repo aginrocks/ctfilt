@@ -57,7 +57,7 @@ pub async fn run(repo: Repository, directory: &Path) -> Result<()> {
 
     // dbg!(diff);
     if diff.is_empty() {
-        success!("No changes to apply");
+        warn!("No changes to apply");
         return Ok(());
     }
 
