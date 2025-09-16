@@ -7,9 +7,12 @@ edition = "2024"
 utoipa = ["dep:utoipa"]
 schemars = ["dep:schemars"]
 validator = ["dep:validator"]
+clap = ["dep:clap"]
 
 [dependencies]
+clap = { version = "4.5.47", features = ["derive"], optional = true }
 schemars = { version = "1.0.4", features = ["derive", "preserve_order"], optional = true }
 serde = { version = "1.0.219", features = ["derive"] }
+strum = { version = "0.27.2", features = ["derive"] }
 utoipa = { version = "5.4.0", features = ["chrono"], optional = true }
 validator = { version = "0.20.0", features = ["derive"], optional = true }

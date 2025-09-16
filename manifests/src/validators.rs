@@ -20,3 +20,15 @@ pub fn slug_validator(s: &str) -> Result<(), ValidationError> {
 
     Ok(())
 }
+
+pub fn to_slug(s: &str) -> String {
+    s.to_lowercase()
+        .chars()
+        .map(|c| match c {
+            'a'..='z' | '0'..='9' | '_' => c,
+            _ => '-',
+        })
+        .collect::<String>()
+        .trim_matches('-')
+        .to_string()
+}

@@ -3,15 +3,20 @@ use serde::{Deserialize, Serialize};
 #[cfg(feature = "schemars")]
 use schemars::JsonSchema;
 
+use strum::{EnumIter, EnumString};
 #[cfg(feature = "utoipa")]
 use utoipa::ToSchema;
 
 #[cfg(feature = "validator")]
 use {crate::validators::slug_validator, validator::Validate};
 
-#[derive(Debug, Serialize, Deserialize, Clone, Default)]
+#[cfg(feature = "clap")]
+use clap::ValueEnum;
+
+#[derive(Debug, Serialize, Deserialize, Clone, Default, EnumIter, EnumString)]
 #[cfg_attr(feature = "utoipa", derive(ToSchema))]
 #[cfg_attr(feature = "schemars", derive(JsonSchema))]
+#[cfg_attr(feature = "clap", derive(ValueEnum), clap(rename_all = "lower"))]
 #[serde(rename_all = "lowercase")]
 pub enum CourseDifficulty {
     #[default]
