@@ -8,11 +8,16 @@ utoipa = ["dep:utoipa"]
 schemars = ["dep:schemars"]
 validator = ["dep:validator"]
 clap = ["dep:clap"]
+readwrite = ["dep:tokio", "dep:url", "dep:serde_yaml", "dep:color-eyre"]
 
 [dependencies]
 clap = { version = "4.5.47", features = ["derive"], optional = true }
+color-eyre = { version="0.6.5", optional = true }
 schemars = { version = "1.0.4", features = ["derive", "preserve_order"], optional = true }
 serde = { version = "1.0.219", features = ["derive"] }
+serde_yaml = { version = "0.9.34", optional = true }
 strum = { version = "0.27.2", features = ["derive"] }
+tokio = { version = "1.47.1", features = ["fs"], optional = true }
+url = { version = "2.5.7", optional = true }
 utoipa = { version = "5.4.0", features = ["chrono"], optional = true }
 validator = { version = "0.20.0", features = ["derive"], optional = true }

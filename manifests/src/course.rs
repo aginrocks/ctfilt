@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 #[cfg(feature = "schemars")]
 use schemars::JsonSchema;
 
-use strum::{EnumIter, EnumString};
+use strum::{Display, EnumIter, EnumString};
 #[cfg(feature = "utoipa")]
 use utoipa::ToSchema;
 
@@ -13,7 +13,7 @@ use {crate::validators::slug_validator, validator::Validate};
 #[cfg(feature = "clap")]
 use clap::ValueEnum;
 
-#[derive(Debug, Serialize, Deserialize, Clone, Default, EnumIter, EnumString)]
+#[derive(Debug, Serialize, Deserialize, Clone, Default, EnumIter, EnumString, Display)]
 #[cfg_attr(feature = "utoipa", derive(ToSchema))]
 #[cfg_attr(feature = "schemars", derive(JsonSchema))]
 #[cfg_attr(feature = "clap", derive(ValueEnum), clap(rename_all = "lower"))]

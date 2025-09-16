@@ -791,6 +791,7 @@ dependencies = [
  "toml 0.9.5",
  "tracing",
  "tracing-subscriber",
+ "url",
 ]
 
 [[package]]
@@ -3441,9 +3442,13 @@ name = "manifests"
 version = "0.1.0"
 dependencies = [
  "clap",
+ "color-eyre",
  "schemars 1.0.4",
  "serde",
+ "serde_yaml",
  "strum",
+ "tokio",
+ "url",
  "utoipa",
  "validator",
 ]
