@@ -1,6 +1,5 @@
 #[cfg(feature = "readwrite")]
-use color_eyre::eyre::Result;
-use url::Url;
+use {color_eyre::eyre::Result, url::Url};
 
 #[cfg(feature = "readwrite")]
 pub fn serialize_with_schema<T: serde::Serialize>(
