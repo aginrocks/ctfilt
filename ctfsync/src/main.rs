@@ -32,6 +32,11 @@ enum Commands {
     },
     /// Synchronize this Git repo with the CTF platform
     Apply,
+    /// Initialize a new repository for a course or challenge
+    Init {
+        #[command(subcommand)]
+        subcommand: commands::init::InitCommands,
+    },
 }
 
 #[tokio::main]
@@ -56,6 +61,7 @@ async fn main() -> Result<()> {
     let result = match cli.clone().command {
         Commands::Auth { subcommand } => commands::auth::handle_auth(subcommand).await,
         Commands::Apply => commands::apply::handle_apply().await,
+        Commands::Init { subcommand } => commands::init::handle_init(subcommand).await,
     };
 
     if let Err(e) = result {
