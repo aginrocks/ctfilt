@@ -20,6 +20,7 @@ database_object!(Lesson {
     #[schema(value_type = String)]
 
     id: ObjectId,
+
     #[serde(with = "object_id_as_string_required")]
     #[schema(value_type = String)]
     course: ObjectId,
@@ -32,8 +33,6 @@ database_object!(Lesson {
     content: String,
 
     attachments: Vec<String>,
-
-    r#ref: String,
 });
 
 #[derive(Clone)]
