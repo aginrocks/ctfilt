@@ -1,17 +1,14 @@
-use std::{
-    path::{Path, PathBuf},
-    str::FromStr,
-};
+use std::{path::Path, str::FromStr};
 
 use api_client::{
     apis::courses_api,
     models::{CourseMetadata, UpdateCourseRequest},
 };
-use gix::{ObjectId, Repository};
+use gix::{ObjectId, Repository, diff::Options};
 use miette::{IntoDiagnostic, Result};
 use tracing::warn;
 
-use crate::{api::init_api_config, errors::NoManifest};
+use crate::{api::init_api_config, errors::NoManifest, success};
 
 pub async fn run(repo: Repository, directory: &Path) -> Result<()> {
     let mut head = repo.head().into_diagnostic()?;
@@ -25,29 +22,44 @@ pub async fn run(repo: Repository, directory: &Path) -> Result<()> {
 
     let config = init_api_config().await?;
 
-    let latest_ref = courses_api::get_course(config, &manifest.slug)
+    let server_ref = courses_api::get_course(config, &manifest.slug)
         .await
-        .into_diagnostic()?
-        .r#ref;
+        .map(|course| course.r#ref);
+
+    let server_tree = match server_ref {
+        Ok(server_ref) => {
+            let id = ObjectId::from_str(&server_ref).into_diagnostic()?;
+            let commit = repo.find_commit(id);
+            match commit {
+                Ok(commit) => commit.tree().into_diagnostic()?,
+                Err(_) => {
+                    // Commit does not exist, possible force push
+                    warn!(
+                        "The server is on commit {server_ref}, which does not exist in your local repository. This may indicate a force-push or history rewrite. Data on the server will be OVERWRITTEN with your local state."
+                    );
+                    repo.empty_tree()
+                }
+            }
+        }
+        Err(_) => repo.empty_tree(),
+    };
 
     let update_request = UpdateCourseRequest::new(manifest.clone(), r#ref);
-    let update_response = courses_api::update_course(config, &manifest.slug, update_request)
+    courses_api::update_course(config, &manifest.slug, update_request)
         .await
         .into_diagnostic()?;
 
-    let latest_ref_id = ObjectId::from_str(&latest_ref).into_diagnostic()?;
-    let latest_ref_object = repo.find_commit(latest_ref_id);
-    match latest_ref_object {
-        Ok(latest_ref_object) => todo!(),
-        Err(_) => {
-            // Commit does not exist, possible force push
-            warn!(
-                "The server is on commit {latest_ref}, which does not exist in your local repository. This may indicate a force-push or history rewrite. If you continue, Data on the production server will be OVERWRITTEN with your local state."
-            );
-        }
-    }
+    let head_tree = repo.head_tree().into_diagnostic()?;
 
-    dbg!(update_response);
+    let diff = repo
+        .diff_tree_to_tree(&server_tree, &head_tree, Options::default())
+        .into_diagnostic()?;
+
+    // dbg!(diff);
+    if diff.is_empty() {
+        success!("No changes to apply");
+        return Ok(());
+    }
 
     Ok(())
 }
