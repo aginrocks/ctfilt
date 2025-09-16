@@ -10,7 +10,7 @@ directories = "6.0.0"
 gix = "0.73.0"
 indicatif = { version = "0.18.0", features = ["tokio"] }
 inquire = "0.7.5"
-manifests = { version = "0.1.0", path = "../manifests", features = ["validator", "clap"] }
+manifests = { version = "0.1.0", path = "../manifests", features = ["validator", "clap", "readwrite"] }
 miette = "7.6.0"
 owo-colors = "4.2.2"
 reqwest =  { version = "0.12.23", default-features = false, features = [
@@ -32,3 +32,4 @@ tracing-subscriber = { version = "0.3.19", features = [
     "serde_json",
     "time",
 ] }
+url = "2.5.7"
