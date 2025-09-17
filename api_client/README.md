@@ -31,6 +31,7 @@ Class | Method | HTTP request | Description
 *AuthApi* | [**log_in**](docs/AuthApi.md#log_in) | **GET** /api/login | Log in
 *CourseApi* | [**get_course_lesson**](docs/CourseApi.md#get_course_lesson) | **GET** /api/courses/{course_slug}/lessons/{lesson_slug} | Get lesson
 *CourseApi* | [**get_course_lessons**](docs/CourseApi.md#get_course_lessons) | **GET** /api/courses/{course_slug}/lessons | Get lessons
+*CourseApi* | [**update_course_lesson**](docs/CourseApi.md#update_course_lesson) | **PUT** /api/courses/{course_slug}/lessons/{lesson_slug} | Update lesson
 *CoursesApi* | [**get_course**](docs/CoursesApi.md#get_course) | **GET** /api/courses/{course_slug} | Get course
 *CoursesApi* | [**get_courses**](docs/CoursesApi.md#get_courses) | **GET** /api/courses | Get all courses
 *CoursesApi* | [**update_course**](docs/CoursesApi.md#update_course) | **PUT** /api/courses/{course_slug} | Update course
@@ -50,6 +51,7 @@ Class | Method | HTTP request | Description
  - [NotFoundError](docs/NotFoundError.md)
  - [UnauthorizedError](docs/UnauthorizedError.md)
  - [UpdateCourseRequest](docs/UpdateCourseRequest.md)
+ - [UpdateLessonRequest](docs/UpdateLessonRequest.md)
  - [User](docs/User.md)
 
 

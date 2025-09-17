@@ -16,5 +16,7 @@ pub mod unauthorized_error;
 pub use self::unauthorized_error::UnauthorizedError;
 pub mod update_course_request;
 pub use self::update_course_request::UpdateCourseRequest;
+pub mod update_lesson_request;
+pub use self::update_lesson_request::UpdateLessonRequest;
 pub mod user;
 pub use self::user::User;
