@@ -15,7 +15,6 @@ docs/OtherApi.md
 docs/SchemaApi.md
 docs/UnauthorizedError.md
 docs/UpdateCourseRequest.md
-docs/UpdateLessonRequest.md
 docs/User.md
 git_push.sh
 src/apis/auth_api.rs
@@ -36,5 +35,4 @@ src/models/mod.rs
 src/models/not_found_error.rs
 src/models/unauthorized_error.rs
 src/models/update_course_request.rs
-src/models/update_lesson_request.rs
 src/models/user.rs
