@@ -4,9 +4,13 @@ use api_client::{
     apis::courses_api,
     models::{CourseMetadata, UpdateCourseRequest},
 };
-use gix::{ObjectId, Repository, diff::Options};
+use gix::{
+    ObjectId, Repository,
+    diff::{Options, tree_with_rewrites::Change},
+};
 use miette::{IntoDiagnostic, Result};
-use tracing::warn;
+use owo_colors::OwoColorize;
+use tracing::{info, warn};
 
 use crate::{api::init_api_config, errors::NoManifest, success};
 
@@ -44,10 +48,10 @@ pub async fn run(repo: Repository, directory: &Path) -> Result<()> {
         Err(_) => repo.empty_tree(),
     };
 
-    let update_request = UpdateCourseRequest::new(manifest.clone(), r#ref);
-    courses_api::update_course(config, &manifest.slug, update_request)
-        .await
-        .into_diagnostic()?;
+    // let update_request = UpdateCourseRequest::new(manifest.clone(), r#ref);
+    // courses_api::update_course(config, &manifest.slug, update_request)
+    //     .await
+    //     .into_diagnostic()?;
 
     let head_tree = repo.head_tree().into_diagnostic()?;
 
@@ -59,6 +63,17 @@ pub async fn run(repo: Repository, directory: &Path) -> Result<()> {
     if diff.is_empty() {
         warn!("No changes to apply");
         return Ok(());
+    }
+
+    for change in diff {
+        let logged_change = match change {
+            Change::Addition { .. } => change.location().green().to_string(),
+            Change::Deletion { .. } => change.location().red().to_string(),
+            Change::Modification { .. } | Change::Rewrite { .. } => {
+                change.location().yellow().to_string()
+            }
+        };
+        println!("Applying {}", logged_change.bold());
     }
 
     Ok(())
