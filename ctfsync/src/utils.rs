@@ -1,6 +1,11 @@
+use std::path::Path;
+
 use indicatif::ProgressStyle;
 use inquire::ui::{Attributes, Color, IndexPrefix, RenderConfig, StyleSheet, Styled};
+use miette::{IntoDiagnostic, Result};
 use owo_colors::OwoColorize;
+
+use crate::errors::OutOfScopeFile;
 
 pub fn make_link(text: &str, url: &str) -> String {
     let visible_text = text.replace(' ', "\u{00A0}");
@@ -58,4 +63,40 @@ pub fn get_spinner_style() -> ProgressStyle {
     ProgressStyle::with_template("{prefix:.bold.dim}{spinner:.bold.blue} {wide_msg}")
         .unwrap()
         .tick_chars("⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏")
+}
+
+pub fn is_hidden(path: &Path) -> bool {
+    path.components().any(|comp| {
+        if let std::path::Component::Normal(os_str) = comp
+            && let Some(str) = os_str.to_str()
+        {
+            return str.starts_with('.');
+        }
+        false
+    })
+}
+
+pub fn read_slug(path: &Path) -> Result<(i32, String)> {
+    let first_segment = path
+        .components()
+        .find_map(|s| {
+            if let std::path::Component::Normal(os_str) = s
+                && let Some(str) = os_str.to_str()
+            {
+                Some(str)
+            } else {
+                None
+            }
+        })
+        .ok_or(OutOfScopeFile)?;
+
+    let mut parts = first_segment.splitn(2, '-');
+    let order = parts
+        .next()
+        .ok_or(OutOfScopeFile)?
+        .parse::<i32>()
+        .into_diagnostic()?;
+    let slug = parts.next().ok_or(OutOfScopeFile)?;
+
+    Ok((order, slug.to_string()))
 }

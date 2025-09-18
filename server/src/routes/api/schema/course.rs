@@ -31,6 +31,6 @@ pub async fn get_course_schema() -> Json<Value> {
     Json(
         schema
             .serialize(serde_json::value::Serializer)
-            .expect("failed to serialize challenge JSON schema"),
+            .expect("failed to serialize course JSON schema"),
     )
 }

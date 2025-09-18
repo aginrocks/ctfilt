@@ -50,3 +50,16 @@ pub struct NoManifest;
     help("Commit or stash your changes before applying configuration")
 )]
 pub struct DityWorktree;
+
+#[derive(Error, Debug, Diagnostic)]
+#[error("File is out of scope")]
+#[diagnostic(
+    code(repo::out_of_scope_file),
+    help("The file is ignored by the build system")
+)]
+pub struct OutOfScopeFile;
+
+#[derive(Error, Debug, Diagnostic)]
+#[error("Failed to parse lesson's filed")]
+#[diagnostic(code(lesson::missing_files), help("The lesson has invalid fields"))]
+pub struct MissingLessonFiles;

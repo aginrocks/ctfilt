@@ -1,3 +1,6 @@
+mod diff;
+mod map;
+
 use std::{path::Path, str::FromStr};
 
 use api_client::{
@@ -6,13 +9,17 @@ use api_client::{
 };
 use gix::{
     ObjectId, Repository,
+    bstr::{ByteSlice, Utf8Error},
     diff::{Options, tree_with_rewrites::Change},
 };
 use miette::{IntoDiagnostic, Result};
 use owo_colors::OwoColorize;
 use tracing::{info, warn};
 
-use crate::{api::init_api_config, errors::NoManifest, success};
+use crate::{
+    api::init_api_config, commands::apply::course::diff::apply_diff, errors::NoManifest, success,
+    utils::is_hidden,
+};
 
 pub async fn run(repo: Repository, directory: &Path) -> Result<()> {
     let mut head = repo.head().into_diagnostic()?;
@@ -59,22 +66,22 @@ pub async fn run(repo: Repository, directory: &Path) -> Result<()> {
         .diff_tree_to_tree(&server_tree, &head_tree, Options::default())
         .into_diagnostic()?;
 
-    // dbg!(diff);
+    let diff = diff
+        .into_iter()
+        .filter(|change| {
+            change
+                .location()
+                .to_path()
+                .is_ok_and(|path| !is_hidden(path))
+        })
+        .collect::<Vec<Change>>();
+
     if diff.is_empty() {
         warn!("No changes to apply");
         return Ok(());
     }
 
-    for change in diff {
-        let logged_change = match change {
-            Change::Addition { .. } => change.location().green().to_string(),
-            Change::Deletion { .. } => change.location().red().to_string(),
-            Change::Modification { .. } | Change::Rewrite { .. } => {
-                change.location().yellow().to_string()
-            }
-        };
-        println!("Applying {}", logged_change.bold());
-    }
+    apply_diff(diff, directory, manifest.slug).await?;
 
     Ok(())
 }
