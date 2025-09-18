@@ -9,8 +9,7 @@ use tokio::fs;
 use crate::{commands::apply::course::map::LessonsMap, errors::OutOfScopeFile};
 
 pub async fn apply_diff(diff: Vec<Change>, directory: &Path, course_slug: String) -> Result<()> {
-    let mut lessons_queue = LessonsMap::new(course_slug);
-
+    let lessons_map = LessonsMap::new(course_slug);
     for change in diff {
         let logged_change = match change {
             Change::Addition { .. } => change.location().green().to_string(),
@@ -21,7 +20,6 @@ pub async fn apply_diff(diff: Vec<Change>, directory: &Path, course_slug: String
         };
         println!("Applying {}", logged_change.bold());
 
-        // TODO: Use Semaphore to allow for limited concurrency
         match change {
             Change::Addition { .. } | Change::Modification { .. } => {
                 let path = directory.join(change.location().to_string());
@@ -30,19 +28,19 @@ pub async fn apply_diff(diff: Vec<Change>, directory: &Path, course_slug: String
 
                 match file_type {
                     FileDetectionResult::LessonManifest(content) => {
-                        lessons_queue.insert_manifest(parent.to_path_buf(), content);
+                        lessons_map.insert_manifest(parent.to_path_buf(), content);
                     }
                     FileDetectionResult::Readme(content) => {
-                        lessons_queue.insert_content(parent.to_path_buf(), content);
+                        lessons_map.insert_content(parent.to_path_buf(), content);
                     }
-                    _ => todo!(),
+                    _ => {}
                 }
             }
-            Change::Deletion { .. } | Change::Rewrite { .. } => {
-                todo!();
-            }
+            Change::Deletion { .. } | Change::Rewrite { .. } => {}
         }
     }
+
+    lessons_map.send_all().await?;
 
     Ok(())
 }

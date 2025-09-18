@@ -55,10 +55,10 @@ pub async fn run(repo: Repository, directory: &Path) -> Result<()> {
         Err(_) => repo.empty_tree(),
     };
 
-    // let update_request = UpdateCourseRequest::new(manifest.clone(), r#ref);
-    // courses_api::update_course(config, &manifest.slug, update_request)
-    //     .await
-    //     .into_diagnostic()?;
+    let update_request = UpdateCourseRequest::new(manifest.clone(), r#ref);
+    courses_api::update_course(config, &manifest.slug, update_request)
+        .await
+        .into_diagnostic()?;
 
     let head_tree = repo.head_tree().into_diagnostic()?;
 

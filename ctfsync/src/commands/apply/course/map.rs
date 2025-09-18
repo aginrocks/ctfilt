@@ -1,9 +1,13 @@
-use std::{collections::HashMap, path::PathBuf};
+use std::{
+    path::{Path, PathBuf},
+    sync::Arc,
+};
 
 use api_client::{
     apis::course_api,
     models::{LessonMetadata, UpdateLessonRequest},
 };
+use dashmap::DashMap;
 use miette::{IntoDiagnostic, Result};
 
 use crate::{
@@ -14,26 +18,26 @@ use crate::{
 };
 
 pub struct LessonsMap {
-    pub cache: HashMap<PathBuf, Entry>,
+    pub cache: Arc<DashMap<PathBuf, Entry>>,
     pub course_slug: String,
 }
 
+#[derive(Clone, Debug)]
 pub struct Entry {
     pub manifest: Option<LessonMetadata>,
     pub content: Option<String>,
     pub sent: bool,
 }
 
-// TODO: make thread-safe
 impl LessonsMap {
     pub fn new(course_slug: String) -> Self {
         Self {
-            cache: HashMap::new(),
+            cache: Arc::new(DashMap::new()),
             course_slug,
         }
     }
 
-    pub fn insert_manifest(&mut self, path: PathBuf, manifest: LessonMetadata) {
+    pub fn insert_manifest(&self, path: PathBuf, manifest: LessonMetadata) {
         self.cache.insert(
             path,
             Entry {
@@ -44,7 +48,7 @@ impl LessonsMap {
         );
     }
 
-    pub fn insert_content(&mut self, path: PathBuf, content: String) {
+    pub fn insert_content(&self, path: PathBuf, content: String) {
         self.cache.insert(
             path,
             Entry {
@@ -55,13 +59,12 @@ impl LessonsMap {
         );
     }
 
-    pub async fn send(&mut self, path: PathBuf) -> Result<bool> {
-        let entry = self.cache.get_mut(&path).ok_or(MissingLessonFiles)?;
+    pub async fn send(&self, path: &Path, entry: Entry) -> Result<bool> {
         if entry.sent {
             return Ok(false);
         }
 
-        let (order, slug) = read_slug(&path)?;
+        let (order, slug) = read_slug(path)?;
 
         let metadata = match entry.manifest {
             Some(ref manifest) => manifest.clone(),
@@ -90,8 +93,20 @@ impl LessonsMap {
             .await
             .into_diagnostic()?;
 
-        entry.sent = true;
+        drop(entry);
 
         Ok(true)
+    }
+
+    // TODO: Use Semaphore to allow for limited concurrency
+    pub async fn send_all(&self) -> Result<()> {
+        for item in self.cache.iter() {
+            let (path, entry) = item.pair();
+            if !entry.sent {
+                self.send(path, entry.clone()).await?;
+            }
+        }
+
+        Ok(())
     }
 }

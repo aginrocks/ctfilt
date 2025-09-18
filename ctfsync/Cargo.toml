@@ -6,6 +6,7 @@ edition = "2024"
 [dependencies]
 api_client = { version = "2.0.0", path = "../api_client" }
 clap = { version = "4.5.47", features = ["derive"] }
+dashmap = "6.1.0"
 directories = "6.0.0"
 gix = "0.73.0"
 indicatif = { version = "0.18.0", features = ["tokio"] }

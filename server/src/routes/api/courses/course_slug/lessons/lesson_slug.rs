@@ -113,7 +113,7 @@ async fn update_course_lesson(
         .find_one_and_replace(
             doc! {
                 "course": course.id,
-                "slug": course_slug.clone(),
+                "slug": lesson_slug.clone(),
             },
             new_lesson,
         )
