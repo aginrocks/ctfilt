@@ -37,6 +37,11 @@ enum Commands {
         #[command(subcommand)]
         subcommand: commands::init::InitCommands,
     },
+    /// Create a new object inside current repository (eg. lesson)
+    New {
+        #[command(subcommand)]
+        subcommand: commands::new::NewCommands,
+    },
 }
 
 #[tokio::main]
@@ -62,6 +67,7 @@ async fn main() -> Result<()> {
         Commands::Auth { subcommand } => commands::auth::handle_auth(subcommand).await,
         Commands::Apply => commands::apply::handle_apply().await,
         Commands::Init { subcommand } => commands::init::handle_init(subcommand).await,
+        Commands::New { subcommand } => commands::new::handle_new(subcommand).await,
     };
 
     if let Err(e) = result {

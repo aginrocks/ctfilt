@@ -13,7 +13,6 @@ use miette::{IntoDiagnostic, Result};
 use crate::{
     api::init_api_config,
     commands::apply::course::diff::{read_manifest, read_readme},
-    errors::MissingLessonFiles,
     utils::read_slug,
 };
 
@@ -64,7 +63,7 @@ impl LessonsMap {
             return Ok(false);
         }
 
-        let (order, slug) = read_slug(path)?;
+        let (order, _slug) = read_slug(path)?;
 
         let metadata = match entry.manifest {
             Some(ref manifest) => manifest.clone(),

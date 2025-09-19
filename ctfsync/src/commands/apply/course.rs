@@ -9,15 +9,14 @@ use api_client::{
 };
 use gix::{
     ObjectId, Repository,
-    bstr::{ByteSlice, Utf8Error},
+    bstr::ByteSlice,
     diff::{Options, tree_with_rewrites::Change},
 };
 use miette::{IntoDiagnostic, Result};
-use owo_colors::OwoColorize;
-use tracing::{info, warn};
+use tracing::warn;
 
 use crate::{
-    api::init_api_config, commands::apply::course::diff::apply_diff, errors::NoManifest, success,
+    api::init_api_config, commands::apply::course::diff::apply_diff, errors::NoManifest,
     utils::is_hidden,
 };
 
@@ -72,7 +71,7 @@ pub async fn run(repo: Repository, directory: &Path) -> Result<()> {
             change
                 .location()
                 .to_path()
-                .is_ok_and(|path| !is_hidden(path))
+                .is_ok_and(|path| path.is_file() && !is_hidden(path))
         })
         .collect::<Vec<Change>>();
 
