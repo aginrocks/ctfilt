@@ -43,7 +43,7 @@ pub struct LessonStore {
 
 impl LessonStore {
     pub fn new(database: &Database) -> Self {
-        const COLLECTION: &str = "courses";
+        const COLLECTION: &str = "lessons";
 
         let collection = database.collection::<Lesson>(COLLECTION);
         let partial_collection = database.collection::<PartialLesson>(COLLECTION);
