@@ -51,7 +51,7 @@ pub fn routes() -> Vec<Route> {
         (status = UNAUTHORIZED, description = "Unauthorized", body = UnauthorizedError, content_type = "application/json"),
         (status = NOT_FOUND, description = "Course not found", body = NotFoundError, content_type = "application/json")
     ),
-    tag = "Courses"
+    tag = "Course"
 )]
 async fn get_course(
     Extension(state): Extension<AppState>,
@@ -83,7 +83,7 @@ pub struct UpdateCourseRequest {
         (status = OK, description = "Success", body = CreateSuccess, content_type = "application/json"),
         (status = UNAUTHORIZED, description = "Unauthorized", body = UnauthorizedError, content_type = "application/json")
     ),
-    tag = "Courses"
+    tag = "Course"
 )]
 async fn update_course(
     Extension(state): Extension<AppState>,

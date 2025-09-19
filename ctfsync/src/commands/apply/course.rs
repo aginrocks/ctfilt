@@ -4,7 +4,7 @@ mod map;
 use std::{path::Path, str::FromStr};
 
 use api_client::{
-    apis::courses_api,
+    apis::course_api,
     models::{CourseMetadata, UpdateCourseRequest},
 };
 use gix::{
@@ -32,7 +32,7 @@ pub async fn run(repo: Repository, directory: &Path) -> Result<()> {
 
     let config = init_api_config().await?;
 
-    let server_ref = courses_api::get_course(config, &manifest.slug)
+    let server_ref = course_api::get_course(config, &manifest.slug)
         .await
         .map(|course| course.r#ref);
 
@@ -55,7 +55,7 @@ pub async fn run(repo: Repository, directory: &Path) -> Result<()> {
     };
 
     let update_request = UpdateCourseRequest::new(manifest.clone(), r#ref);
-    courses_api::update_course(config, &manifest.slug, update_request)
+    course_api::update_course(config, &manifest.slug, update_request)
         .await
         .into_diagnostic()?;
 

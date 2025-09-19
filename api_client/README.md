@@ -29,15 +29,16 @@ Class | Method | HTTP request | Description
 *AuthApi* | [**check_system_auth**](docs/AuthApi.md#check_system_auth) | **GET** /api/auth/check | Check system auth
 *AuthApi* | [**get_user**](docs/AuthApi.md#get_user) | **GET** /api/user | Get user details
 *AuthApi* | [**log_in**](docs/AuthApi.md#log_in) | **GET** /api/login | Log in
+*CourseApi* | [**get_course**](docs/CourseApi.md#get_course) | **GET** /api/courses/{course_slug} | Get course
 *CourseApi* | [**get_course_lesson**](docs/CourseApi.md#get_course_lesson) | **GET** /api/courses/{course_slug}/lessons/{lesson_slug} | Get lesson
 *CourseApi* | [**get_course_lessons**](docs/CourseApi.md#get_course_lessons) | **GET** /api/courses/{course_slug}/lessons | Get lessons
+*CourseApi* | [**update_course**](docs/CourseApi.md#update_course) | **PUT** /api/courses/{course_slug} | Update course
 *CourseApi* | [**update_course_lesson**](docs/CourseApi.md#update_course_lesson) | **PUT** /api/courses/{course_slug}/lessons/{lesson_slug} | Update lesson
-*CoursesApi* | [**get_course**](docs/CoursesApi.md#get_course) | **GET** /api/courses/{course_slug} | Get course
 *CoursesApi* | [**get_courses**](docs/CoursesApi.md#get_courses) | **GET** /api/courses | Get all courses
-*CoursesApi* | [**update_course**](docs/CoursesApi.md#update_course) | **PUT** /api/courses/{course_slug} | Update course
 *OtherApi* | [**get_health**](docs/OtherApi.md#get_health) | **GET** /api/health | Check server health
 *SchemaApi* | [**get_challenge_schema**](docs/SchemaApi.md#get_challenge_schema) | **GET** /api/schema/challenge | Challenge schema
 *SchemaApi* | [**get_course_schema**](docs/SchemaApi.md#get_course_schema) | **GET** /api/schema/course | Course schema
+*SchemaApi* | [**get_lesson_schema**](docs/SchemaApi.md#get_lesson_schema) | **GET** /api/schema/lesson | Lesson schema
 
 
 ## Documentation For Models
