@@ -19,6 +19,9 @@ pub struct Course {
     /// The difficulty level of the course
     #[serde(rename = "difficulty")]
     pub difficulty: models::CourseDifficulty,
+    /// Items included in the course (order matters)
+    #[serde(rename = "items")]
+    pub items: Vec<models::CourseItem>,
     /// A short unique name for the course
     #[serde(rename = "name")]
     pub name: String,
@@ -36,21 +39,25 @@ pub struct Course {
     pub tags: Option<Vec<String>>,
     #[serde(rename = "_id")]
     pub _id: String,
+    #[serde(rename = "items_ref")]
+    pub items_ref: Vec<models::CourseItem>,
     #[serde(rename = "ref")]
     pub r#ref: String,
 }
 
 impl Course {
-    pub fn new(description: String, difficulty: models::CourseDifficulty, name: String, slug: String, _id: String, r#ref: String) -> Course {
+    pub fn new(description: String, difficulty: models::CourseDifficulty, items: Vec<models::CourseItem>, name: String, slug: String, _id: String, items_ref: Vec<models::CourseItem>, r#ref: String) -> Course {
         Course {
             description,
             difficulty,
+            items,
             name,
             objectives: None,
             prerequisites: None,
             slug,
             tags: None,
             _id,
+            items_ref,
             r#ref,
         }
     }

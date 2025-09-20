@@ -94,9 +94,15 @@ async fn update_course(
         return Err(AxumError::bad_request(eyre!("Slugs are immutable")));
     }
 
+    let items = state
+        .store
+        .resolve_course_items(&course_slug, body.metadata.items.clone())
+        .await?;
+
     let new_course = PartialCourse {
         metadata: body.metadata,
         r#ref: body.r#ref,
+        items_ref: items,
     };
 
     state

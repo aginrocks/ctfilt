@@ -21,11 +21,8 @@ database_object!(Lesson {
 
     id: ObjectId,
 
-    #[serde(with = "object_id_as_string_required")]
-    #[schema(value_type = String)]
-    course: ObjectId,
-
-    order: i32,
+    // It's used for resolving lesson slugs uniquely within a course
+    course_slug: String,
 
     #[serde(flatten)]
     metadata: LessonMetadata,
@@ -76,10 +73,10 @@ impl LessonStore {
         Ok(lessons)
     }
 
-    pub async fn get_by_slug(&self, course_id: ObjectId, slug: &str) -> AxumResult<Lesson> {
+    pub async fn get_by_slug(&self, course_slug: &str, slug: &str) -> AxumResult<Lesson> {
         let lesson = self
             .collection
-            .find_one(doc! { "slug": slug, "course": course_id })
+            .find_one(doc! { "slug": slug, "course_slug": course_slug })
             .await
             .wrap_err("Failed to fetch lesson")?
             .ok_or_else(|| AxumError::not_found(eyre!("Lesson not found")))?;

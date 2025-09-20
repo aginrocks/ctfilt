@@ -6,12 +6,14 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **description** | **String** | A short description of the course | 
 **difficulty** | [**models::CourseDifficulty**](CourseDifficulty.md) | The difficulty level of the course | 
+**items** | [**Vec<models::CourseItem>**](CourseItem.md) | Items included in the course (order matters) | 
 **name** | **String** | A short unique name for the course | 
 **objectives** | Option<**Vec<String>**> | A list of learning objectives for the course | [optional]
 **prerequisites** | Option<**Vec<String>**> | A list of course slugs that are prerequisites for this course | [optional]
 **slug** | **String** | A URL-friendly unique identifier for the course | 
 **tags** | Option<**Vec<String>**> | Tags associated with the course | [optional]
 **_id** | **String** |  | 
+**items_ref** | [**Vec<models::CourseItem>**](CourseItem.md) |  | 
 **r#ref** | **String** |  | 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)

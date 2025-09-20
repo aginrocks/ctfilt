@@ -75,28 +75,3 @@ pub fn is_hidden(path: &Path) -> bool {
         false
     })
 }
-
-pub fn read_slug(path: &Path) -> Result<(i32, String)> {
-    let first_segment = path
-        .components()
-        .find_map(|s| {
-            if let std::path::Component::Normal(os_str) = s
-                && let Some(str) = os_str.to_str()
-            {
-                Some(str)
-            } else {
-                None
-            }
-        })
-        .ok_or(OutOfScopeFile)?;
-
-    let mut parts = first_segment.splitn(2, '-');
-    let order = parts
-        .next()
-        .ok_or(OutOfScopeFile)?
-        .parse::<i32>()
-        .into_diagnostic()?;
-    let slug = parts.next().ok_or(OutOfScopeFile)?;
-
-    Ok((order, slug.to_string()))
-}

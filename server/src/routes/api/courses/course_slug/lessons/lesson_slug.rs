@@ -55,11 +55,10 @@ pub async fn get_course_lesson(
     Extension(state): Extension<AppState>,
     Path((course_slug, lesson_slug)): Path<(String, String)>,
 ) -> AxumResult<Json<Lesson>> {
-    let course = state.store.courses.get_by_slug(&course_slug).await?;
     let lesson = state
         .store
         .lessons
-        .get_by_slug(course.id, &lesson_slug)
+        .get_by_slug(&course_slug, &lesson_slug)
         .await?;
 
     Ok(Json(lesson))
@@ -68,7 +67,6 @@ pub async fn get_course_lesson(
 #[derive(Deserialize, Validate, ToSchema)]
 pub struct UpdateLessonRequest {
     pub metadata: LessonMetadata,
-    pub order: i32,
     pub content: String,
 }
 
@@ -97,14 +95,11 @@ async fn update_course_lesson(
         return Err(AxumError::bad_request(eyre!("Slugs are immutable")));
     }
 
-    let course = state.store.courses.get_by_slug(&course_slug).await?;
-
     let new_lesson = PartialLesson {
-        course: course.id,
         metadata: body.metadata,
-        order: body.order,
         content: body.content,
         attachments: vec![],
+        course_slug: course_slug.clone(),
     };
 
     state
@@ -112,7 +107,7 @@ async fn update_course_lesson(
         .collection::<PartialLesson>("lessons")
         .find_one_and_replace(
             doc! {
-                "course": course.id,
+                "course_slug": course_slug,
                 "slug": lesson_slug.clone(),
             },
             new_lesson,

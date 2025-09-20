@@ -27,8 +27,14 @@ pub enum ChallengeFlagMeta {
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[cfg_attr(feature = "utoipa", derive(ToSchema))]
 #[cfg_attr(feature = "schemars", derive(JsonSchema))]
+#[cfg_attr(feature = "validator", derive(Validate))]
 pub struct ChallengeFlag {
-    pub points: i32,
+    /// Slug that will allow this flag to be referenced in contests
+    #[cfg_attr(
+        feature = "validator",
+        validate(custom(function = "slug_validator"), length(min = 1, max = 32))
+    )]
+    pub slug: String,
 
     /// A short description where the flag can be found.
     /// Can be revealed in courses.
@@ -71,6 +77,16 @@ pub struct ChallengeMetadata {
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[cfg_attr(feature = "utoipa", derive(ToSchema))]
 #[cfg_attr(feature = "schemars", derive(JsonSchema))]
+pub struct ChallengeContainer {
+    pub name: String,
+    pub args: Option<Vec<String>>,
+    pub command: Option<Vec<String>>,
+    pub image: String,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[cfg_attr(feature = "utoipa", derive(ToSchema))]
+#[cfg_attr(feature = "schemars", derive(JsonSchema))]
 #[serde(tag = "type", rename_all = "lowercase")]
 pub enum ChallengeSpec {
     /// A fully static challenge with one answer
@@ -81,8 +97,8 @@ pub enum ChallengeSpec {
 
     /// A challenge that requires VPN use and is created per user
     Container {
-        /// The container image for the container challenge
-        image: String,
+        /// Containers that should be created in the challenge Pod
+        containers: Vec<ChallengeContainer>,
     },
 }
 

@@ -6,6 +6,9 @@ docs/AuthCheckSuccess.md
 docs/Course.md
 docs/CourseApi.md
 docs/CourseDifficulty.md
+docs/CourseItem.md
+docs/CourseItemOneOf.md
+docs/CourseItemOneOf1.md
 docs/CourseMetadata.md
 docs/CoursesApi.md
 docs/CreateSuccess.md
@@ -29,6 +32,9 @@ src/lib.rs
 src/models/auth_check_success.rs
 src/models/course.rs
 src/models/course_difficulty.rs
+src/models/course_item.rs
+src/models/course_item_one_of.rs
+src/models/course_item_one_of_1.rs
 src/models/course_metadata.rs
 src/models/create_success.rs
 src/models/lesson_metadata.rs

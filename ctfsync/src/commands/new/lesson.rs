@@ -47,26 +47,14 @@ pub async fn run(args: InitLessonArgs) -> Result<()> {
 
     let directory = repo.workdir().ok_or(NoGitWorkdir)?;
 
-    let last_index = std::fs::read_dir(directory)
-        .into_diagnostic()?
-        .filter_map(|entry| entry.ok())
-        .map(|entry| entry.path())
-        .filter(|entry| entry.is_dir())
-        .filter_map(|entry| {
-            let name = entry.file_name()?.to_str()?;
-            let prefix = name.split('-').next()?;
-            Some(prefix.to_string())
-        })
-        .filter_map(|prefix| prefix.parse::<u32>().ok())
-        .max()
-        .unwrap_or(0);
-
-    let lesson_dir_name = format!("{:0>2}-{slug}", last_index + 1);
-    let lesson_dir = directory.join(&lesson_dir_name);
+    let lesson_dir = directory.join(&slug);
     tokio::fs::create_dir(&lesson_dir).await.into_diagnostic()?;
 
     let manifest_path = lesson_dir.join("lesson.yaml");
-    let metadata = LessonMetadata { name, slug };
+    let metadata = LessonMetadata {
+        name,
+        slug: slug.clone(),
+    };
 
     let config = init_config().await?;
     let server_base = Url::parse(&config.base_url).into_diagnostic()?;
@@ -77,20 +65,14 @@ pub async fn run(args: InitLessonArgs) -> Result<()> {
         .await
         .into_diagnostic()?;
 
-    println!(
-        "Created {}",
-        format!("{}/lesson.yaml", lesson_dir_name).bold().green()
-    );
+    println!("Created {}", format!("{}/lesson.yaml", slug).bold().green());
 
     let readme_path = lesson_dir.join("README.md");
     fs::write(&readme_path, format!("# {}\n\n", metadata.name))
         .await
         .into_diagnostic()?;
 
-    println!(
-        "Created {}",
-        format!("{}/README.md", lesson_dir_name).bold().green()
-    );
+    println!("Created {}", format!("{}/README.md", slug).bold().green());
 
     Ok(())
 }

@@ -25,6 +25,21 @@ pub enum CourseDifficulty {
     Advanced,
 }
 
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[cfg_attr(feature = "utoipa", derive(ToSchema))]
+#[cfg_attr(feature = "schemars", derive(JsonSchema))]
+#[serde(untagged)]
+pub enum CourseItem {
+    Lesson {
+        /// Lesson slug referencing a lesson in the same repository
+        lesson: String,
+    },
+    Challenge {
+        /// Challenge slug referencing any challenge on the server
+        challenge: String,
+    },
+}
+
 #[derive(Debug, Serialize, Deserialize, Clone, Default)]
 #[cfg_attr(feature = "utoipa", derive(ToSchema))]
 #[cfg_attr(feature = "schemars", derive(JsonSchema))]
@@ -56,4 +71,7 @@ pub struct CourseMetadata {
 
     /// The difficulty level of the course
     pub difficulty: CourseDifficulty,
+
+    /// Items included in the course (order matters)
+    pub items: Vec<CourseItem>,
 }

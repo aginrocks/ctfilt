@@ -17,16 +17,13 @@ pub struct UpdateLessonRequest {
     pub content: String,
     #[serde(rename = "metadata")]
     pub metadata: Box<models::LessonMetadata>,
-    #[serde(rename = "order")]
-    pub order: i32,
 }
 
 impl UpdateLessonRequest {
-    pub fn new(content: String, metadata: models::LessonMetadata, order: i32) -> UpdateLessonRequest {
+    pub fn new(content: String, metadata: models::LessonMetadata) -> UpdateLessonRequest {
         UpdateLessonRequest {
             content,
             metadata: Box::new(metadata),
-            order,
         }
     }
 }

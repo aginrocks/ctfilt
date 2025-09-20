@@ -13,7 +13,6 @@ use miette::{IntoDiagnostic, Result};
 use crate::{
     api::init_api_config,
     commands::apply::course::diff::{read_manifest, read_readme},
-    utils::read_slug,
 };
 
 pub struct LessonsMap {
@@ -63,8 +62,6 @@ impl LessonsMap {
             return Ok(false);
         }
 
-        let (order, _slug) = read_slug(path)?;
-
         let metadata = match entry.manifest {
             Some(ref manifest) => manifest.clone(),
             None => {
@@ -86,7 +83,6 @@ impl LessonsMap {
         let body = UpdateLessonRequest {
             metadata: Box::new(metadata.clone()),
             content,
-            order,
         };
         course_api::update_course_lesson(config, &self.course_slug, &metadata.slug, body)
             .await

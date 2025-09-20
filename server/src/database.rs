@@ -13,8 +13,10 @@ pub use challenge::*;
 pub use course::*;
 pub use init::*;
 pub use lesson::*;
-use mongodb::{Client, Database};
+use mongodb::{Client, Database, bson::oid::ObjectId};
 pub use user::*;
+
+use crate::axum_error::AxumResult;
 
 #[derive(Clone)]
 pub struct DatabaseStore {
@@ -30,5 +32,26 @@ impl DatabaseStore {
             courses: CourseStore::new(database),
             lessons: LessonStore::new(database),
         }
+    }
+
+    pub async fn resolve_course_items(
+        &self,
+        course_slug: &str,
+        items: Vec<manifests::CourseItem>,
+    ) -> AxumResult<Vec<CourseItem>> {
+        let mut result = Vec::new();
+
+        for item in items {
+            let resolved_item = match item {
+                manifests::CourseItem::Lesson { lesson } => {
+                    let lesson = self.lessons.get_by_slug(course_slug, &lesson).await?;
+                    CourseItem::Lesson { lesson: lesson.id }
+                }
+                manifests::CourseItem::Challenge { challenge } => todo!(),
+            };
+            result.push(resolved_item);
+        }
+
+        Ok(result)
     }
 }
