@@ -16,7 +16,10 @@ pub async fn run(_repo: Repository, directory: &Path) -> Result<()> {
     let config = init_api_config().await?;
 
     // TODO: Handle refs properly
-    let update_request = UpdateChallengeRequest::new(manifest.clone(), "".to_string());
+    let update_request = UpdateChallengeRequest::new(
+        manifest.clone(),
+        "8a3920b7b28274305c1ee2182d4aff0e277f6fd2".to_string(),
+    );
     challenge_api::update_challenge(config, &manifest.slug, update_request)
         .await
         .into_diagnostic()?;
