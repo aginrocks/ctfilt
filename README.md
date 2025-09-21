@@ -1,6 +1,12 @@
-# CTFILT 2
+<p align="center">
+  <img src="web/public/logo.svg" alt="CTFILT Logo" width="200"/>
+</p>
 
-`ctfilt` is a comprehensive platform for creating and managing Capture The Flag (CTF) challenges and courses. It consists of a central server, various supporting services, and command-line tools for administration. The project is built primarily in Rust and leverages technologies like Kubernetes and OpenAPI.
+<p align="center">
+    <img src="https://img.shields.io/badge/made%20with-Rust-orange" alt="Made with Rust">
+</p>
+
+**CTFILT** is a comprehensive platform for creating and managing Capture The Flag (CTF) challenges and courses. It consists of a central server, various supporting services, and command-line tools for administration. The project is built primarily in Rust and leverages technologies like Kubernetes and OpenAPI.
 
 ## Project Overview
 
