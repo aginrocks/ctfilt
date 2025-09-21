@@ -41,8 +41,8 @@ pub struct ChallengeFlag {
     /// Visible only after solving the challenge in contests.
     pub description: Option<String>,
 
-    #[serde(flatten)]
-    pub meta: ChallengeFlagMeta,
+    // #[serde(flatten)]
+    pub spec: ChallengeFlagMeta,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone, Default)]
@@ -68,7 +68,7 @@ pub struct ChallengeMetadata {
     /// Markdown description of the challenge
     pub details: String,
 
-    #[serde(flatten)]
+    // #[serde(flatten)]
     pub spec: ChallengeSpec,
 
     pub flags: Vec<ChallengeFlag>,

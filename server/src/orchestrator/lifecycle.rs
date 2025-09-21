@@ -70,7 +70,7 @@ impl ChallengeOrchestrator {
             .flags
             .iter()
             .enumerate()
-            .filter_map(|(index, flag)| match flag.meta {
+            .filter_map(|(index, flag)| match flag.spec {
                 ChallengeFlagMeta::DynamicMount { ref mount_path } => Some(DynamicFlag {
                     flag: self.flags.generate(user_id, challenge_id, index),
                     mount_path: mount_path.clone(),
