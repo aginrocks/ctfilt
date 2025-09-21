@@ -13,11 +13,6 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Default, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Challenge {
-    #[serde(rename = "type")]
-    pub r#type: Type,
-    /// Containers that should be created in the challenge Pod
-    #[serde(rename = "containers")]
-    pub containers: Vec<models::ChallengeContainer>,
     /// A short description, Markdown not supported
     #[serde(rename = "description")]
     pub description: String,
@@ -32,6 +27,8 @@ pub struct Challenge {
     /// A URL-friendly unique identifier for the challenge
     #[serde(rename = "slug")]
     pub slug: String,
+    #[serde(rename = "spec")]
+    pub spec: Box<models::ChallengeSpec>,
     #[serde(rename = "_id")]
     pub _id: String,
     #[serde(rename = "ref")]
@@ -39,30 +36,17 @@ pub struct Challenge {
 }
 
 impl Challenge {
-    pub fn new(r#type: Type, containers: Vec<models::ChallengeContainer>, description: String, details: String, flags: Vec<models::ChallengeFlag>, name: String, slug: String, _id: String, r#ref: String) -> Challenge {
+    pub fn new(description: String, details: String, flags: Vec<models::ChallengeFlag>, name: String, slug: String, spec: models::ChallengeSpec, _id: String, r#ref: String) -> Challenge {
         Challenge {
-            r#type,
-            containers,
             description,
             details,
             flags,
             name,
             slug,
+            spec: Box::new(spec),
             _id,
             r#ref,
         }
-    }
-}
-/// 
-#[derive(Clone, Copy, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Serialize, Deserialize)]
-pub enum Type {
-    #[serde(rename = "container")]
-    Container,
-}
-
-impl Default for Type {
-    fn default() -> Type {
-        Self::Container
     }
 }
 

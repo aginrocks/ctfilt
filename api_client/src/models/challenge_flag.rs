@@ -13,43 +13,23 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Default, Debug, PartialEq, Serialize, Deserialize)]
 pub struct ChallengeFlag {
-    /// The static flag for the challenge
-    #[serde(rename = "flag")]
-    pub flag: String,
-    #[serde(rename = "type")]
-    pub r#type: Type,
-    /// Where the flag should be mounted inside the container
-    #[serde(rename = "mount_path")]
-    pub mount_path: String,
     /// A short description where the flag can be found. Can be revealed in courses. Visible only after solving the challenge in contests.
     #[serde(rename = "description", default, with = "::serde_with::rust::double_option", skip_serializing_if = "Option::is_none")]
     pub description: Option<Option<String>>,
     /// Slug that will allow this flag to be referenced in contests
     #[serde(rename = "slug")]
     pub slug: String,
+    #[serde(rename = "spec")]
+    pub spec: Box<models::ChallengeFlagMeta>,
 }
 
 impl ChallengeFlag {
-    pub fn new(flag: String, r#type: Type, mount_path: String, slug: String) -> ChallengeFlag {
+    pub fn new(slug: String, spec: models::ChallengeFlagMeta) -> ChallengeFlag {
         ChallengeFlag {
-            flag,
-            r#type,
-            mount_path,
             description: None,
             slug,
+            spec: Box::new(spec),
         }
-    }
-}
-/// 
-#[derive(Clone, Copy, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Serialize, Deserialize)]
-pub enum Type {
-    #[serde(rename = "dynamic-mount")]
-    DynamicMount,
-}
-
-impl Default for Type {
-    fn default() -> Type {
-        Self::DynamicMount
     }
 }
 

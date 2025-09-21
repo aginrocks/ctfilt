@@ -13,11 +13,6 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Default, Debug, PartialEq, Serialize, Deserialize)]
 pub struct ChallengeMetadata {
-    #[serde(rename = "type")]
-    pub r#type: Type,
-    /// Containers that should be created in the challenge Pod
-    #[serde(rename = "containers")]
-    pub containers: Vec<models::ChallengeContainer>,
     /// A short description, Markdown not supported
     #[serde(rename = "description")]
     pub description: String,
@@ -32,31 +27,20 @@ pub struct ChallengeMetadata {
     /// A URL-friendly unique identifier for the challenge
     #[serde(rename = "slug")]
     pub slug: String,
+    #[serde(rename = "spec")]
+    pub spec: Box<models::ChallengeSpec>,
 }
 
 impl ChallengeMetadata {
-    pub fn new(r#type: Type, containers: Vec<models::ChallengeContainer>, description: String, details: String, flags: Vec<models::ChallengeFlag>, name: String, slug: String) -> ChallengeMetadata {
+    pub fn new(description: String, details: String, flags: Vec<models::ChallengeFlag>, name: String, slug: String, spec: models::ChallengeSpec) -> ChallengeMetadata {
         ChallengeMetadata {
-            r#type,
-            containers,
             description,
             details,
             flags,
             name,
             slug,
+            spec: Box::new(spec),
         }
-    }
-}
-/// 
-#[derive(Clone, Copy, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Serialize, Deserialize)]
-pub enum Type {
-    #[serde(rename = "container")]
-    Container,
-}
-
-impl Default for Type {
-    fn default() -> Type {
-        Self::Container
     }
 }
 
