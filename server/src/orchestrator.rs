@@ -1,8 +1,9 @@
 mod lifecycle;
 mod resources;
 mod types;
+mod watcher;
 
-use exterminator::Exterminator;
+use exterminator::{Extermination, Exterminator};
 use headscale::apis::configuration::Configuration;
 use kube::Client;
 use std::sync::Arc;
@@ -11,6 +12,7 @@ use crate::utils::FlagGenerator;
 
 pub use lifecycle::*;
 pub use types::*;
+pub use watcher::*;
 
 pub struct ChallengeOrchestrator {
     pub kube: Client,
@@ -18,6 +20,7 @@ pub struct ChallengeOrchestrator {
     pub headscale_config: Arc<Configuration>,
     pub headscale_public_url: String,
     pub exterminator: Exterminator,
+    pub watcher: PodWatcher,
 }
 
 impl ChallengeOrchestrator {
@@ -26,14 +29,15 @@ impl ChallengeOrchestrator {
         flags: Arc<FlagGenerator>,
         headscale_config: Arc<Configuration>,
         headscale_public_url: String,
-        exterminator: Exterminator,
+        extermination: Extermination,
     ) -> Self {
         Self {
-            kube,
+            kube: kube.clone(),
             flags,
             headscale_config,
             headscale_public_url,
-            exterminator,
+            exterminator: Exterminator::new(kube.clone(), extermination.clone()),
+            watcher: PodWatcher::new(kube, extermination),
         }
     }
 }

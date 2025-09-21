@@ -61,3 +61,4 @@ clap = { version = "4.5.47", features = ["derive"] }
 futures = "0.3.31"
 validator = { version = "0.20.0", features = ["derive"] }
 axum-valid = "0.24.0"
+dashmap = "6.1.0"

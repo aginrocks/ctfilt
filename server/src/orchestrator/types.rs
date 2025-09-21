@@ -14,7 +14,7 @@ pub enum ChallengeStatus {
     Starting,
     Running,
     Stopping,
-    Stopped,
+    Unknown,
 }
 
 #[derive(Debug, Serialize, Deserialize, ToSchema, Clone, Builder, Default)]

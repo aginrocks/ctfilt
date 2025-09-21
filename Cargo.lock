@@ -4963,6 +4963,7 @@ dependencies = [
  "clap",
  "color-eyre",
  "config",
+ "dashmap",
  "derive_builder",
  "dotenvy",
  "exterminator",

@@ -105,15 +105,21 @@ async fn main() -> Result<()> {
         settings.flags.length,
     ));
 
-    let exterminator = Exterminator::new(kube_client.clone(), settings.extermination.clone());
-
     let orchestrator = Arc::new(ChallengeOrchestrator::new(
         kube_client.clone(),
         flags.clone(),
         headscale_config.clone(),
         settings.headscale.public_url.clone(),
-        exterminator,
+        settings.extermination.clone(),
     ));
+
+    let orchestrator_watcher = orchestrator.clone();
+    tokio::spawn(async move {
+        match orchestrator_watcher.watcher.watch_pods().await {
+            Ok(_) => info!("Pod watcher exited"),
+            Err(e) => error!(error = ?e, "Pod watcher exited with error"),
+        }
+    });
 
     let app_state = AppState {
         database,
