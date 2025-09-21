@@ -1,3 +1,4 @@
+pub mod challenge;
 pub mod course;
 
 use clap::Subcommand;
@@ -11,12 +12,15 @@ pub enum InitCommands {
         args: course::InitCourseArgs,
     },
     /// Initialize a challenge
-    Challenge,
+    Challenge {
+        #[command(flatten)]
+        args: challenge::InitChallengeArgs,
+    },
 }
 
 pub async fn handle_init(cmd: InitCommands) -> Result<()> {
     match cmd {
         InitCommands::Course { args } => course::run(args).await,
-        _ => todo!(),
+        InitCommands::Challenge { args } => challenge::run(args).await,
     }
 }

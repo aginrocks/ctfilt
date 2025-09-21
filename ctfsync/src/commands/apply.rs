@@ -1,3 +1,4 @@
+pub mod challenge;
 pub mod course;
 
 use std::convert::Infallible;
@@ -33,7 +34,7 @@ pub async fn handle_apply() -> Result<()> {
 
     match repo_type {
         RepoType::Course => course::run(repo, directory).await,
-        RepoType::Challenge => todo!(),
+        RepoType::Challenge => challenge::run(repo, directory).await,
         RepoType::Unknown => Err(NoManifest.into()),
     }
 }
