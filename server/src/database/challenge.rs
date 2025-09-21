@@ -1,11 +1,18 @@
+use color_eyre::eyre::{Context, eyre};
 use manifests::ChallengeMetadata;
-use mongodb::bson::oid::ObjectId;
+use mongodb::{
+    Collection, Database,
+    bson::{doc, oid::ObjectId},
+};
 use partial_struct::Partial;
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 use visible::StructFields;
 
-use crate::mongo_id::object_id_as_string_required;
+use crate::{
+    axum_error::{AxumError, AxumResult},
+    mongo_id::object_id_as_string_required,
+};
 
 database_object!(Challenge {
     #[serde(rename = "_id", with = "object_id_as_string_required")]
@@ -14,4 +21,36 @@ database_object!(Challenge {
 
     #[serde(flatten)]
     metadata: ChallengeMetadata,
+
+    r#ref: String,
 });
+
+#[derive(Clone)]
+pub struct ChallengeStore {
+    collection: Collection<Challenge>,
+    partial_collection: Collection<PartialChallenge>,
+}
+
+impl ChallengeStore {
+    pub fn new(database: &Database) -> Self {
+        const COLLECTION: &str = "challenges";
+
+        let collection = database.collection::<Challenge>(COLLECTION);
+        let partial_collection = database.collection::<PartialChallenge>(COLLECTION);
+        Self {
+            collection,
+            partial_collection,
+        }
+    }
+
+    pub async fn get_by_slug(&self, slug: &str) -> AxumResult<Challenge> {
+        let challenge = self
+            .collection
+            .find_one(doc! { "slug": slug })
+            .await
+            .wrap_err("Failed to fetch challenge")?
+            .ok_or_else(|| AxumError::not_found(eyre!("Challenge not found")))?;
+
+        Ok(challenge)
+    }
+}

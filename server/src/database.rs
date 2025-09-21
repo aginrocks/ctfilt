@@ -23,6 +23,7 @@ pub struct DatabaseStore {
     pub database: Database,
     pub courses: CourseStore,
     pub lessons: LessonStore,
+    pub challenges: ChallengeStore,
 }
 
 impl DatabaseStore {
@@ -31,6 +32,7 @@ impl DatabaseStore {
             database: database.clone(),
             courses: CourseStore::new(database),
             lessons: LessonStore::new(database),
+            challenges: ChallengeStore::new(database),
         }
     }
 }
