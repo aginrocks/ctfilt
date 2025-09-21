@@ -12,16 +12,16 @@ use crate::models;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Default, Debug, PartialEq, Serialize, Deserialize)]
-pub struct UpdateCourseRequest {
+pub struct UpdateChallengeRequest {
     #[serde(rename = "metadata")]
-    pub metadata: Box<models::CourseMetadataString>,
+    pub metadata: Box<models::ChallengeMetadata>,
     #[serde(rename = "ref")]
     pub r#ref: String,
 }
 
-impl UpdateCourseRequest {
-    pub fn new(metadata: models::CourseMetadataString, r#ref: String) -> UpdateCourseRequest {
-        UpdateCourseRequest {
+impl UpdateChallengeRequest {
+    pub fn new(metadata: models::ChallengeMetadata, r#ref: String) -> UpdateChallengeRequest {
+        UpdateChallengeRequest {
             metadata: Box::new(metadata),
             r#ref,
         }

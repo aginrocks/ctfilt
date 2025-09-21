@@ -29,6 +29,8 @@ Class | Method | HTTP request | Description
 *AuthApi* | [**check_system_auth**](docs/AuthApi.md#check_system_auth) | **GET** /api/auth/check | Check system auth
 *AuthApi* | [**get_user**](docs/AuthApi.md#get_user) | **GET** /api/user | Get user details
 *AuthApi* | [**log_in**](docs/AuthApi.md#log_in) | **GET** /api/login | Log in
+*ChallengeApi* | [**get_challenge**](docs/ChallengeApi.md#get_challenge) | **GET** /api/challenges/{challenge_slug} | Get challenge
+*ChallengeApi* | [**update_challenge**](docs/ChallengeApi.md#update_challenge) | **PUT** /api/challenges/{challenge_slug} | Update challenge
 *CourseApi* | [**get_course**](docs/CourseApi.md#get_course) | **GET** /api/courses/{course_slug} | Get course
 *CourseApi* | [**get_course_lesson**](docs/CourseApi.md#get_course_lesson) | **GET** /api/courses/{course_slug}/lessons/{lesson_slug} | Get lesson
 *CourseApi* | [**update_course**](docs/CourseApi.md#update_course) | **PUT** /api/courses/{course_slug} | Update course
@@ -43,16 +45,28 @@ Class | Method | HTTP request | Description
 ## Documentation For Models
 
  - [AuthCheckSuccess](docs/AuthCheckSuccess.md)
+ - [Challenge](docs/Challenge.md)
+ - [ChallengeContainer](docs/ChallengeContainer.md)
+ - [ChallengeFlag](docs/ChallengeFlag.md)
+ - [ChallengeFlagMeta](docs/ChallengeFlagMeta.md)
+ - [ChallengeFlagMetaOneOf](docs/ChallengeFlagMetaOneOf.md)
+ - [ChallengeFlagMetaOneOf1](docs/ChallengeFlagMetaOneOf1.md)
+ - [ChallengeMetadata](docs/ChallengeMetadata.md)
+ - [ChallengeSpec](docs/ChallengeSpec.md)
+ - [ChallengeSpecOneOf](docs/ChallengeSpecOneOf.md)
+ - [ChallengeSpecOneOf1](docs/ChallengeSpecOneOf1.md)
+ - [ChallengeSpecOneOf2](docs/ChallengeSpecOneOf2.md)
  - [Course](docs/Course.md)
  - [CourseDifficulty](docs/CourseDifficulty.md)
- - [CourseItem](docs/CourseItem.md)
- - [CourseItemOneOf](docs/CourseItemOneOf.md)
- - [CourseItemOneOf1](docs/CourseItemOneOf1.md)
- - [CourseMetadata](docs/CourseMetadata.md)
+ - [CourseItemString](docs/CourseItemString.md)
+ - [CourseItemStringOneOf](docs/CourseItemStringOneOf.md)
+ - [CourseItemStringOneOf1](docs/CourseItemStringOneOf1.md)
+ - [CourseMetadataString](docs/CourseMetadataString.md)
  - [CreateSuccess](docs/CreateSuccess.md)
  - [LessonMetadata](docs/LessonMetadata.md)
  - [NotFoundError](docs/NotFoundError.md)
  - [UnauthorizedError](docs/UnauthorizedError.md)
+ - [UpdateChallengeRequest](docs/UpdateChallengeRequest.md)
  - [UpdateCourseRequest](docs/UpdateCourseRequest.md)
  - [UpdateLessonRequest](docs/UpdateLessonRequest.md)
  - [User](docs/User.md)

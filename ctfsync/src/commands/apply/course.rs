@@ -5,7 +5,7 @@ use std::{path::Path, str::FromStr};
 
 use api_client::{
     apis::course_api,
-    models::{CourseMetadata, UpdateCourseRequest},
+    models::{CourseMetadataString, UpdateCourseRequest},
 };
 use gix::{
     ObjectId, Repository,
@@ -29,7 +29,7 @@ pub async fn run(repo: Repository, directory: &Path) -> Result<()> {
         .id
         .to_string();
 
-    let manifest = load_course_manifest::<CourseMetadata>(directory).await?;
+    let manifest = load_course_manifest::<CourseMetadataString>(directory).await?;
 
     let config = init_api_config().await?;
 

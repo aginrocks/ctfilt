@@ -11,8 +11,9 @@
 use crate::models;
 use serde::{Deserialize, Serialize};
 
+/// CourseMetadataString : Metadata for a course  # Generics:  - `Ref`: The type used to reference lessons and challenges
 #[derive(Clone, Default, Debug, PartialEq, Serialize, Deserialize)]
-pub struct Course {
+pub struct CourseMetadataString {
     /// A short description of the course
     #[serde(rename = "description")]
     pub description: String,
@@ -26,26 +27,23 @@ pub struct Course {
     #[serde(rename = "name")]
     pub name: String,
     /// A list of learning objectives for the course
-    #[serde(rename = "objectives", skip_serializing_if = "Option::is_none")]
-    pub objectives: Option<Vec<String>>,
+    #[serde(rename = "objectives", default, with = "::serde_with::rust::double_option", skip_serializing_if = "Option::is_none")]
+    pub objectives: Option<Option<Vec<String>>>,
     /// A list of course slugs that are prerequisites for this course
-    #[serde(rename = "prerequisites", skip_serializing_if = "Option::is_none")]
-    pub prerequisites: Option<Vec<String>>,
+    #[serde(rename = "prerequisites", default, with = "::serde_with::rust::double_option", skip_serializing_if = "Option::is_none")]
+    pub prerequisites: Option<Option<Vec<String>>>,
     /// A URL-friendly unique identifier for the course
     #[serde(rename = "slug")]
     pub slug: String,
     /// Tags associated with the course
-    #[serde(rename = "tags", skip_serializing_if = "Option::is_none")]
-    pub tags: Option<Vec<String>>,
-    #[serde(rename = "_id")]
-    pub _id: String,
-    #[serde(rename = "ref")]
-    pub r#ref: String,
+    #[serde(rename = "tags", default, with = "::serde_with::rust::double_option", skip_serializing_if = "Option::is_none")]
+    pub tags: Option<Option<Vec<String>>>,
 }
 
-impl Course {
-    pub fn new(description: String, difficulty: models::CourseDifficulty, items: Vec<models::CourseItemString>, name: String, slug: String, _id: String, r#ref: String) -> Course {
-        Course {
+impl CourseMetadataString {
+    /// Metadata for a course  # Generics:  - `Ref`: The type used to reference lessons and challenges
+    pub fn new(description: String, difficulty: models::CourseDifficulty, items: Vec<models::CourseItemString>, name: String, slug: String) -> CourseMetadataString {
+        CourseMetadataString {
             description,
             difficulty,
             items,
@@ -54,8 +52,6 @@ impl Course {
             prerequisites: None,
             slug,
             tags: None,
-            _id,
-            r#ref,
         }
     }
 }

@@ -1,11 +1,11 @@
-# UpdateCourseRequest
+# ChallengeSpecOneOf2
 
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**metadata** | [**models::CourseMetadataString**](CourseMetadata_String.md) |  | 
-**r#ref** | **String** |  | 
+**containers** | [**Vec<models::ChallengeContainer>**](ChallengeContainer.md) | Containers that should be created in the challenge Pod | 
+**r#type** | **String** |  | 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 
