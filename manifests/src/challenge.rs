@@ -37,8 +37,7 @@ pub struct ChallengeFlag {
     pub slug: String,
 
     /// A short description where the flag can be found.
-    /// Can be revealed in courses.
-    /// Visible only after solving the challenge in contests.
+    /// Visible only after solving the challenge.
     pub description: Option<String>,
 
     // #[serde(flatten)]
@@ -72,6 +71,44 @@ pub struct ChallengeMetadata {
     pub spec: ChallengeSpec,
 
     pub flags: Vec<ChallengeFlag>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[cfg_attr(feature = "utoipa", derive(ToSchema))]
+#[cfg_attr(feature = "schemars", derive(JsonSchema))]
+#[serde(tag = "status", rename_all = "kebab-case")]
+pub enum PublicFlag {
+    Submitted {
+        /// A short description where the flag can be found.
+        /// Visible only after solving the challenge.
+        description: Option<String>,
+
+        /// Current points value of this flag
+        points: i32,
+    },
+    NotSubmitted {
+        /// Current points value of this flag
+        points: i32,
+    },
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone, Default)]
+#[cfg_attr(feature = "utoipa", derive(ToSchema))]
+#[cfg_attr(feature = "schemars", derive(JsonSchema))]
+pub struct PublicChallengeMetadata {
+    /// A short unique name for the challenge
+    pub name: String,
+
+    /// A URL-friendly unique identifier for the challenge
+    pub slug: String,
+
+    /// A short description, Markdown not supported
+    pub description: String,
+
+    /// Markdown description of the challenge
+    pub details: String,
+
+    pub flags: Vec<PublicFlag>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]

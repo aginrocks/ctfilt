@@ -2,7 +2,7 @@ use color_eyre::eyre::{Context, eyre};
 use manifests::ChallengeMetadata;
 use mongodb::{
     Collection, Database,
-    bson::{doc, oid::ObjectId},
+    bson::{Document, doc, oid::ObjectId},
 };
 use partial_struct::Partial;
 use serde::{Deserialize, Serialize};
@@ -53,4 +53,7 @@ impl ChallengeStore {
 
         Ok(challenge)
     }
+
+    // Get the query to join public data
+    // fn get_public_query() -> Vec<Document> {}
 }
