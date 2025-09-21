@@ -1,9 +1,12 @@
+mod start;
+mod stop;
+
 use axum::{Extension, Json, extract::Path};
 use axum_valid::Valid;
 use color_eyre::eyre::{Context, eyre};
 use manifests::ChallengeMetadata;
 use mongodb::bson::doc;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 use utoipa_axum::routes;
 use validator::Validate;
@@ -24,13 +27,17 @@ use super::Route;
 const PATH: &str = "/api/challenges/{challenge_slug}";
 
 pub fn routes() -> Vec<Route> {
-    [vec![
-        (routes!(get_challenge), RouteProtectionLevel::Authenticated),
-        (
-            routes!(update_challenge),
-            RouteProtectionLevel::SystemAuthenticated,
-        ),
-    ]]
+    [
+        vec![
+            (routes!(get_challenge), RouteProtectionLevel::Authenticated),
+            (
+                routes!(update_challenge),
+                RouteProtectionLevel::SystemAuthenticated,
+            ),
+        ],
+        start::routes(),
+        stop::routes(),
+    ]
     .concat()
 }
 
@@ -44,7 +51,7 @@ pub fn routes() -> Vec<Route> {
     responses(
         (status = OK, description = "Success", body = Challenge, content_type = "application/json"),
         (status = UNAUTHORIZED, description = "Unauthorized", body = UnauthorizedError, content_type = "application/json"),
-        (status = NOT_FOUND, description = "Course not found", body = NotFoundError, content_type = "application/json")
+        (status = NOT_FOUND, description = "Challenge not found", body = NotFoundError, content_type = "application/json")
     ),
     tag = "Challenge"
 )]
@@ -107,4 +114,10 @@ async fn update_challenge(
         success: true,
         id: challenge_slug,
     }))
+}
+
+/// Further information can be obtained from Socket.IO connection
+#[derive(Serialize, ToSchema)]
+pub struct KubernetesActionResult {
+    pub success: bool,
 }

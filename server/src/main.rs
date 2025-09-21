@@ -22,6 +22,7 @@ use axum_oidc::{
 use clap::Parser;
 use color_eyre::Result;
 use color_eyre::eyre::WrapErr;
+use exterminator::Exterminator;
 use serde::{Deserialize, Serialize};
 use tokio::net::TcpListener;
 use tower::ServiceBuilder;
@@ -104,11 +105,14 @@ async fn main() -> Result<()> {
         settings.flags.length,
     ));
 
+    let exterminator = Exterminator::new(kube_client.clone(), settings.extermination.clone());
+
     let orchestrator = Arc::new(ChallengeOrchestrator::new(
         kube_client.clone(),
         flags.clone(),
         headscale_config.clone(),
         settings.headscale.public_url.clone(),
+        exterminator,
     ));
 
     let app_state = AppState {

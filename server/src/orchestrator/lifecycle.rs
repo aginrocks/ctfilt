@@ -1,6 +1,6 @@
 use chrono::Utc;
-use color_eyre::eyre::Result;
-use manifests::{ChallengeFlagMeta, ChallengeMetadata};
+use color_eyre::eyre::{Result, bail};
+use manifests::{ChallengeFlagMeta, ChallengeMetadata, ChallengeSpec};
 use mongodb::bson::oid::ObjectId;
 
 use crate::{
@@ -21,6 +21,11 @@ impl ChallengeOrchestrator {
         user_id: ObjectId,
         subject: &str,
     ) -> Result<RunningChallenge> {
+        let containers = match metadata.spec {
+            ChallengeSpec::Container { ref containers } => containers.clone(),
+            _ => bail!("This challenge cannot be started"),
+        };
+
         let hostname = generate_hostname()?;
 
         let provisioner = ResourceProvisisonerBuilder::default()
@@ -47,7 +52,7 @@ impl ChallengeOrchestrator {
 
         // Creating a Deployment
         let hostname = provisioner
-            .provision_challenge_pod(&ts_secret_name, &secret_name, flags)
+            .provision_challenge_pod(&ts_secret_name, &secret_name, flags, containers)
             .await?;
 
         let response = RunningChallengeBuilder::default()

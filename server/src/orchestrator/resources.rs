@@ -17,6 +17,7 @@ use k8s_openapi::api::core::v1::{
     SecretKeySelector, SecretVolumeSource, SecurityContext, Volume, VolumeMount,
 };
 use kube::{Api, Client, api::ObjectMeta};
+use manifests::ChallengeContainer;
 use mongodb::bson::oid::ObjectId;
 
 #[derive(Builder, Clone)]
@@ -258,9 +259,11 @@ impl ResourceProvisisoner {
         ts_secret_name: &str,
         flags_secret_name: &str,
         flags: Vec<DynamicFlag>,
+        spec_containers: Vec<ChallengeContainer>,
     ) -> Result<String> {
         let pods: Api<Pod> = Api::default_namespaced(self.kube.clone());
 
+        // TODO: Add support for mounting flags to specific containers (for now they will be mounted to all containers)
         // TODO: Add a challenge container and mount flags
 
         let flag_mounts = flags
@@ -275,6 +278,18 @@ impl ResourceProvisisoner {
             })
             .collect::<Vec<_>>();
 
+        let containers = spec_containers
+            .into_iter()
+            .map(|c| Container {
+                name: c.name,
+                image: Some(c.image),
+                args: c.args,
+                command: c.command,
+                volume_mounts: Some(flag_mounts.clone()),
+                ..Default::default()
+            })
+            .collect::<Vec<_>>();
+
         let pod = Pod {
             metadata: ObjectMeta {
                 name: Some(self.hostname.clone()),
@@ -282,15 +297,11 @@ impl ResourceProvisisoner {
                 ..Default::default()
             },
             spec: Some(PodSpec {
-                containers: vec![
-                    Container {
-                        name: "nginx".to_string(),
-                        image: Some("nginx:latest".to_string()),
-                        volume_mounts: Some(flag_mounts),
-                        ..Default::default()
-                    },
-                    self.get_tailscale_sidecar(ts_secret_name),
-                ],
+                containers: [
+                    containers.as_slice(),
+                    &[self.get_tailscale_sidecar(ts_secret_name)],
+                ]
+                .concat(),
                 volumes: Some(vec![Volume {
                     name: "flag".to_string(),
                     secret: Some(SecretVolumeSource {
