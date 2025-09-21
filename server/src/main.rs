@@ -7,6 +7,7 @@ mod mongo_id;
 mod orchestrator;
 mod routes;
 mod settings;
+mod socket;
 mod state;
 mod utils;
 
@@ -22,8 +23,8 @@ use axum_oidc::{
 use clap::Parser;
 use color_eyre::Result;
 use color_eyre::eyre::WrapErr;
-use exterminator::Exterminator;
 use serde::{Deserialize, Serialize};
+use socketioxide::{SocketIoBuilder, layer::SocketIoLayer};
 use tokio::net::TcpListener;
 use tower::ServiceBuilder;
 use tower_sessions::SessionManagerLayer;
@@ -46,6 +47,7 @@ use crate::{
     orchestrator::ChallengeOrchestrator,
     routes::RouteProtectionLevel,
     settings::Settings,
+    socket::init_io,
     state::AppState,
     utils::{FlagGenerator, create_token},
 };
@@ -131,41 +133,15 @@ async fn main() -> Result<()> {
         headscale_config,
     };
 
-    let session_layer = init_session_store(&settings).await?;
-    let app = init_axum(app_state, session_layer).await?;
-    let listener = init_listener(&settings).await?;
+    let (io_layer, io) = SocketIoBuilder::new()
+        .with_state(app_state.clone())
+        .build_layer();
 
-    // orchestrator
-    //     .start_challenge(
-    //         ObjectId::new(),
-    //         &ChallengeMetadata {
-    //             name: "test".to_string(),
-    //             slug: "test".to_string(),
-    //             description: "test".to_string(),
-    //             spec: ChallengeSpec::Container {
-    //                 image: "test".to_string(),
-    //             },
-    //             flags: vec![
-    //                 ChallengeFlag {
-    //                     points: 100,
-    //                     description: None,
-    //                     meta: ChallengeFlagMeta::DynamicMount {
-    //                         mount_path: "/flag1".to_string(),
-    //                     },
-    //                 },
-    //                 ChallengeFlag {
-    //                     points: 200,
-    //                     description: None,
-    //                     meta: ChallengeFlagMeta::DynamicMount {
-    //                         mount_path: "/flag2".to_string(),
-    //                     },
-    //                 },
-    //             ],
-    //         },
-    //         ObjectId::new(),
-    //         "ce24e0c8-cd22-4e2c-9698-dd2a21c17b9b",
-    //     )
-    //     .await?;
+    init_io(io).await?;
+
+    let session_layer = init_session_store(&settings).await?;
+    let app = init_axum(app_state, io_layer, session_layer).await?;
+    let listener = init_listener(&settings).await?;
 
     info!(
         "listening on {} ({})",
@@ -197,9 +173,10 @@ fn init_tracing(filter: LevelFilter) -> Result<()> {
     Ok(())
 }
 
-#[instrument(skip(state, session_layer))]
+#[instrument(skip(state, io_layer, session_layer))]
 async fn init_axum(
     state: AppState,
+    io_layer: SocketIoLayer,
     session_layer: SessionManagerLayer<RedisStore<Pool>>,
 ) -> Result<Router> {
     let oidc_login_service = ServiceBuilder::new()
@@ -331,8 +308,9 @@ async fn init_axum(
 
     let router = router
         .layer(oidc_auth_service)
-        .layer(session_layer)
-        .fallback(|| async { (StatusCode::NOT_FOUND, "Not found").into_response() });
+        .fallback(|| async { (StatusCode::NOT_FOUND, "Not found").into_response() })
+        .layer(io_layer)
+        .layer(session_layer);
 
     Ok(router)
 }

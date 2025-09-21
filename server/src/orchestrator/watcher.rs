@@ -86,6 +86,7 @@ impl PodWatcher {
             }
         }
     }
+
     /// This function won't return an error
     async fn handle_pod_deletion_safe(&self, pod: Pod) {
         // Handle the deletion safely, logging any errors internally
