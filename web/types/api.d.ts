@@ -26,6 +26,61 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/challenges/{challenge_slug}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get challenge */
+        get: operations["get_challenge"];
+        /**
+         * Update challenge
+         * @description If challenge is not found, it will be created
+         */
+        put: operations["update_challenge"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/challenges/{challenge_slug}/start": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Start a challenge */
+        post: operations["start_challenge"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/challenges/{challenge_slug}/stop": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Stop a challenge */
+        post: operations["stop_challenge"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/courses": {
         parameters: {
             query?: never;
@@ -57,23 +112,6 @@ export interface paths {
          * @description If course is not found, it will be created
          */
         put: operations["update_course"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/courses/{course_slug}/lessons": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get lessons */
-        get: operations["get_course_lessons"];
-        put?: never;
         post?: never;
         delete?: never;
         options?: never;
@@ -223,17 +261,85 @@ export interface components {
         AuthCheckSuccess: {
             success: boolean;
         };
-        Course: components["schemas"]["CourseMetadata"] & {
+        Challenge: components["schemas"]["ChallengeMetadata"] & {
+            _id: string;
+            ref: string;
+        };
+        ChallengeContainer: {
+            args?: string[] | null;
+            command?: string[] | null;
+            image: string;
+            name: string;
+        };
+        ChallengeFlag: {
+            /** @description A short description where the flag can be found.
+             *     Visible only after solving the challenge. */
+            description?: string | null;
+            /** @description Slug that will allow this flag to be referenced in contests */
+            slug: string;
+            spec: components["schemas"]["ChallengeFlagMeta"];
+        };
+        ChallengeFlagMeta: {
+            /** @description The static flag for the challenge */
+            flag: string;
+            /** @enum {string} */
+            type: "static";
+        } | {
+            /** @description Where the flag should be mounted inside the container */
+            mount_path: string;
+            /** @enum {string} */
+            type: "dynamic-mount";
+        };
+        ChallengeMetadata: {
+            /** @description A short description, Markdown not supported */
+            description: string;
+            /** @description Markdown description of the challenge */
+            details: string;
+            flags: components["schemas"]["ChallengeFlag"][];
+            /** @description A short unique name for the challenge */
+            name: string;
+            /** @description A URL-friendly unique identifier for the challenge */
+            slug: string;
+            spec: components["schemas"]["ChallengeSpec"];
+        };
+        ChallengeSpec: {
+            /** @enum {string} */
+            type: "static";
+        } | {
+            /** @enum {string} */
+            type: "dynamic";
+        } | {
+            /** @description Containers that should be created in the challenge Pod */
+            containers: components["schemas"]["ChallengeContainer"][];
+            /** @enum {string} */
+            type: "container";
+        };
+        Course: components["schemas"]["CourseMetadata_String"] & {
             _id: string;
             ref: string;
         };
         /** @enum {string} */
         CourseDifficulty: "beginner" | "intermediate" | "advanced";
-        CourseMetadata: {
+        /** @description # Generics:
+         *
+         *     - `Ref`: The type used to reference lessons and challenges */
+        CourseItem_String: {
+            lesson: string;
+        } | {
+            challenge: string;
+        };
+        /** @description Metadata for a course
+         *
+         *     # Generics:
+         *
+         *     - `Ref`: The type used to reference lessons and challenges */
+        CourseMetadata_String: {
             /** @description A short description of the course */
             description: string;
             /** @description The difficulty level of the course */
             difficulty: components["schemas"]["CourseDifficulty"];
+            /** @description Items included in the course (order matters) */
+            items: components["schemas"]["CourseItem_String"][];
             /** @description A short unique name for the course */
             name: string;
             /** @description A list of learning objectives for the course */
@@ -251,6 +357,10 @@ export interface components {
          *     } */
         CreateSuccess: {
             id: string;
+            success: boolean;
+        };
+        /** @description Further information can be obtained from Socket.IO connection */
+        KubernetesActionResult: {
             success: boolean;
         };
         LessonMetadata: {
@@ -271,15 +381,17 @@ export interface components {
         UnauthorizedError: {
             error: string;
         };
+        UpdateChallengeRequest: {
+            metadata: components["schemas"]["ChallengeMetadata"];
+            ref: string;
+        };
         UpdateCourseRequest: {
-            metadata: components["schemas"]["CourseMetadata"];
+            metadata: components["schemas"]["CourseMetadata_String"];
             ref: string;
         };
         UpdateLessonRequest: {
             content: string;
             metadata: components["schemas"]["LessonMetadata"];
-            /** Format: int32 */
-            order: number;
         };
         User: {
             _id: string;
@@ -321,6 +433,165 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["UnauthorizedError"];
+                };
+            };
+        };
+    };
+    get_challenge: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Challenge slug */
+                challenge_slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Challenge"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UnauthorizedError"];
+                };
+            };
+            /** @description Challenge not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NotFoundError"];
+                };
+            };
+        };
+    };
+    update_challenge: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Challenge slug */
+                challenge_slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateChallengeRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CreateSuccess"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UnauthorizedError"];
+                };
+            };
+        };
+    };
+    start_challenge: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Challenge slug */
+                challenge_slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["KubernetesActionResult"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UnauthorizedError"];
+                };
+            };
+            /** @description Challenge not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NotFoundError"];
+                };
+            };
+        };
+    };
+    stop_challenge: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Challenge slug */
+                challenge_slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["KubernetesActionResult"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UnauthorizedError"];
+                };
+            };
+            /** @description Challenge not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NotFoundError"];
                 };
             };
         };
@@ -427,47 +698,6 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["UnauthorizedError"];
-                };
-            };
-        };
-    };
-    get_course_lessons: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Course slug */
-                course_slug: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["LessonMetadata"][];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["UnauthorizedError"];
-                };
-            };
-            /** @description Course not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["NotFoundError"];
                 };
             };
         };
