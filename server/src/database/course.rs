@@ -15,30 +15,14 @@ use crate::{
     mongo_id::object_id_as_string_required,
 };
 
-#[derive(Serialize, Deserialize, ToSchema, Debug, Clone)]
-#[serde(untagged)]
-pub enum CourseItem {
-    Lesson {
-        #[serde(with = "object_id_as_string_required")]
-        #[schema(value_type = String)]
-        lesson: ObjectId,
-    },
-    Challenge {
-        #[serde(with = "object_id_as_string_required")]
-        #[schema(value_type = String)]
-        challenge: ObjectId,
-    },
-}
-
 database_object!(Course {
     #[serde(rename = "_id", with = "object_id_as_string_required")]
     #[schema(value_type = String)]
     id: ObjectId,
 
     #[serde(flatten)]
-    metadata: CourseMetadata,
-
-    items_ref: Vec<CourseItem>,
+    #[schema(value_type = CourseMetadata<String>)]
+    metadata: CourseMetadata<ObjectId>,
 
     r#ref: String,
 });

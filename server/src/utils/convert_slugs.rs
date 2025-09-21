@@ -1,0 +1,40 @@
+use async_trait::async_trait;
+use manifests::{CourseItem, CourseMetadata};
+use mongodb::bson::oid::ObjectId;
+
+use crate::{axum_error::AxumResult, database::DatabaseStore};
+
+#[async_trait]
+pub trait ConvertSlugs<To> {
+    async fn convert_slugs(&self, store: DatabaseStore) -> AxumResult<To>;
+}
+
+#[async_trait]
+impl ConvertSlugs<CourseMetadata<ObjectId>> for CourseMetadata<String> {
+    async fn convert_slugs(&self, store: DatabaseStore) -> AxumResult<CourseMetadata<ObjectId>> {
+        let mut result = Vec::new();
+
+        let item = self.clone();
+
+        for item in item.items.clone() {
+            match item {
+                CourseItem::Lesson { lesson } => {
+                    let lesson = store.lessons.get_by_slug(&self.slug, &lesson).await?;
+                    result.push(CourseItem::<ObjectId>::Lesson { lesson: lesson.id })
+                }
+                CourseItem::Challenge { challenge } => {}
+            }
+        }
+
+        Ok(CourseMetadata {
+            name: item.name,
+            slug: item.slug,
+            tags: item.tags,
+            description: item.description,
+            objectives: item.objectives,
+            prerequisites: item.prerequisites,
+            difficulty: item.difficulty,
+            items: result,
+        })
+    }
+}

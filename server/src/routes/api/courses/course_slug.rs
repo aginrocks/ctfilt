@@ -19,6 +19,7 @@ use crate::{
         api::{CreateSuccess, NotFoundError},
     },
     state::AppState,
+    utils::ConvertSlugs,
 };
 
 use super::Route;
@@ -64,7 +65,7 @@ async fn get_course(
 
 #[derive(Deserialize, ToSchema, Validate)]
 pub struct UpdateCourseRequest {
-    pub metadata: CourseMetadata,
+    pub metadata: CourseMetadata<String>,
 
     #[validate(length(min = 40, max = 64))]
     pub r#ref: String,
@@ -94,15 +95,9 @@ async fn update_course(
         return Err(AxumError::bad_request(eyre!("Slugs are immutable")));
     }
 
-    let items = state
-        .store
-        .resolve_course_items(&course_slug, body.metadata.items.clone())
-        .await?;
-
     let new_course = PartialCourse {
-        metadata: body.metadata,
+        metadata: body.metadata.convert_slugs(state.store).await?,
         r#ref: body.r#ref,
-        items_ref: items,
     };
 
     state

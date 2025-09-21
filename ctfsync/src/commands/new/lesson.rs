@@ -74,5 +74,7 @@ pub async fn run(args: InitLessonArgs) -> Result<()> {
 
     println!("Created {}", format!("{}/README.md", slug).bold().green());
 
+    // TODO: Add to main manifest
+
     Ok(())
 }

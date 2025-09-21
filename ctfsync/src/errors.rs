@@ -44,6 +44,14 @@ pub struct NoGitWorkdir;
 pub struct NoManifest;
 
 #[derive(Error, Debug, Diagnostic)]
+#[error("Invalid manifest")]
+#[diagnostic(
+    code(repo::no_manifest),
+    help("Ensure that the manifest is a valid YAML file")
+)]
+pub struct InvalidManifest;
+
+#[derive(Error, Debug, Diagnostic)]
 #[error("Your repository has uncommitted changes")]
 #[diagnostic(
     code(repo::dirty),

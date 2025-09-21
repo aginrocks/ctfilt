@@ -81,7 +81,7 @@ pub async fn run(args: InitCourseArgs) -> Result<()> {
     let directory = repo.workdir().ok_or(NoGitWorkdir)?;
     let manifest_path = directory.join("course.yaml");
 
-    let metadata = CourseMetadata {
+    let metadata: CourseMetadata<String> = CourseMetadata {
         name,
         slug,
         description,

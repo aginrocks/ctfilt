@@ -13,6 +13,7 @@ use gix::{
     diff::{Options, tree_with_rewrites::Change},
 };
 use miette::{IntoDiagnostic, Result};
+use serde::Deserialize;
 use tracing::warn;
 
 use crate::{
@@ -28,7 +29,7 @@ pub async fn run(repo: Repository, directory: &Path) -> Result<()> {
         .id
         .to_string();
 
-    let manifest = load_manifest(directory).await?;
+    let manifest = load_course_manifest::<CourseMetadata>(directory).await?;
 
     let config = init_api_config().await?;
 
@@ -85,11 +86,14 @@ pub async fn run(repo: Repository, directory: &Path) -> Result<()> {
     Ok(())
 }
 
-async fn load_manifest(directory: &Path) -> Result<CourseMetadata> {
+pub async fn load_course_manifest<T>(directory: &Path) -> Result<T>
+where
+    T: for<'de> Deserialize<'de>,
+{
     let manifest = directory.join("course.yaml");
     let manifest = tokio::fs::read_to_string(manifest)
         .await
         .map_err(|_| NoManifest)?;
-    let manifest = serde_yaml::from_str::<CourseMetadata>(&manifest).into_diagnostic()?;
+    let manifest = serde_yaml::from_str::<T>(&manifest).into_diagnostic()?;
     Ok(manifest)
 }

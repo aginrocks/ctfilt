@@ -25,26 +25,34 @@ pub enum CourseDifficulty {
     Advanced,
 }
 
+/// # Generics:
+///
+/// - `Ref`: The type used to reference lessons and challenges
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[cfg_attr(feature = "utoipa", derive(ToSchema))]
 #[cfg_attr(feature = "schemars", derive(JsonSchema))]
 #[serde(untagged)]
-pub enum CourseItem {
+pub enum CourseItem<Ref> {
     Lesson {
         /// Lesson slug referencing a lesson in the same repository
-        lesson: String,
+        lesson: Ref,
     },
     Challenge {
         /// Challenge slug referencing any challenge on the server
-        challenge: String,
+        challenge: Ref,
     },
 }
 
+/// Metadata for a course
+///
+/// # Generics:
+///
+/// - `Ref`: The type used to reference lessons and challenges
 #[derive(Debug, Serialize, Deserialize, Clone, Default)]
 #[cfg_attr(feature = "utoipa", derive(ToSchema))]
 #[cfg_attr(feature = "schemars", derive(JsonSchema))]
 #[cfg_attr(feature = "validator", derive(Validate))]
-pub struct CourseMetadata {
+pub struct CourseMetadata<Ref> {
     /// A short unique name for the course
     #[cfg_attr(feature = "validator", validate(length(min = 1, max = 32)))]
     pub name: String,
@@ -73,5 +81,5 @@ pub struct CourseMetadata {
     pub difficulty: CourseDifficulty,
 
     /// Items included in the course (order matters)
-    pub items: Vec<CourseItem>,
+    pub items: Vec<CourseItem<Ref>>,
 }
