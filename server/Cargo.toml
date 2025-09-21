@@ -63,3 +63,4 @@ validator = { version = "0.20.0", features = ["derive"] }
 axum-valid = "0.24.0"
 dashmap = "6.1.0"
 socketioxide = { version = "0.17.2", features = ["state", "tracing"] }
+ts-rs = { version = "11.0.1", features = ["chrono-impl", "bson-uuid-impl"] }
