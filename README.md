@@ -108,14 +108,20 @@ Contains the frontend application for the `ctfilt` platform.
 - **`Caddyfile`**: Configuration for the Caddy web server, acting as a development reverse proxy for the application.
 - **`generate-ctfilt-client.sh`/`generate-headscale-client.sh`**: Scripts for generating API clients.
 
-## [Getting Started](#getting-started)
+## Development
 
-1. Ensure you have Rust and Kubernetes installed
-2. Clone the repository
-3. Build the project with `cargo build --release`
-4. Configure the server using `server/config.toml`
-5. Start the server with `cargo run -p server`
+### Prerequisites
 
+  - Rust and Cargo
+  - Docker and Kubernetes (for local testing)
+  - MongoDB
+  - Valkey (or Redis)
+
+### Getting Started
+
+1. Clone the repository
+2. Build the desired components using `cargo build`
+3. If a component requires configuration, edit the respective `config.toml`
 
 ## License
 
