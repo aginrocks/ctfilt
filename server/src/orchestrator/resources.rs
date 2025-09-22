@@ -33,6 +33,7 @@ pub struct ResourceProvisisoner {
 
 #[derive(Clone)]
 pub struct DynamicFlag {
+    pub slug: String,
     pub flag: String,
     pub mount_path: String,
 }
@@ -146,8 +147,7 @@ impl ResourceProvisisoner {
 
         let flags_data = flags
             .iter()
-            .enumerate()
-            .map(|(index, flag)| (index.to_string(), flag.flag.clone()))
+            .map(|flag| (flag.slug.clone(), flag.flag.clone()))
             .collect::<BTreeMap<_, _>>();
 
         let secret = Secret {
@@ -267,12 +267,11 @@ impl ResourceProvisisoner {
         // TODO: Add a challenge container and mount flags
 
         let flag_mounts = flags
-            .iter()
-            .enumerate()
-            .map(|(index, flag)| VolumeMount {
+            .into_iter()
+            .map(|flag| VolumeMount {
                 name: "flag".to_string(),
                 mount_path: flag.mount_path.clone(),
-                sub_path: Some(index.to_string()),
+                sub_path: Some(flag.slug),
                 read_only: Some(true),
                 ..Default::default()
             })

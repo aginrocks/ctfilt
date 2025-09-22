@@ -14,8 +14,8 @@ impl FlagGenerator {
         }
     }
 
-    pub fn generate(&self, user_id: ObjectId, challenge_id: ObjectId, flag_index: usize) -> String {
-        let seed = format!("{user_id}:{challenge_id}:{}:{flag_index}", self.secret);
+    pub fn generate(&self, user_id: ObjectId, challenge_id: ObjectId, flag_slug: &str) -> String {
+        let seed = format!("{user_id}:{challenge_id}:{}:{flag_slug}", self.secret);
 
         let flag = format!("{:x}", Sha256::digest(seed));
         let flag = &flag[..self.flag_length];
