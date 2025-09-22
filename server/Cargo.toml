@@ -23,7 +23,11 @@ openidconnect = { version = "4.0.0", default-features = false, features = [
 partial_struct = "0.4.5"
 paste = "1.0.15"
 rand = { version = "0.9.1", features = ["thread_rng"] }
-reqwest = { version = "0.12.15", features = ["rustls-tls", "http2", "charset"], default-features = false }
+reqwest = { version = "0.12.15", features = [
+    "rustls-tls",
+    "http2",
+    "charset",
+], default-features = false }
 serde = { version = "1.0.219", features = ["derive"] }
 serde_json = "1.0.140"
 strum = { version = "0.27.1", features = ["derive"] }
@@ -56,11 +60,14 @@ derive_builder = "0.20.2"
 names = { version = "0.14.0", default-features = false }
 headscale = { version = "2.0.0", path = "../headscale" }
 exterminator = { version = "0.1.0", path = "../exterminator" }
-manifests = { version = "0.1.0", path = "../manifests", features = ["schemars", "utoipa", "validator"] }
+manifests = { version = "0.1.0", path = "../manifests", features = [
+    "schemars",
+    "utoipa",
+    "validator",
+] }
 clap = { version = "4.5.47", features = ["derive"] }
 futures = "0.3.31"
 validator = { version = "0.20.0", features = ["derive"] }
 axum-valid = "0.24.0"
 dashmap = "6.1.0"
-socketioxide = { version = "0.17.2", features = ["state", "tracing"] }
 ts-rs = { version = "11.0.1", features = ["chrono-impl", "bson-uuid-impl"] }
