@@ -5,6 +5,7 @@ mod health;
 mod login;
 mod schema;
 mod user;
+mod ws;
 
 use serde::Serialize;
 use utoipa::ToSchema;
@@ -20,6 +21,7 @@ pub fn routes() -> Vec<Route> {
         courses::routes(),
         auth::routes(),
         challenges::routes(),
+        ws::routes(),
     ]
     .concat()
 }

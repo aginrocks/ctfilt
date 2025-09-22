@@ -3,11 +3,12 @@ use derive_builder::Builder;
 use k8s_openapi::chrono::Utc;
 use mongodb::bson::oid::ObjectId;
 use serde::{Deserialize, Serialize};
+use ts_rs::TS;
 use utoipa::ToSchema;
 
 use crate::mongo_id::object_id_as_string_required;
 
-#[derive(Debug, Serialize, Deserialize, ToSchema, Clone, Default)]
+#[derive(Debug, Serialize, Deserialize, ToSchema, Clone, Default, TS)]
 #[serde(rename_all = "lowercase")]
 pub enum ChallengeStatus {
     #[default]
@@ -17,10 +18,11 @@ pub enum ChallengeStatus {
     Unknown,
 }
 
-#[derive(Debug, Serialize, Deserialize, ToSchema, Clone, Builder, Default)]
+#[derive(Debug, Serialize, Deserialize, ToSchema, Clone, Builder, Default, TS)]
 pub struct RunningChallenge {
     #[serde(rename = "_id", with = "object_id_as_string_required")]
     #[schema(value_type = String)]
+    #[ts(as = "String")]
     pub id: ObjectId,
     pub status: ChallengeStatus,
     pub hostname: Option<String>,

@@ -1,5 +1,5 @@
 use chrono::DateTime;
-use color_eyre::eyre::{Context, ContextCompat, Result};
+use color_eyre::eyre::{Context, ContextCompat, Result, eyre};
 use dashmap::DashMap;
 use exterminator::Extermination;
 use futures::TryStreamExt;
@@ -13,6 +13,8 @@ use kube::{
     },
 };
 use mongodb::bson::oid::ObjectId;
+use serde::Serialize;
+use tokio::sync::broadcast::{self, Receiver, Sender};
 use tracing::{info, info_span, warn};
 
 use crate::orchestrator::{ChallengeStatus, RunningChallenge};
@@ -21,18 +23,29 @@ pub struct UserState {
     pub challenges: DashMap<ObjectId, RunningChallenge>,
 }
 
+#[derive(Serialize, Clone)]
+pub struct PodEvent {
+    pub user: ObjectId,
+    pub challenges: Vec<RunningChallenge>,
+}
+
 pub struct PodWatcher {
     pub client: Client,
     pub users_state: DashMap<ObjectId, UserState>,
     pub extermination: Extermination,
+    pub receiver: Receiver<PodEvent>,
+    pub sender: Sender<PodEvent>,
 }
 
 impl PodWatcher {
     pub fn new(client: Client, extermination: Extermination) -> Self {
+        let (sender, receiver) = broadcast::channel(64);
         Self {
             client,
             users_state: DashMap::new(),
             extermination,
+            sender,
+            receiver,
         }
     }
 
@@ -78,8 +91,9 @@ impl PodWatcher {
 
         let handle_result = self.handle_pod(pod).await;
         match handle_result {
-            Ok(_) => {
+            Ok(user_id) => {
                 info!("Pod handled successfully");
+                self.send_event_safe(user_id);
             }
             Err(err) => {
                 warn!("Pod generated error: {}", err);
@@ -95,8 +109,9 @@ impl PodWatcher {
 
         let handle_result = self.handle_pod_deletion(pod).await;
         match handle_result {
-            Ok(_) => {
+            Ok(user_id) => {
                 info!("Pod handled successfully");
+                self.send_event_safe(user_id);
             }
             Err(err) => {
                 warn!("Pod generated error: {}", err);
@@ -147,7 +162,7 @@ impl PodWatcher {
         ))
     }
 
-    async fn handle_pod(&self, pod: Pod) -> Result<()> {
+    async fn handle_pod(&self, pod: Pod) -> Result<ObjectId> {
         let (user, summary) = self.summarize_pod(pod)?;
 
         let user_state = self.users_state.entry(user).or_insert_with(|| UserState {
@@ -156,10 +171,10 @@ impl PodWatcher {
 
         user_state.challenges.insert(summary.id, summary);
 
-        Ok(())
+        Ok(user)
     }
 
-    async fn handle_pod_deletion(&self, pod: Pod) -> Result<()> {
+    async fn handle_pod_deletion(&self, pod: Pod) -> Result<ObjectId> {
         let (user, summary) = self.summarize_pod(pod)?;
 
         let user_state = self.users_state.entry(user).or_insert_with(|| UserState {
@@ -168,6 +183,34 @@ impl PodWatcher {
 
         user_state.challenges.remove(&summary.id);
 
+        Ok(user)
+    }
+
+    pub fn get_latest_event(&self, user: ObjectId) -> Result<PodEvent> {
+        let user_state = self.users_state.get(&user).wrap_err("User not found")?;
+
+        let challenges = user_state
+            .challenges
+            .iter()
+            .map(|e| e.value().clone())
+            .collect();
+
+        Ok(PodEvent { user, challenges })
+    }
+
+    fn send_event(&self, user: ObjectId) -> Result<()> {
+        let event = self.get_latest_event(user)?;
+
+        self.sender
+            .send(event)
+            .map_err(|_| eyre!("Failed to send"))?;
+
         Ok(())
+    }
+
+    fn send_event_safe(&self, user: ObjectId) {
+        if let Err(err) = self.send_event(user) {
+            warn!("Failed to send event: {}", err);
+        }
     }
 }
