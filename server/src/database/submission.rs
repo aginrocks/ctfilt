@@ -7,7 +7,7 @@ use visible::StructFields;
 
 use crate::mongo_id::object_id_as_string_required;
 
-database_object!(Solve {
+database_object!(Submission {
     #[serde(rename = "_id", with = "object_id_as_string_required")]
     #[schema(value_type = String)]
     id: ObjectId,

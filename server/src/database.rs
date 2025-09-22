@@ -6,7 +6,7 @@ pub mod challenge;
 pub mod course;
 pub mod init;
 pub mod lesson;
-pub mod solve;
+pub mod submission;
 pub mod user;
 
 pub use access_token::*;
@@ -15,7 +15,7 @@ pub use course::*;
 pub use init::*;
 pub use lesson::*;
 use mongodb::{Client, Database, bson::oid::ObjectId};
-pub use solve::*;
+pub use submission::*;
 pub use user::*;
 
 use crate::axum_error::AxumResult;
