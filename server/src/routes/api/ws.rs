@@ -10,6 +10,7 @@ use axum::{
 };
 use color_eyre::eyre::Result;
 use mongodb::bson::oid::ObjectId;
+use tracing::info;
 use utoipa_axum::routes;
 
 use crate::{
@@ -41,12 +42,14 @@ async fn websocket(
     Extension(state): Extension<AppState>,
     Extension(user_id): Extension<UserId>,
 ) -> Response {
+    info!("New WS Conenction");
     ws.on_upgrade(move |socket| handle_socket(socket, state, *user_id))
 }
 
 async fn handle_socket(mut socket: WebSocket, state: AppState, user_id: ObjectId) {
     let latest = state.orchestrator.watcher.get_latest_event(user_id);
     if let Ok(latest) = latest {
+        dbg!(&latest);
         handle_event(latest, &mut socket).await.ok();
     }
 

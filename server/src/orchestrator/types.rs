@@ -8,7 +8,7 @@ use utoipa::ToSchema;
 
 use crate::mongo_id::object_id_as_string_required;
 
-#[derive(Debug, Serialize, Deserialize, ToSchema, Clone, Default, TS)]
+#[derive(Debug, Serialize, Deserialize, ToSchema, Clone, Default, TS, PartialEq, Eq)]
 #[serde(rename_all = "lowercase")]
 pub enum ChallengeStatus {
     #[default]
@@ -18,7 +18,7 @@ pub enum ChallengeStatus {
     Unknown,
 }
 
-#[derive(Debug, Serialize, Deserialize, ToSchema, Clone, Builder, Default, TS)]
+#[derive(Debug, Serialize, Deserialize, ToSchema, Clone, Builder, Default, TS, PartialEq, Eq)]
 pub struct RunningChallenge {
     #[serde(rename = "_id", with = "object_id_as_string_required")]
     #[schema(value_type = String)]
