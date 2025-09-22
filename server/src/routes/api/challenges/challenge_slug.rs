@@ -1,5 +1,6 @@
 mod start;
 mod stop;
+mod submit;
 
 use axum::{Extension, Json, extract::Path};
 use axum_valid::Valid;
@@ -37,6 +38,7 @@ pub fn routes() -> Vec<Route> {
         ],
         start::routes(),
         stop::routes(),
+        submit::routes(),
     ]
     .concat()
 }
