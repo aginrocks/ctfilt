@@ -1,11 +1,13 @@
 use axum::{Extension, Json, extract::Path};
-use serde::Serialize;
+use axum_valid::Valid;
+use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 use utoipa_axum::routes;
+use validator::Validate;
 
 use crate::{
     axum_error::AxumResult,
-    middlewares::require_auth::{UnauthorizedError, UserData},
+    middlewares::require_auth::{UnauthorizedError, UserData, UserId},
     routes::{
         RouteProtectionLevel,
         api::{NotFoundError, challenges::challenge_slug::KubernetesActionResult},
@@ -31,6 +33,12 @@ pub struct FlagSubmissionResult {
     pub points_awarded: i32,
 }
 
+#[derive(Deserialize, ToSchema, Validate)]
+pub struct FlagSubmissionRequest {
+    #[validate(length(min = 1))]
+    pub flag: String,
+}
+
 // TODO: Add rate limiting
 /// Submit a flag
 ///
@@ -51,12 +59,21 @@ pub struct FlagSubmissionResult {
 async fn submit_flag(
     Extension(state): Extension<AppState>,
     Path(challenge_slug): Path<String>,
-    Extension(user): Extension<UserData>,
+    Extension(user_id): Extension<UserId>,
+    Valid(Json(body)): Valid<Json<FlagSubmissionRequest>>,
 ) -> AxumResult<Json<FlagSubmissionResult>> {
     let challenge = state.store.challenges.get_by_slug(&challenge_slug).await?;
 
+    let flags = state
+        .flags
+        .generate_all(*user_id, challenge.id, challenge.metadata.flags);
+
+    let correct_flag = flags.into_iter().find(|f| f.value == body.flag);
+
+    // TODO: Record the submission in the database
+
     Ok(Json(FlagSubmissionResult {
-        correct: true,
+        correct: correct_flag.is_some(),
         points_awarded: 0,
     }))
 }
