@@ -92,6 +92,11 @@ pub struct Flags {
     pub length: usize,
 }
 
+#[derive(Debug, Deserialize, Serialize)]
+pub struct UserLimits {
+    pub max_concurrent_challenges: usize,
+}
+
 impl Default for Flags {
     fn default() -> Self {
         let rng = ThreadRng::default();
@@ -116,6 +121,7 @@ pub struct Settings {
     pub headscale: Headscale,
     pub extermination: Extermination,
     pub flags: Flags,
+    pub user_limits: UserLimits,
 }
 
 impl Settings {
@@ -205,6 +211,9 @@ impl Settings {
             extermination: Default::default(),
             flags: Flags {
                 ..Default::default()
+            },
+            user_limits: UserLimits {
+                max_concurrent_challenges: 2,
             },
         }
     }
