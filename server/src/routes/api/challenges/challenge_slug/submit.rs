@@ -7,11 +7,8 @@ use validator::Validate;
 
 use crate::{
     axum_error::AxumResult,
-    middlewares::require_auth::{UnauthorizedError, UserData, UserId},
-    routes::{
-        RouteProtectionLevel,
-        api::{NotFoundError, challenges::challenge_slug::KubernetesActionResult},
-    },
+    middlewares::require_auth::{UnauthorizedError, UserId},
+    routes::{RouteProtectionLevel, api::NotFoundError},
     state::AppState,
 };
 

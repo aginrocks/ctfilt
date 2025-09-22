@@ -1,14 +1,13 @@
-use axum::{Extension, Json, extract::Path};
+use axum::Json;
 use utoipa_axum::routes;
 
 use crate::{
     axum_error::AxumResult,
-    middlewares::require_auth::{UnauthorizedError, UserData},
+    middlewares::require_auth::UnauthorizedError,
     routes::{
         RouteProtectionLevel,
         api::{NotFoundError, challenges::challenge_slug::KubernetesActionResult},
     },
-    state::AppState,
 };
 
 use super::Route;
@@ -37,10 +36,6 @@ pub fn routes() -> Vec<Route> {
     ),
     tag = "Challenge"
 )]
-async fn stop_challenge(
-    Extension(state): Extension<AppState>,
-    Path(course_slug): Path<String>,
-    Extension(user): Extension<UserData>,
-) -> AxumResult<Json<KubernetesActionResult>> {
+async fn stop_challenge() -> AxumResult<Json<KubernetesActionResult>> {
     todo!()
 }

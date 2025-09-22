@@ -22,7 +22,8 @@ impl ConvertSlugs<CourseMetadata<ObjectId>> for CourseMetadata<String> {
                     let lesson = store.lessons.get_by_slug(&self.slug, &lesson).await?;
                     result.push(CourseItem::<ObjectId>::Lesson { lesson: lesson.id })
                 }
-                CourseItem::Challenge { challenge } => {}
+                // TODO
+                CourseItem::Challenge { .. } => {}
             }
         }
 
