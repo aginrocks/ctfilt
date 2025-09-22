@@ -71,17 +71,20 @@ impl ChallengeOrchestrator {
         metadata: &ChallengeMetadata,
         user_id: ObjectId,
     ) -> Vec<DynamicFlag> {
-        metadata
+        let generated = self
             .flags
+            .generate_all(user_id, challenge_id, metadata.flags.clone());
+
+        generated
             .iter()
-            .filter_map(|flag| match flag.spec {
+            .filter_map(|flag| match flag.meta.spec {
                 ChallengeFlagMeta::DynamicMount { ref mount_path } => Some(DynamicFlag {
-                    flag: self.flags.generate(user_id, challenge_id, &flag.slug),
+                    flag: flag.value.clone(),
                     mount_path: mount_path.clone(),
-                    slug: flag.slug.clone(),
+                    slug: flag.meta.slug.clone(),
                 }),
                 _ => None,
             })
-            .collect::<Vec<_>>()
+            .collect()
     }
 }
