@@ -103,6 +103,14 @@ Contains the frontend application for the `ctfilt` platform.
   - Course navigation
   - Admin interface for content management
 
+#### [`mongo_utils`](mongo_utils)
+
+A crate providing useful derive macros for working with MongoDB.
+
+- **Purpose**: Simplifies MongoDB integration in Rust applications.
+- **Key Features**:
+  - Custom derive macros for MongoDB pipelines
+
 ### Top-Level Files
 
 - **`Caddyfile`**: Configuration for the Caddy web server, acting as a development reverse proxy for the application.
