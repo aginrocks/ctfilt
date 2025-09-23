@@ -1,5 +1,9 @@
 use chrono::{DateTime, Utc};
-use mongodb::bson::{doc, oid::ObjectId};
+use color_eyre::eyre::{Context, Result};
+use mongodb::{
+    Collection, Database,
+    bson::{doc, oid::ObjectId},
+};
 use partial_struct::Partial;
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
@@ -31,3 +35,31 @@ database_object!(Submission {
     /// Whether the submission was correct
     correct: bool,
 });
+
+#[derive(Clone)]
+pub struct SubmissionStore {
+    collection: Collection<Submission>,
+    partial_collection: Collection<PartialSubmission>,
+}
+
+impl SubmissionStore {
+    pub fn new(database: &Database) -> Self {
+        const COLLECTION: &str = "submissions";
+
+        let collection = database.collection(COLLECTION);
+        let partial_collection = database.collection(COLLECTION);
+        Self {
+            collection,
+            partial_collection,
+        }
+    }
+
+    pub async fn add_submission(&self, submission: PartialSubmission) -> Result<()> {
+        self.partial_collection
+            .insert_one(submission)
+            .await
+            .wrap_err("Failed to save submission")?;
+
+        Ok(())
+    }
+}

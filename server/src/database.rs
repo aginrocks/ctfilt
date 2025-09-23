@@ -14,11 +14,9 @@ pub use challenge::*;
 pub use course::*;
 pub use init::*;
 pub use lesson::*;
-use mongodb::{Client, Database, bson::oid::ObjectId};
+use mongodb::Database;
 pub use submission::*;
 pub use user::*;
-
-use crate::axum_error::AxumResult;
 
 #[derive(Clone)]
 pub struct DatabaseStore {
@@ -26,6 +24,7 @@ pub struct DatabaseStore {
     pub courses: CourseStore,
     pub lessons: LessonStore,
     pub challenges: ChallengeStore,
+    pub submissions: SubmissionStore,
 }
 
 impl DatabaseStore {
@@ -35,6 +34,7 @@ impl DatabaseStore {
             courses: CourseStore::new(database),
             lessons: LessonStore::new(database),
             challenges: ChallengeStore::new(database),
+            submissions: SubmissionStore::new(database),
         }
     }
 }

@@ -1,5 +1,6 @@
 use axum::{Extension, Json, extract::Path};
 use axum_valid::Valid;
+use chrono::Utc;
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 use utoipa_axum::routes;
@@ -7,6 +8,7 @@ use validator::Validate;
 
 use crate::{
     axum_error::AxumResult,
+    database::PartialSubmission,
     middlewares::require_auth::{UnauthorizedError, UserId},
     routes::{RouteProtectionLevel, api::NotFoundError},
     state::AppState,
@@ -67,7 +69,16 @@ async fn submit_flag(
 
     let correct_flag = flags.into_iter().find(|f| f.value == body.flag);
 
-    // TODO: Record the submission in the database
+    let submission = PartialSubmission {
+        user: *user_id,
+        challenge: challenge.id,
+        flag: correct_flag.as_ref().map(|flag| flag.meta.slug.clone()),
+        submitted_at: Utc::now(),
+        raw_submission: body.flag,
+        correct: correct_flag.is_some(),
+    };
+
+    state.store.submissions.add_submission(submission).await?;
 
     Ok(Json(FlagSubmissionResult {
         correct: correct_flag.is_some(),

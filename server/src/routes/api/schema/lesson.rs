@@ -1,5 +1,5 @@
 use axum::Json;
-use manifests::{CourseMetadata, LessonMetadata};
+use manifests::LessonMetadata;
 use schemars::schema_for;
 use serde::Serialize;
 use serde_json::Value;
