@@ -1,4 +1,5 @@
 use color_eyre::eyre::{Context, eyre};
+use futures::TryStreamExt;
 use manifests::ChallengeMetadata;
 use mongodb::{
     Collection, Database,
@@ -54,6 +55,16 @@ impl ChallengeStore {
         Ok(challenge)
     }
 
+    pub async fn get_many(&self, ids: Vec<ObjectId>) -> AxumResult<Vec<Challenge>> {
+        let cursor = self
+            .collection
+            .find(doc! { "_id": { "$in": ids } })
+            .await
+            .wrap_err("Failed to fetch challenges")?;
+
+        let challenges = cursor.try_collect().await?;
+        Ok(challenges)
+    }
     // Get the query to join public data
     // fn get_public_query() -> Vec<Document> {}
 }

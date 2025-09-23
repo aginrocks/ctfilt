@@ -83,4 +83,15 @@ impl LessonStore {
 
         Ok(lesson)
     }
+
+    pub async fn get_many(&self, ids: Vec<ObjectId>) -> AxumResult<Vec<Lesson>> {
+        let cursor = self
+            .collection
+            .find(doc! { "_id": { "$in": ids } })
+            .await
+            .wrap_err("Failed to fetch lessons")?;
+
+        let lessons = cursor.try_collect().await?;
+        Ok(lessons)
+    }
 }
