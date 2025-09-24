@@ -29,7 +29,6 @@ pub fn routes() -> Vec<Route> {
 #[derive(Serialize, ToSchema)]
 pub struct FlagSubmissionResult {
     pub correct: bool,
-    pub points_awarded: i32,
 }
 
 #[derive(Deserialize, ToSchema, Validate)]
@@ -82,6 +81,5 @@ async fn submit_flag(
 
     Ok(Json(FlagSubmissionResult {
         correct: correct_flag.is_some(),
-        points_awarded: 0,
     }))
 }
