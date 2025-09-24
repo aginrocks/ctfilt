@@ -118,18 +118,7 @@ A crate providing useful derive macros for working with MongoDB.
 
 ## Development
 
-### Prerequisites
-
-  - Rust and Cargo
-  - Docker and Kubernetes (for local testing)
-  - MongoDB
-  - Valkey (or Redis)
-
-### Getting Started
-
-1. Clone the repository
-2. Build the desired components using `cargo build`
-3. If a component requires configuration, edit the respective `config.toml`
+For detailed instructions on setting up a development environment, please refer to the [DEVELOPMENT.md](DEVELOPMENT.md) file.
 
 ## License
 

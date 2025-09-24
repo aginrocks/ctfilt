@@ -1,0 +1,268 @@
+# Development Guide for CTFILT
+
+This guide outlines the necessary requirements and steps for setting up a development environment for CTFILT.
+
+## Prerequisites
+
+### System Requirements
+
+- **Rust**: Latest stable version (use [rustup](https://rustup.rs/) for installation)
+- **Docker**: Latest stable version
+- **Docker Compose**: Latest stable version
+- **Node.js**: v20 or later (LTS recommended)
+- **Caddy**: v2 or later
+- **Tailscale**: Latest version for VPN access to the cluster
+
+## Setup Steps
+
+### 1. Clone the Repository and Switch to Development Branch
+
+```bash
+# Clone the repository
+git clone <repository-url>
+cd ctfilt
+
+# Switch to the development branch
+git checkout dev
+```
+
+Always work on the development branch unless instructed otherwise. The master branch is used for stable releases.
+
+### 2. Set Up Development Dependencies
+
+#### Start Local Services with Docker Compose
+
+The project requires MongoDB and Valkey (Redis-compatible database) for local development. These are configured in the `compose.dev.yaml` file.
+
+Start these services using:
+
+```bash
+docker compose -f compose.dev.yaml up -d
+```
+
+This will start:
+- MongoDB (accessible at `localhost:27017`)
+- Valkey (accessible at `localhost:6379`)
+
+#### Build Rust Dependencies
+
+The project consists of multiple Rust crates. Navigate to the specific subfolder you want to build and run:
+
+```bash
+# Build a specific crate
+cd server
+cargo build
+
+# Or from the workspace root, specify the package
+cargo build -p server
+cargo build -p headscale
+cargo build -p pod_assassin
+# etc.
+```
+
+#### Install Node.js Dependencies
+
+```bash
+cd web
+pnpm install
+```
+
+### 3. Configuration Setup
+
+The project uses a `config.toml` file for configuration. When you first run the server without a configuration file, an example `config.toml` will be automatically created in the project root directory.
+
+```bash
+# Run the server once to generate the default config.toml
+cd server
+cargo run
+```
+
+After the config file is generated, customize the configuration as needed for your environment.
+
+### 4. Kubernetes Access Configuration
+
+#### Kubeconfig Setup
+
+You need a valid kubeconfig file to interact with the Kubernetes cluster:
+
+1. Obtain the kubeconfig file from your team or organization
+2. Place it in your `~/.kube/config` file or specify it using the `KUBECONFIG` environment variable:
+
+```bash
+export KUBECONFIG=/path/to/your/kubeconfig
+```
+
+#### Tailscale VPN Setup
+
+1. Install [Tailscale](https://tailscale.com/download) for your platform
+2. Authenticate using:
+
+```bash
+tailscale up --login-server=https://vpn.agin.rocks
+```
+
+You need to use `https://vpn.agin.rocks` as a login server.
+
+`vpn.ctf.agin.rocks` is another VPN instance, but it's for end users of the platform, not for developers.
+
+#### Headscale API Key
+
+For access to challenges via Headscale:
+
+1. Request a Headscale API key
+2. Configure it in your `config.toml` file under the headscale section:
+
+```toml
+[headscale]
+url = "http://headscale"
+public_url = "https://headscale.example.com"
+api_key = "your_api_key_here"
+```
+
+Note: All configuration is done through `config.toml` files. You can store your secrets in `config.toml` as it's not tracked by Git.
+
+### 5. Start Development Servers
+
+#### Caddy for Reverse Proxy
+
+The included `Caddyfile` is configured to proxy API requests to the backend server and other requests to the frontend server.
+
+Start Caddy:
+
+```bash
+caddy run
+```
+
+#### Backend Server
+
+```bash
+cd server
+cargo run
+# Or from project root
+cargo run -p server
+```
+
+#### Frontend Server
+
+```bash
+cd web
+pnpm dev
+```
+
+The application will be accessible at `http://localhost:3030`
+
+API documentation will be accessible at `http://localhost:3030/apidoc/scalar` (or other documentation UI of your choice)
+
+## Development Workflow
+
+### Branch Management
+
+Always create feature branches from the `dev` branch, not from `main`:
+
+```bash
+# Ensure you're on dev branch and up to date
+git checkout dev
+git pull
+
+# Create a new feature branch
+git checkout -b feat/your-feature-name
+```
+
+When your feature is complete, create a pull request to merge back into the `dev` branch.
+
+### WebSocket Type Bindings
+
+To export WebSocket type bindings for the frontend, run:
+
+```bash
+cargo test -p server export_bindings
+```
+
+This generates TypeScript definitions for the WebSocket API that can be used by the frontend. You should run this command whenever you make changes to the WebSocket protocol in the backend.
+
+### Frontend Development
+
+The frontend is built with Next.js. To generate TypeScript definitions from the API:
+
+```bash
+cd web
+pnpm typegen
+```
+
+### Backend Development
+
+The backend is composed of multiple Rust crates. Make changes to the relevant crate and run:
+
+```bash
+# Navigate to the specific crate directory
+cd <crate-name>
+cargo run
+
+# Or from the project root
+cargo run -p <crate-name>
+```
+
+### Working with Kubernetes
+
+Ensure you have:
+1. A valid kubeconfig
+2. VPN access via Tailscale
+
+Configure Kubernetes mode in your `config.toml`:
+
+```toml
+[kubernetes]
+mode = "kubeconfig"  # or "incluster" for production deployments
+```
+
+## Troubleshooting
+
+### Database Connection Issues
+
+If you cannot connect to MongoDB or Valkey:
+
+```bash
+# Check if containers are running
+docker compose -f compose.dev.yaml ps
+
+# Restart containers if needed
+docker compose -f compose.dev.yaml restart
+```
+
+### Configuration Issues
+
+If you encounter configuration-related errors:
+
+1. Remember that the first time you run the server, it will automatically create an example `config.toml` file
+2. Check that you've customized the automatically generated `config.toml` with your specific settings
+3. For development, you can create a `config-local.toml` file that won't be tracked by git
+4. Environment variables can override config values using the format: `CTFILT__SECTION__KEY`
+
+### Kubernetes Connectivity Issues
+
+If you're having trouble connecting to the Kubernetes cluster:
+
+1. Verify Tailscale is connected: `tailscale status`
+2. Verify your kubeconfig is valid: `kubectl get nodes`
+3. Check that the Headscale API key is correctly configured in your `config.toml`
+
+## Configuration
+
+The application uses the `config` crate to manage configuration. When you first run the server, an example `config.toml` file will be automatically created in the project root directory with default values. You should then customize this file according to your development environment.
+
+Environment-specific configurations can be created in files like `config-development.toml` or `config-production.toml`. Local overrides can be placed in `config-local.toml`.
+
+The configuration system will automatically look for these files in the following order:
+1. `config.toml` (base configuration)
+2. `config-{environment}.toml` (environment-specific settings)
+3. `config-local.toml` (local developer settings)
+4. Environment variables with the prefix `CTFILT__` (e.g., `CTFILT__DB__CONNECTION_STRING`)
+
+## Additional Resources
+
+- [Rust Documentation](https://www.rust-lang.org/learn)
+- [Next.js Documentation](https://nextjs.org/docs)
+- [Kubernetes Documentation](https://kubernetes.io/docs/)
+- [Tailscale Documentation](https://tailscale.com/kb/)
+- [Caddy Documentation](https://caddyserver.com/docs/)
+- [Config Crate Documentation](https://docs.rs/config/latest/config/)
