@@ -3446,6 +3446,7 @@ dependencies = [
 name = "manifests"
 version = "0.1.0"
 dependencies = [
+ "chrono",
  "clap",
  "color-eyre",
  "schemars 1.0.4",

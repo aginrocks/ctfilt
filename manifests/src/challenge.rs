@@ -49,7 +49,7 @@ pub struct ChallengeFlag {
 #[cfg_attr(feature = "schemars", derive(JsonSchema))]
 #[cfg_attr(feature = "validator", derive(Validate))]
 pub struct ChallengeMetadata {
-    /// A short unique name for the challenge
+    /// A short name for the challenge
     #[cfg_attr(feature = "validator", validate(length(min = 1, max = 32)))]
     pub name: String,
 

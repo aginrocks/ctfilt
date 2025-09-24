@@ -11,6 +11,7 @@ clap = ["dep:clap"]
 readwrite = ["dep:tokio", "dep:url", "dep:serde_yaml", "dep:color-eyre"]
 
 [dependencies]
+chrono = { version = "0.4.42", features = ["serde"] }
 clap = { version = "4.5.47", features = ["derive"], optional = true }
 color-eyre = { version="0.6.5", optional = true }
 schemars = { version = "1.0.4", features = ["derive", "preserve_order"], optional = true }
