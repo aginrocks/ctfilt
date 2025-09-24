@@ -52,6 +52,9 @@ pub struct ContestMetadata {
 
     /// Policy for joining the contest
     pub join_policy: ContestJoinPolicy,
+
+    /// Pre-defined difficulty levels for challenges and their scoring rules
+    pub difficulty_levels: HashMap<String, ScoringRule>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone, Default)]
@@ -81,9 +84,6 @@ pub struct ContestBatch {
     /// Markdown description of the batch
     pub details: String,
 
-    /// Pre-defined difficulty levels for challenges and their scoring rules
-    pub difficulty_levels: HashMap<String, ScoringRule>,
-
     /// Bindings of individual challenges to this batch
     pub challenges: Vec<ChallengeBinding>,
 }
@@ -91,7 +91,7 @@ pub struct ContestBatch {
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[cfg_attr(feature = "utoipa", derive(ToSchema))]
 #[cfg_attr(feature = "schemars", derive(JsonSchema))]
-#[serde(tag = "scoring")]
+#[serde(tag = "scoring", rename_all = "kebab-case")]
 pub enum ScoringRule {
     Static {
         points: i32,
