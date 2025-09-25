@@ -98,7 +98,7 @@ export KUBECONFIG=/path/to/your/kubeconfig
 2. Authenticate using:
 
 ```bash
-tailscale up --login-server=https://vpn.agin.rocks
+sudo tailscale up --login-server=https://vpn.agin.rocks
 ```
 
 You need to use `https://vpn.agin.rocks` as a login server.
