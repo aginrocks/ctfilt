@@ -42,8 +42,6 @@ impl ChallengeOrchestrator {
         let key = provisioner.generate_preauth_key().await?;
         let ts_secret_name = provisioner.provision_tailscale_secret(&key).await?;
 
-        dbg!(key);
-
         // Generating flags
         let flags = self.generate_flags(id, metadata, user_id);
         let secret_name = provisioner.provision_flags_secret(flags.clone()).await?;

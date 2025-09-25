@@ -49,7 +49,6 @@ async fn websocket(
 async fn handle_socket(mut socket: WebSocket, state: AppState, user_id: ObjectId) {
     let latest = state.orchestrator.watcher.get_latest_event(user_id);
     if let Ok(latest) = latest {
-        dbg!(&latest);
         handle_event(latest, &mut socket).await.ok();
     }
 
