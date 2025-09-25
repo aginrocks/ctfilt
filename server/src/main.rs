@@ -5,6 +5,7 @@ mod kubernetes;
 mod middlewares;
 mod mongo_id;
 mod orchestrator;
+mod redis_client;
 mod routes;
 mod settings;
 mod state;
@@ -43,6 +44,7 @@ use crate::{
     kubernetes::init_kubernetes,
     middlewares::require_auth::{require_auth, require_system_auth},
     orchestrator::ChallengeOrchestrator,
+    redis_client::init_redis,
     routes::RouteProtectionLevel,
     settings::Settings,
     state::AppState,
@@ -120,6 +122,8 @@ async fn main() -> Result<()> {
         }
     });
 
+    let fred = init_redis(&settings).await?;
+
     let app_state = AppState {
         database,
         store,
@@ -128,9 +132,10 @@ async fn main() -> Result<()> {
         flags,
         orchestrator: orchestrator.clone(),
         headscale_config,
+        fred: fred.clone(),
     };
 
-    let session_layer = init_session_store(&settings).await?;
+    let session_layer = init_session_store(&settings, fred).await?;
     let app = init_axum(app_state, session_layer).await?;
     let listener = init_listener(&settings).await?;
 

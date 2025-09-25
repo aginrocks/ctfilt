@@ -17,4 +17,5 @@ pub struct AppState {
     pub flags: Arc<FlagGenerator>,
     pub orchestrator: Arc<ChallengeOrchestrator>,
     pub headscale_config: Arc<Configuration>,
+    pub fred: fred::prelude::Pool,
 }

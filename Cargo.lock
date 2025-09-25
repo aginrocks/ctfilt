@@ -1392,11 +1392,17 @@ dependencies = [
  "parking_lot",
  "rand 0.8.5",
  "redis-protocol",
+ "rustls",
+ "rustls-native-certs",
  "semver",
+ "serde_json",
  "socket2 0.5.10",
  "tokio",
+ "tokio-rustls",
  "tokio-stream",
  "tokio-util",
+ "tracing",
+ "tracing-futures",
  "url",
  "urlencoding",
 ]
@@ -5013,6 +5019,7 @@ dependencies = [
  "derive_builder",
  "dotenvy",
  "exterminator",
+ "fred",
  "futures",
  "headscale",
  "http",
@@ -5772,6 +5779,16 @@ checksum = "8b1581020d7a273442f5b45074a6a57d5757ad0a47dac0e9f0bd57b81936f3db"
 dependencies = [
  "tracing",
  "tracing-subscriber",
+]
+
+[[package]]
+name = "tracing-futures"
+version = "0.2.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "97d095ae15e245a057c8e8451bab9b3ee1e1f68e9ba2b4fbc18d0ac5237835f2"
+dependencies = [
+ "pin-project",
+ "tracing",
 ]
 
 [[package]]

@@ -20,13 +20,8 @@ pub async fn init_database(settings: &Settings) -> Result<Database> {
 
 pub async fn init_session_store(
     settings: &Settings,
+    pool: Pool,
 ) -> Result<SessionManagerLayer<RedisStore<Pool>>> {
-    let config = Config::from_url(&settings.redis.connection_string)?;
-    let pool = Pool::new(config, None, None, None, 6)?;
-
-    let _redis_conn = pool.connect();
-    pool.wait_for_connect().await?;
-
     let session_store = RedisStore::<Pool>::new(pool);
 
     let session_layer = SessionManagerLayer::new(session_store)
