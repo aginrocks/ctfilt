@@ -26,26 +26,10 @@ import { TeamSwitcher } from '@/components/team-switcher';
 import { Sidebar, SidebarContent, SidebarHeader, SidebarRail } from '@/components/ui/sidebar';
 import { IconFlag, IconFlask, IconTrophy } from '@tabler/icons-react';
 import { Separator } from './ui/separator';
+import { Logo } from './logo';
 
 // This is sample data.
 const data = {
-    teams: [
-        {
-            name: 'Acme Inc',
-            logo: Command,
-            plan: 'Enterprise',
-        },
-        {
-            name: 'Acme Corp.',
-            logo: AudioWaveform,
-            plan: 'Startup',
-        },
-        {
-            name: 'Evil Corp.',
-            logo: Command,
-            plan: 'Free',
-        },
-    ],
     navMain: [
         {
             title: 'Lab',
@@ -261,10 +245,10 @@ export function AppSidebar({
     return (
         <Sidebar className="border-r-0" {...props}>
             <SidebarHeader>
-                <TeamSwitcher teams={data.teams} />
+                <Logo />
                 <NavMain items={data.navMain} />
             </SidebarHeader>
-            <Separator />
+            <Separator className="bg-sidebar-border" />
             <SidebarContent>
                 {/*<NavFavorites favorites={data.favorites} />*/}
                 {/*<NavWorkspaces workspaces={data.workspaces} />*/}
