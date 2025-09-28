@@ -19,6 +19,7 @@ use axum::{
     extract::Extension,
     http::StatusCode,
     response::{IntoResponse, Json},
+    routing::get,
 };
 use axum_oidc::{OidcAuthLayer, OidcClient, error::MiddlewareError};
 use clap::Parser;
@@ -211,23 +212,17 @@ async fn init_axum(
     let (router, api) = router.with_state(state.clone()).split_for_parts();
 
     let openapi_prefix = "/apidoc";
-    let spec_path = format!("{openapi_prefix}/openapi.json");
+    let spec_name = "/openapi.json";
+
+    let docs = Router::new()
+        .merge(Redoc::with_url("/redoc", api.clone()))
+        .merge(RapiDoc::new(format!("{openapi_prefix}{spec_name}")).path("/rapidoc"))
+        .merge(Scalar::with_url("/scalar", api.clone()))
+        .route(spec_name, get(|| async move { Json(api) }));
 
     let router = router
-        .merge(Redoc::with_url(
-            format!("{openapi_prefix}/redoc"),
-            api.clone(),
-        ))
-        .merge(RapiDoc::new(spec_path.clone()).path(format!("{openapi_prefix}/rapidoc")))
-        .merge(Scalar::with_url(
-            format!("{openapi_prefix}/scalar"),
-            api.clone(),
-        ))
-        .route(&spec_path, axum::routing::get(|| async move { Json(api) }));
-
-    let router = router.layer(Extension(state));
-
-    let router = router
+        .nest(openapi_prefix, docs)
+        .layer(Extension(state))
         .layer(oidc_auth_service)
         .layer(session_layer)
         .fallback(|| async { (StatusCode::NOT_FOUND, "Not found").into_response() });

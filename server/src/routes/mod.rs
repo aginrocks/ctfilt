@@ -1,4 +1,5 @@
 mod api;
+
 use utoipa::OpenApi;
 use utoipa_axum::router::OpenApiRouter;
 
