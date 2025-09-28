@@ -63,11 +63,11 @@ pub struct ContestMetadata {
 #[cfg_attr(feature = "validator", derive(Validate))]
 pub struct ContestBatch<Ref> {
     /// Batch start date in RFC 3339 (empty will mean the batch is available immediately)
-    #[schemars(with = "Option<String>")]
+    #[cfg_attr(feature = "schemars", schemars(with = "Option<String>"))]
     pub start: Option<DateTime<Utc>>,
 
     /// Batch end date in RFC 3339 (empty will mean the batch never ends)
-    #[schemars(with = "Option<String>")]
+    #[cfg_attr(feature = "schemars", schemars(with = "Option<String>"))]
     pub end: Option<DateTime<Utc>>,
 
     /// A short name for the batch (e.g. "Day 1")
