@@ -61,7 +61,7 @@ pub struct ContestMetadata {
 #[cfg_attr(feature = "utoipa", derive(ToSchema))]
 #[cfg_attr(feature = "schemars", derive(JsonSchema))]
 #[cfg_attr(feature = "validator", derive(Validate))]
-pub struct ContestBatch {
+pub struct ContestBatch<Ref> {
     /// Batch start date in RFC 3339 (empty will mean the batch is available immediately)
     #[schemars(with = "Option<String>")]
     pub start: Option<DateTime<Utc>>,
@@ -85,7 +85,7 @@ pub struct ContestBatch {
     pub details: String,
 
     /// Bindings of individual challenges to this batch
-    pub challenges: Vec<ChallengeBinding>,
+    pub challenges: Vec<ChallengeBinding<Ref>>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -119,13 +119,9 @@ pub enum ScoringFunction {
 #[cfg_attr(feature = "utoipa", derive(ToSchema))]
 #[cfg_attr(feature = "schemars", derive(JsonSchema))]
 #[cfg_attr(feature = "validator", derive(Validate))]
-pub struct ChallengeBinding {
+pub struct ChallengeBinding<Ref> {
     /// Challenge slug referencing any challenge on the server
-    #[cfg_attr(
-        feature = "validator",
-        validate(custom(function = "slug_validator"), length(min = 1, max = 32))
-    )]
-    pub challenge: String,
+    pub challenge: Ref,
 
     pub flags: Vec<FlagBinding>,
 }

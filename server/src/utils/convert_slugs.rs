@@ -39,3 +39,5 @@ impl ConvertSlugs<CourseMetadata<ObjectId>> for CourseMetadata<String> {
         })
     }
 }
+
+// TODO: Implement for `ContestBatch`

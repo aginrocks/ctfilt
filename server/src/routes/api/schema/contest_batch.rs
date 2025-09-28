@@ -27,7 +27,7 @@ pub fn routes() -> Vec<Route> {
     tag = "Schema"
 )]
 pub async fn get_contest_schema() -> Json<Value> {
-    let schema = schema_for!(ContestBatch);
+    let schema = schema_for!(ContestBatch<String>);
     Json(
         schema
             .serialize(serde_json::value::Serializer)

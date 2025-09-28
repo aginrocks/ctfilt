@@ -24,6 +24,7 @@ database_object!(Course {
     #[schema(value_type = CourseMetadata<String>)]
     metadata: CourseMetadata<ObjectId>,
 
+    /// Commit hash of the repository the course was imported from
     r#ref: String,
 });
 
