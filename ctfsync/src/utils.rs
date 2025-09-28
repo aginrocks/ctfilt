@@ -2,10 +2,7 @@ use std::path::Path;
 
 use indicatif::ProgressStyle;
 use inquire::ui::{Attributes, Color, IndexPrefix, RenderConfig, StyleSheet, Styled};
-use miette::{IntoDiagnostic, Result};
 use owo_colors::OwoColorize;
-
-use crate::errors::OutOfScopeFile;
 
 pub fn make_link(text: &str, url: &str) -> String {
     let visible_text = text.replace(' ', "\u{00A0}");
