@@ -1,24 +1,20 @@
 use axum::{Extension, Json};
-use utoipa_axum::routes;
+use utoipa_axum::{router::OpenApiRouter, routes};
 
 use crate::{
     database::User,
     middlewares::require_auth::{UnauthorizedError, UserData},
-    routes::RouteProtectionLevel,
+    state::AppState,
 };
 
-use super::Route;
-
-const PATH: &str = "/api/user";
-
-pub fn routes() -> Vec<Route> {
-    vec![(routes!(get_user), RouteProtectionLevel::Authenticated)]
+pub fn routes() -> OpenApiRouter<AppState> {
+    OpenApiRouter::new().routes(routes!(get_user))
 }
 
 /// Get user details
 #[utoipa::path(
     method(get),
-    path = PATH,
+    path = "/",
     responses(
         (status = OK, description = "Success", body = User, content_type = "application/json"),
         (status = UNAUTHORIZED, description = "Unauthorized", body = UnauthorizedError, content_type = "application/json")

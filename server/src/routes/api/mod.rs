@@ -7,23 +7,28 @@ mod schema;
 mod user;
 mod ws;
 
+use axum::middleware;
 use serde::Serialize;
 use utoipa::ToSchema;
+use utoipa_axum::router::OpenApiRouter;
 
-use super::Route;
+use crate::{middlewares::require_auth::require_auth, state::AppState};
 
-pub fn routes() -> Vec<Route> {
-    [
-        health::routes(),
-        user::routes(),
-        login::routes(),
-        schema::routes(),
-        courses::routes(),
-        auth::routes(),
-        challenges::routes(),
-        ws::routes(),
-    ]
-    .concat()
+pub fn routes() -> OpenApiRouter<AppState> {
+    let auth = OpenApiRouter::new()
+        .nest("/auth", auth::routes())
+        .nest("/challenges", challenges::routes())
+        .nest("/user", user::routes())
+        .nest("/ws", ws::routes())
+        .nest("/courses", courses::routes())
+        .layer(middleware::from_fn(require_auth));
+
+    let public = OpenApiRouter::new()
+        .nest("/health", health::routes())
+        .nest("/login", login::routes())
+        .nest("/schema", schema::routes());
+
+    auth.merge(public)
 }
 
 #[derive(Serialize, ToSchema)]

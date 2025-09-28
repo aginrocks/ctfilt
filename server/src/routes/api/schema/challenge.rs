@@ -3,16 +3,12 @@ use manifests::ChallengeMetadata;
 use schemars::schema_for;
 use serde::Serialize;
 use serde_json::Value;
-use utoipa_axum::routes;
+use utoipa_axum::{router::OpenApiRouter, routes};
 
-use crate::routes::RouteProtectionLevel;
+use crate::state::AppState;
 
-use super::Route;
-
-const PATH: &str = "/api/schema/challenge";
-
-pub fn routes() -> Vec<Route> {
-    vec![(routes!(get_challenge_schema), RouteProtectionLevel::Public)]
+pub fn routes() -> OpenApiRouter<AppState> {
+    OpenApiRouter::new().routes(routes!(get_challenge_schema))
 }
 
 /// Challenge schema
@@ -20,7 +16,7 @@ pub fn routes() -> Vec<Route> {
 /// This endpoint returns JSON schema for the challenge manifest.
 #[utoipa::path(
     method(get),
-    path = PATH,
+    path = "/",
     responses(
         (status = OK, description = "Success", body = String, content_type = "application/json")
     ),

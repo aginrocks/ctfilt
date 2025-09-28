@@ -1,29 +1,23 @@
 mod course_slug;
 
 use axum::{Extension, Json};
-use utoipa_axum::routes;
+use utoipa_axum::{router::OpenApiRouter, routes};
 
 use crate::{
     axum_error::AxumResult, database::Course, middlewares::require_auth::UnauthorizedError,
-    routes::RouteProtectionLevel, state::AppState,
+    state::AppState,
 };
 
-use super::Route;
-
-const PATH: &str = "/api/courses";
-
-pub fn routes() -> Vec<Route> {
-    [
-        vec![(routes!(get_courses), RouteProtectionLevel::Authenticated)],
-        course_slug::routes(),
-    ]
-    .concat()
+pub fn routes() -> OpenApiRouter<AppState> {
+    OpenApiRouter::new()
+        .nest("/{course_slug}", course_slug::routes())
+        .routes(routes!(get_courses))
 }
 
 /// Get all courses
 #[utoipa::path(
     method(get),
-    path = PATH,
+    path = "/",
     responses(
         (status = OK, description = "Success", body = Vec<Course>, content_type = "application/json"),
         (status = UNAUTHORIZED, description = "Unauthorized", body = UnauthorizedError, content_type = "application/json")

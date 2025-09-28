@@ -4,15 +4,15 @@ mod contest_batch;
 mod course;
 mod lesson;
 
-use super::Route;
+use utoipa_axum::router::OpenApiRouter;
 
-pub fn routes() -> Vec<Route> {
-    [
-        challenge::routes(),
-        course::routes(),
-        lesson::routes(),
-        contest::routes(),
-        contest_batch::routes(),
-    ]
-    .concat()
+use crate::state::AppState;
+
+pub fn routes() -> OpenApiRouter<AppState> {
+    OpenApiRouter::new()
+        .nest("/challenge", challenge::routes())
+        .nest("/course", course::routes())
+        .nest("/lesson", lesson::routes())
+        .nest("/contest", contest::routes())
+        .nest("/contest-batch", contest_batch::routes())
 }

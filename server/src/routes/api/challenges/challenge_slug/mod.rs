@@ -2,51 +2,41 @@ mod start;
 mod stop;
 mod submit;
 
-use axum::{Extension, Json, extract::Path};
+use axum::{Extension, Json, extract::Path, middleware};
 use axum_valid::Valid;
 use color_eyre::eyre::{Context, eyre};
 use manifests::ChallengeMetadata;
 use mongodb::bson::doc;
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
-use utoipa_axum::routes;
+use utoipa_axum::{router::OpenApiRouter, routes};
 use validator::Validate;
 
 use crate::{
     axum_error::{AxumError, AxumResult},
     database::{Challenge, PartialChallenge},
-    middlewares::require_auth::UnauthorizedError,
-    routes::{
-        RouteProtectionLevel,
-        api::{CreateSuccess, NotFoundError},
-    },
+    middlewares::require_auth::{UnauthorizedError, require_system_auth},
+    routes::api::{CreateSuccess, NotFoundError},
     state::AppState,
 };
 
-use super::Route;
+pub fn routes() -> OpenApiRouter<AppState> {
+    let system = OpenApiRouter::new()
+        .routes(routes!(update_challenge))
+        .layer(middleware::from_fn(require_system_auth));
 
-const PATH: &str = "/api/challenges/{challenge_slug}";
-
-pub fn routes() -> Vec<Route> {
-    [
-        vec![
-            (routes!(get_challenge), RouteProtectionLevel::Authenticated),
-            (
-                routes!(update_challenge),
-                RouteProtectionLevel::SystemAuthenticated,
-            ),
-        ],
-        start::routes(),
-        stop::routes(),
-        submit::routes(),
-    ]
-    .concat()
+    OpenApiRouter::new()
+        .merge(system)
+        .routes(routes!(get_challenge))
+        .nest("/start", start::routes())
+        .nest("/stop", stop::routes())
+        .nest("/submit", submit::routes())
 }
 
 /// Get challenge
 #[utoipa::path(
     method(get),
-    path = PATH,
+    path = "/",
     params(
         ("challenge_slug" = String, Path, description = "Challenge slug"),
     ),
@@ -80,7 +70,7 @@ pub struct UpdateChallengeRequest {
 /// If challenge is not found, it will be created
 #[utoipa::path(
     method(put),
-    path = PATH,
+    path = "/",
     params(
         ("challenge_slug" = String, Path, description = "Challenge slug"),
     ),

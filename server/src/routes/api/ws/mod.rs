@@ -11,32 +11,23 @@ use axum::{
 use color_eyre::eyre::Result;
 use mongodb::bson::oid::ObjectId;
 use tracing::info;
-use utoipa_axum::routes;
+use utoipa_axum::{router::OpenApiRouter, routes};
 
 use crate::{
     middlewares::require_auth::UserId,
     orchestrator::PodEvent,
-    routes::{
-        RouteProtectionLevel,
-        api::ws::types::{ChallengesUpdate, ServerMessage},
-    },
+    routes::api::ws::types::{ChallengesUpdate, ServerMessage},
     state::AppState,
 };
 
-use super::Route;
-
-const PATH: &str = "/api/ws";
-
-pub fn routes() -> Vec<Route> {
-    vec![(routes!(websocket), RouteProtectionLevel::Authenticated)]
+pub fn routes() -> OpenApiRouter<AppState> {
+    OpenApiRouter::new().routes(routes!(websocket))
 }
 
-/// Log in
-#[utoipa::path(
-    method(get),
-    path = PATH,
-    tag = "WebSocket"
-)]
+/// WebSocket
+///
+/// Sends real-time updates about challenges and other events.
+#[utoipa::path(method(get), path = "/", tag = "WebSocket")]
 async fn websocket(
     ws: WebSocketUpgrade,
     Extension(state): Extension<AppState>,

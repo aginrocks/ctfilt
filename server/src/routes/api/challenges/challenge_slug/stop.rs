@@ -1,33 +1,24 @@
-use axum::{Extension, Json, extract::Path};
+use axum::{Extension, Json, extract::Path, middleware};
 use color_eyre::eyre::{ContextCompat, eyre};
-use utoipa_axum::routes;
+use utoipa_axum::{router::OpenApiRouter, routes};
 
 use crate::{
     axum_error::{AxumError, AxumResult},
-    middlewares::require_auth::{UnauthorizedError, UserId},
-    routes::{
-        RouteProtectionLevel,
-        api::{NotFoundError, challenges::challenge_slug::KubernetesActionResult},
-    },
+    middlewares::require_auth::{UnauthorizedError, UserId, require_auth},
+    routes::api::{NotFoundError, challenges::challenge_slug::KubernetesActionResult},
     state::AppState,
 };
 
-use super::Route;
-
-const PATH: &str = "/api/challenges/{challenge_slug}/stop";
-
-pub fn routes() -> Vec<Route> {
-    [vec![(
-        routes!(stop_challenge),
-        RouteProtectionLevel::Authenticated,
-    )]]
-    .concat()
+pub fn routes() -> OpenApiRouter<AppState> {
+    OpenApiRouter::new()
+        .routes(routes!(stop_challenge))
+        .layer(middleware::from_fn(require_auth))
 }
 
 /// Stop a challenge
 #[utoipa::path(
     method(post),
-    path = PATH,
+    path = "/",
     params(
         ("challenge_slug" = String, Path, description = "Challenge slug"),
     ),

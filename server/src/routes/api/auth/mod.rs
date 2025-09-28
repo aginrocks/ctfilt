@@ -1,7 +1,9 @@
 mod check;
 
-use super::Route;
+use utoipa_axum::router::OpenApiRouter;
 
-pub fn routes() -> Vec<Route> {
-    [check::routes()].concat()
+use crate::state::AppState;
+
+pub fn routes() -> OpenApiRouter<AppState> {
+    OpenApiRouter::new().nest("/check", check::routes())
 }

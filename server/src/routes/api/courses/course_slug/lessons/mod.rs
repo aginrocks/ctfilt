@@ -1,7 +1,9 @@
+use utoipa_axum::router::OpenApiRouter;
+
+use crate::state::AppState;
+
 mod lesson_slug;
 
-use super::Route;
-
-pub fn routes() -> Vec<Route> {
-    [lesson_slug::routes()].concat()
+pub fn routes() -> OpenApiRouter<AppState> {
+    OpenApiRouter::new().nest("/{lesson_slug}", lesson_slug::routes())
 }

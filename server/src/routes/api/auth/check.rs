@@ -1,19 +1,17 @@
-use axum::Json;
+use axum::{Json, middleware};
 use serde::Serialize;
 use utoipa::ToSchema;
-use utoipa_axum::routes;
+use utoipa_axum::{router::OpenApiRouter, routes};
 
-use crate::{middlewares::require_auth::UnauthorizedError, routes::RouteProtectionLevel};
+use crate::{
+    middlewares::require_auth::{UnauthorizedError, require_system_auth},
+    state::AppState,
+};
 
-use super::Route;
-
-const PATH: &str = "/api/auth/check";
-
-pub fn routes() -> Vec<Route> {
-    vec![(
-        routes!(check_system_auth),
-        RouteProtectionLevel::SystemAuthenticated,
-    )]
+pub fn routes() -> OpenApiRouter<AppState> {
+    OpenApiRouter::new()
+        .routes(routes!(check_system_auth))
+        .layer(middleware::from_fn(require_system_auth))
 }
 
 #[derive(Serialize, ToSchema)]
@@ -28,7 +26,7 @@ pub struct AuthCheckSuccess {
 /// This endpoint is only avaliable to users authenticating with a system-wide API key
 #[utoipa::path(
     method(get),
-    path = PATH,
+    path = "/",
     responses(
         (status = OK, description = "Success", body = AuthCheckSuccess, content_type = "application/json"),
         (status = UNAUTHORIZED, description = "Unauthorized", body = UnauthorizedError, content_type = "application/json")

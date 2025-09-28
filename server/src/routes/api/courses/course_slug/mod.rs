@@ -1,49 +1,39 @@
 mod lessons;
 
-use axum::{Extension, Json, extract::Path};
+use axum::{Extension, Json, extract::Path, middleware};
 use axum_valid::Valid;
 use color_eyre::eyre::{Context, eyre};
 use manifests::CourseMetadata;
 use mongodb::bson::doc;
 use serde::Deserialize;
 use utoipa::ToSchema;
-use utoipa_axum::routes;
+use utoipa_axum::{router::OpenApiRouter, routes};
 use validator::Validate;
 
 use crate::{
     axum_error::{AxumError, AxumResult},
     database::{Course, PartialCourse},
-    middlewares::require_auth::UnauthorizedError,
-    routes::{
-        RouteProtectionLevel,
-        api::{CreateSuccess, NotFoundError},
-    },
+    middlewares::require_auth::{UnauthorizedError, require_system_auth},
+    routes::api::{CreateSuccess, NotFoundError},
     state::AppState,
     utils::ConvertSlugs,
 };
 
-use super::Route;
+pub fn routes() -> OpenApiRouter<AppState> {
+    let system = OpenApiRouter::new()
+        .routes(routes!(update_course))
+        .layer(middleware::from_fn(require_system_auth));
 
-const PATH: &str = "/api/courses/{course_slug}";
-
-pub fn routes() -> Vec<Route> {
-    [
-        vec![
-            (routes!(get_course), RouteProtectionLevel::Authenticated),
-            (
-                routes!(update_course),
-                RouteProtectionLevel::SystemAuthenticated,
-            ),
-        ],
-        lessons::routes(),
-    ]
-    .concat()
+    OpenApiRouter::new()
+        .merge(system)
+        .routes(routes!(get_course))
+        .nest("/lessons", lessons::routes())
 }
 
 /// Get course
 #[utoipa::path(
     method(get),
-    path = PATH,
+    path = "/",
     params(
         ("course_slug" = String, Path, description = "Course slug"),
     ),
@@ -76,7 +66,7 @@ pub struct UpdateCourseRequest {
 /// If course is not found, it will be created
 #[utoipa::path(
     method(put),
-    path = PATH,
+    path = "/",
     params(
         ("course_slug" = String, Path, description = "Course slug"),
     ),

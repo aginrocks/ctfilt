@@ -1,29 +1,23 @@
-use axum::{Extension, Json, extract::Path};
+use axum::{Extension, Json, extract::Path, middleware};
 use axum_valid::Valid;
 use chrono::Utc;
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
-use utoipa_axum::routes;
+use utoipa_axum::{router::OpenApiRouter, routes};
 use validator::Validate;
 
 use crate::{
     axum_error::AxumResult,
     database::PartialSubmission,
-    middlewares::require_auth::{UnauthorizedError, UserId},
-    routes::{RouteProtectionLevel, api::NotFoundError},
+    middlewares::require_auth::{UnauthorizedError, UserId, require_auth},
+    routes::api::NotFoundError,
     state::AppState,
 };
 
-use super::Route;
-
-const PATH: &str = "/api/challenges/{challenge_slug}/submit";
-
-pub fn routes() -> Vec<Route> {
-    [vec![(
-        routes!(submit_flag),
-        RouteProtectionLevel::Authenticated,
-    )]]
-    .concat()
+pub fn routes() -> OpenApiRouter<AppState> {
+    OpenApiRouter::new()
+        .routes(routes!(submit_flag))
+        .layer(middleware::from_fn(require_auth))
 }
 
 #[derive(Serialize, ToSchema)]
@@ -43,7 +37,7 @@ pub struct FlagSubmissionRequest {
 /// Submits a flag for the specified challenge. If all correct flags have been submitted, the challenge instance will be stopped.
 #[utoipa::path(
     method(post),
-    path = PATH,
+    path = "/",
     params(
         ("challenge_slug" = String, Path, description = "Challenge slug"),
     ),
