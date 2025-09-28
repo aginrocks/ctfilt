@@ -117,5 +117,6 @@ pub mod course_api;
 pub mod courses_api;
 pub mod other_api;
 pub mod schema_api;
+pub mod web_socket_api;
 
 pub mod configuration;

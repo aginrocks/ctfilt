@@ -13,7 +13,7 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Default, Debug, PartialEq, Serialize, Deserialize)]
 pub struct ChallengeFlag {
-    /// A short description where the flag can be found. Can be revealed in courses. Visible only after solving the challenge in contests.
+    /// A short description where the flag can be found. Visible only after solving the challenge.
     #[serde(rename = "description", default, with = "::serde_with::rust::double_option", skip_serializing_if = "Option::is_none")]
     pub description: Option<Option<String>>,
     /// Slug that will allow this flag to be referenced in contests

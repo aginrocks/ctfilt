@@ -21,7 +21,7 @@ pub struct ChallengeMetadata {
     pub details: String,
     #[serde(rename = "flags")]
     pub flags: Vec<models::ChallengeFlag>,
-    /// A short unique name for the challenge
+    /// A short name for the challenge
     #[serde(rename = "name")]
     pub name: String,
     /// A URL-friendly unique identifier for the challenge

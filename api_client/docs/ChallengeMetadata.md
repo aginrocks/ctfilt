@@ -7,7 +7,7 @@ Name | Type | Description | Notes
 **description** | **String** | A short description, Markdown not supported | 
 **details** | **String** | Markdown description of the challenge | 
 **flags** | [**Vec<models::ChallengeFlag>**](ChallengeFlag.md) |  | 
-**name** | **String** | A short unique name for the challenge | 
+**name** | **String** | A short name for the challenge | 
 **slug** | **String** | A URL-friendly unique identifier for the challenge | 
 **spec** | [**models::ChallengeSpec**](ChallengeSpec.md) |  | 
 

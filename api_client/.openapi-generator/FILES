@@ -24,6 +24,10 @@ docs/CourseItemStringOneOf1.md
 docs/CourseMetadataString.md
 docs/CoursesApi.md
 docs/CreateSuccess.md
+docs/FlagSubmissionRequest.md
+docs/FlagSubmissionResult.md
+docs/GenericError.md
+docs/KubernetesActionResult.md
 docs/LessonMetadata.md
 docs/NotFoundError.md
 docs/OtherApi.md
@@ -33,6 +37,7 @@ docs/UpdateChallengeRequest.md
 docs/UpdateCourseRequest.md
 docs/UpdateLessonRequest.md
 docs/User.md
+docs/WebSocketApi.md
 git_push.sh
 src/apis/auth_api.rs
 src/apis/challenge_api.rs
@@ -42,6 +47,7 @@ src/apis/courses_api.rs
 src/apis/mod.rs
 src/apis/other_api.rs
 src/apis/schema_api.rs
+src/apis/web_socket_api.rs
 src/lib.rs
 src/models/auth_check_success.rs
 src/models/challenge.rs
@@ -62,6 +68,10 @@ src/models/course_item_string_one_of.rs
 src/models/course_item_string_one_of_1.rs
 src/models/course_metadata_string.rs
 src/models/create_success.rs
+src/models/flag_submission_request.rs
+src/models/flag_submission_result.rs
+src/models/generic_error.rs
+src/models/kubernetes_action_result.rs
 src/models/lesson_metadata.rs
 src/models/mod.rs
 src/models/not_found_error.rs

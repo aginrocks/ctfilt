@@ -24,6 +24,34 @@ pub enum GetChallengeError {
     UnknownValue(serde_json::Value),
 }
 
+/// struct for typed errors of method [`start_challenge`]
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(untagged)]
+pub enum StartChallengeError {
+    Status401(models::UnauthorizedError),
+    Status403(models::GenericError),
+    Status404(models::NotFoundError),
+    UnknownValue(serde_json::Value),
+}
+
+/// struct for typed errors of method [`stop_challenge`]
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(untagged)]
+pub enum StopChallengeError {
+    Status401(models::UnauthorizedError),
+    Status404(models::NotFoundError),
+    UnknownValue(serde_json::Value),
+}
+
+/// struct for typed errors of method [`submit_flag`]
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(untagged)]
+pub enum SubmitFlagError {
+    Status401(models::UnauthorizedError),
+    Status404(models::NotFoundError),
+    UnknownValue(serde_json::Value),
+}
+
 /// struct for typed errors of method [`update_challenge`]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(untagged)]
@@ -65,6 +93,117 @@ pub async fn get_challenge(configuration: &configuration::Configuration, challen
     } else {
         let content = resp.text().await?;
         let entity: Option<GetChallengeError> = serde_json::from_str(&content).ok();
+        Err(Error::ResponseError(ResponseContent { status, content, entity }))
+    }
+}
+
+pub async fn start_challenge(configuration: &configuration::Configuration, challenge_slug: &str) -> Result<models::KubernetesActionResult, Error<StartChallengeError>> {
+    // add a prefix to parameters to efficiently prevent name collisions
+    let p_path_challenge_slug = challenge_slug;
+
+    let uri_str = format!("{}/api/challenges/{challenge_slug}/start", configuration.base_path, challenge_slug=crate::apis::urlencode(p_path_challenge_slug));
+    let mut req_builder = configuration.client.request(reqwest::Method::POST, &uri_str);
+
+    if let Some(ref user_agent) = configuration.user_agent {
+        req_builder = req_builder.header(reqwest::header::USER_AGENT, user_agent.clone());
+    }
+
+    let req = req_builder.build()?;
+    let resp = configuration.client.execute(req).await?;
+
+    let status = resp.status();
+    let content_type = resp
+        .headers()
+        .get("content-type")
+        .and_then(|v| v.to_str().ok())
+        .unwrap_or("application/octet-stream");
+    let content_type = super::ContentType::from(content_type);
+
+    if !status.is_client_error() && !status.is_server_error() {
+        let content = resp.text().await?;
+        match content_type {
+            ContentType::Json => serde_json::from_str(&content).map_err(Error::from),
+            ContentType::Text => return Err(Error::from(serde_json::Error::custom("Received `text/plain` content type response that cannot be converted to `models::KubernetesActionResult`"))),
+            ContentType::Unsupported(unknown_type) => return Err(Error::from(serde_json::Error::custom(format!("Received `{unknown_type}` content type response that cannot be converted to `models::KubernetesActionResult`")))),
+        }
+    } else {
+        let content = resp.text().await?;
+        let entity: Option<StartChallengeError> = serde_json::from_str(&content).ok();
+        Err(Error::ResponseError(ResponseContent { status, content, entity }))
+    }
+}
+
+pub async fn stop_challenge(configuration: &configuration::Configuration, challenge_slug: &str) -> Result<models::KubernetesActionResult, Error<StopChallengeError>> {
+    // add a prefix to parameters to efficiently prevent name collisions
+    let p_path_challenge_slug = challenge_slug;
+
+    let uri_str = format!("{}/api/challenges/{challenge_slug}/stop", configuration.base_path, challenge_slug=crate::apis::urlencode(p_path_challenge_slug));
+    let mut req_builder = configuration.client.request(reqwest::Method::POST, &uri_str);
+
+    if let Some(ref user_agent) = configuration.user_agent {
+        req_builder = req_builder.header(reqwest::header::USER_AGENT, user_agent.clone());
+    }
+
+    let req = req_builder.build()?;
+    let resp = configuration.client.execute(req).await?;
+
+    let status = resp.status();
+    let content_type = resp
+        .headers()
+        .get("content-type")
+        .and_then(|v| v.to_str().ok())
+        .unwrap_or("application/octet-stream");
+    let content_type = super::ContentType::from(content_type);
+
+    if !status.is_client_error() && !status.is_server_error() {
+        let content = resp.text().await?;
+        match content_type {
+            ContentType::Json => serde_json::from_str(&content).map_err(Error::from),
+            ContentType::Text => return Err(Error::from(serde_json::Error::custom("Received `text/plain` content type response that cannot be converted to `models::KubernetesActionResult`"))),
+            ContentType::Unsupported(unknown_type) => return Err(Error::from(serde_json::Error::custom(format!("Received `{unknown_type}` content type response that cannot be converted to `models::KubernetesActionResult`")))),
+        }
+    } else {
+        let content = resp.text().await?;
+        let entity: Option<StopChallengeError> = serde_json::from_str(&content).ok();
+        Err(Error::ResponseError(ResponseContent { status, content, entity }))
+    }
+}
+
+/// Submits a flag for the specified challenge. If all correct flags have been submitted, the challenge instance will be stopped.
+pub async fn submit_flag(configuration: &configuration::Configuration, challenge_slug: &str, flag_submission_request: models::FlagSubmissionRequest) -> Result<models::FlagSubmissionResult, Error<SubmitFlagError>> {
+    // add a prefix to parameters to efficiently prevent name collisions
+    let p_path_challenge_slug = challenge_slug;
+    let p_body_flag_submission_request = flag_submission_request;
+
+    let uri_str = format!("{}/api/challenges/{challenge_slug}/submit", configuration.base_path, challenge_slug=crate::apis::urlencode(p_path_challenge_slug));
+    let mut req_builder = configuration.client.request(reqwest::Method::POST, &uri_str);
+
+    if let Some(ref user_agent) = configuration.user_agent {
+        req_builder = req_builder.header(reqwest::header::USER_AGENT, user_agent.clone());
+    }
+    req_builder = req_builder.json(&p_body_flag_submission_request);
+
+    let req = req_builder.build()?;
+    let resp = configuration.client.execute(req).await?;
+
+    let status = resp.status();
+    let content_type = resp
+        .headers()
+        .get("content-type")
+        .and_then(|v| v.to_str().ok())
+        .unwrap_or("application/octet-stream");
+    let content_type = super::ContentType::from(content_type);
+
+    if !status.is_client_error() && !status.is_server_error() {
+        let content = resp.text().await?;
+        match content_type {
+            ContentType::Json => serde_json::from_str(&content).map_err(Error::from),
+            ContentType::Text => return Err(Error::from(serde_json::Error::custom("Received `text/plain` content type response that cannot be converted to `models::FlagSubmissionResult`"))),
+            ContentType::Unsupported(unknown_type) => return Err(Error::from(serde_json::Error::custom(format!("Received `{unknown_type}` content type response that cannot be converted to `models::FlagSubmissionResult`")))),
+        }
+    } else {
+        let content = resp.text().await?;
+        let entity: Option<SubmitFlagError> = serde_json::from_str(&content).ok();
         Err(Error::ResponseError(ResponseContent { status, content, entity }))
     }
 }

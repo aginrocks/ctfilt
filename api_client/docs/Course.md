@@ -13,7 +13,7 @@ Name | Type | Description | Notes
 **slug** | **String** | A URL-friendly unique identifier for the course | 
 **tags** | Option<**Vec<String>**> | Tags associated with the course | [optional]
 **_id** | **String** |  | 
-**r#ref** | **String** |  | 
+**r#ref** | **String** | Commit hash of the repository the course was imported from | 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

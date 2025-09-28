@@ -39,6 +39,7 @@ pub struct Course {
     pub tags: Option<Vec<String>>,
     #[serde(rename = "_id")]
     pub _id: String,
+    /// Commit hash of the repository the course was imported from
     #[serde(rename = "ref")]
     pub r#ref: String,
 }

@@ -30,6 +30,9 @@ Class | Method | HTTP request | Description
 *AuthApi* | [**get_user**](docs/AuthApi.md#get_user) | **GET** /api/user | Get user details
 *AuthApi* | [**log_in**](docs/AuthApi.md#log_in) | **GET** /api/login | Log in
 *ChallengeApi* | [**get_challenge**](docs/ChallengeApi.md#get_challenge) | **GET** /api/challenges/{challenge_slug} | Get challenge
+*ChallengeApi* | [**start_challenge**](docs/ChallengeApi.md#start_challenge) | **POST** /api/challenges/{challenge_slug}/start | Start a challenge
+*ChallengeApi* | [**stop_challenge**](docs/ChallengeApi.md#stop_challenge) | **POST** /api/challenges/{challenge_slug}/stop | Stop a challenge
+*ChallengeApi* | [**submit_flag**](docs/ChallengeApi.md#submit_flag) | **POST** /api/challenges/{challenge_slug}/submit | Submit a flag
 *ChallengeApi* | [**update_challenge**](docs/ChallengeApi.md#update_challenge) | **PUT** /api/challenges/{challenge_slug} | Update challenge
 *CourseApi* | [**get_course**](docs/CourseApi.md#get_course) | **GET** /api/courses/{course_slug} | Get course
 *CourseApi* | [**get_course_lesson**](docs/CourseApi.md#get_course_lesson) | **GET** /api/courses/{course_slug}/lessons/{lesson_slug} | Get lesson
@@ -38,8 +41,11 @@ Class | Method | HTTP request | Description
 *CoursesApi* | [**get_courses**](docs/CoursesApi.md#get_courses) | **GET** /api/courses | Get all courses
 *OtherApi* | [**get_health**](docs/OtherApi.md#get_health) | **GET** /api/health | Check server health
 *SchemaApi* | [**get_challenge_schema**](docs/SchemaApi.md#get_challenge_schema) | **GET** /api/schema/challenge | Challenge schema
+*SchemaApi* | [**get_contest_batch_schema**](docs/SchemaApi.md#get_contest_batch_schema) | **GET** /api/schema/contest-batch | Batch schema
+*SchemaApi* | [**get_contest_schema**](docs/SchemaApi.md#get_contest_schema) | **GET** /api/schema/contest | Contest schema
 *SchemaApi* | [**get_course_schema**](docs/SchemaApi.md#get_course_schema) | **GET** /api/schema/course | Course schema
 *SchemaApi* | [**get_lesson_schema**](docs/SchemaApi.md#get_lesson_schema) | **GET** /api/schema/lesson | Lesson schema
+*WebSocketApi* | [**websocket**](docs/WebSocketApi.md#websocket) | **GET** /api/ws | WebSocket
 
 
 ## Documentation For Models
@@ -63,6 +69,10 @@ Class | Method | HTTP request | Description
  - [CourseItemStringOneOf1](docs/CourseItemStringOneOf1.md)
  - [CourseMetadataString](docs/CourseMetadataString.md)
  - [CreateSuccess](docs/CreateSuccess.md)
+ - [FlagSubmissionRequest](docs/FlagSubmissionRequest.md)
+ - [FlagSubmissionResult](docs/FlagSubmissionResult.md)
+ - [GenericError](docs/GenericError.md)
+ - [KubernetesActionResult](docs/KubernetesActionResult.md)
  - [LessonMetadata](docs/LessonMetadata.md)
  - [NotFoundError](docs/NotFoundError.md)
  - [UnauthorizedError](docs/UnauthorizedError.md)
