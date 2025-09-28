@@ -2,31 +2,39 @@
 
 import { type LucideIcon } from 'lucide-react';
 
-import { SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
+import { SidebarGroup, SidebarGroupLabel, SidebarMenu } from '@/components/ui/sidebar';
 import { Icon } from '@tabler/icons-react';
 
-export function NavMain({
-    items,
-}: {
-    items: {
-        title: string;
-        url: string;
-        icon: LucideIcon | Icon;
-        isActive?: boolean;
-    }[];
-}) {
+import { NavMainItemComponent } from './nav-main-item';
+
+export type NavMainSubItem = {
+    title: string;
+    url: string;
+};
+
+export type NavMainItem = {
+    title: string;
+    url: string;
+    icon: LucideIcon | Icon;
+    isActive?: boolean;
+    defaultOpen?: boolean;
+    items?: NavMainSubItem[];
+};
+
+export type NavMainProps = {
+    title: string;
+    items: NavMainItem[];
+};
+
+export function NavMain({ items, title }: NavMainProps) {
     return (
-        <SidebarMenu>
-            {items.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild isActive={item.isActive}>
-                        <a href={item.url}>
-                            <item.icon />
-                            <span>{item.title}</span>
-                        </a>
-                    </SidebarMenuButton>
-                </SidebarMenuItem>
-            ))}
-        </SidebarMenu>
+        <SidebarGroup>
+            <SidebarGroupLabel>{title}</SidebarGroupLabel>
+            <SidebarMenu>
+                {items.map((item) => (
+                    <NavMainItemComponent key={item.title} item={item} />
+                ))}
+            </SidebarMenu>
+        </SidebarGroup>
     );
 }

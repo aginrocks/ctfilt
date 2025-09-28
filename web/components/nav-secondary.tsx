@@ -1,14 +1,16 @@
-import React from 'react';
+'use client';
+import * as React from 'react';
 import { type LucideIcon } from 'lucide-react';
 
 import {
     SidebarGroup,
     SidebarGroupContent,
     SidebarMenu,
-    SidebarMenuBadge,
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
+import { Icon } from '@tabler/icons-react';
+import Link from 'next/link';
 
 export function NavSecondary({
     items,
@@ -17,8 +19,7 @@ export function NavSecondary({
     items: {
         title: string;
         url: string;
-        icon: LucideIcon;
-        badge?: React.ReactNode;
+        icon: LucideIcon | Icon;
     }[];
 } & React.ComponentPropsWithoutRef<typeof SidebarGroup>) {
     return (
@@ -27,13 +28,12 @@ export function NavSecondary({
                 <SidebarMenu>
                     {items.map((item) => (
                         <SidebarMenuItem key={item.title}>
-                            <SidebarMenuButton asChild>
-                                <a href={item.url}>
+                            <SidebarMenuButton asChild size="sm">
+                                <Link href={item.url} target="_blank">
                                     <item.icon />
                                     <span>{item.title}</span>
-                                </a>
+                                </Link>
                             </SidebarMenuButton>
-                            {item.badge && <SidebarMenuBadge>{item.badge}</SidebarMenuBadge>}
                         </SidebarMenuItem>
                     ))}
                 </SidebarMenu>
