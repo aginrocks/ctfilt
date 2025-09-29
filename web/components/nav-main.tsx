@@ -22,14 +22,14 @@ export type NavMainItem = {
 };
 
 export type NavMainProps = {
-    title: string;
+    title?: string;
     items: NavMainItem[];
 };
 
 export function NavMain({ items, title }: NavMainProps) {
     return (
         <SidebarGroup>
-            <SidebarGroupLabel>{title}</SidebarGroupLabel>
+            {title && <SidebarGroupLabel>{title}</SidebarGroupLabel>}
             <SidebarMenu>
                 {items.map((item) => (
                     <NavMainItemComponent key={item.title} item={item} />

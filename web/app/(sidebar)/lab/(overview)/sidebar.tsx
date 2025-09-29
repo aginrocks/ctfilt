@@ -3,7 +3,9 @@
 import * as React from 'react';
 import {
     IconBell,
+    IconBook,
     IconBuildings,
+    IconFlask,
     IconHistory,
     IconHome,
     IconServer,
@@ -27,6 +29,8 @@ import { Logo } from '@components/logo';
 import { navSecondary } from '@components/sidebar-common';
 
 export function LabSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+    const courses = useQuery($api.queryOptions('get', '/api/courses'));
+
     return (
         <Sidebar variant="inset" {...props}>
             <SidebarHeader>
@@ -36,27 +40,26 @@ export function LabSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     </SidebarMenuItem>
                 </SidebarMenu>
             </SidebarHeader>
-            <SidebarContent>
+            <SidebarContent className="gap-0">
                 <NavMain
                     items={[
                         {
-                            icon: IconHome,
-                            title: 'Home',
-                            url: '/app',
-                        },
-                        {
-                            icon: IconBell,
-                            title: 'Notifications',
-                            url: '/app/notifications',
-                        },
-                        {
-                            icon: IconBuildings,
-                            title: 'Organizations',
-                            url: '/app/orgs',
-                            // defaultOpen: true,
+                            icon: IconBook,
+                            title: 'Explore Courses',
+                            url: '/lab/explore',
                         },
                     ]}
-                    title="General"
+                    title="Lab"
+                />
+                <NavMain
+                    title="Courses"
+                    items={
+                        courses.data?.map((c) => ({
+                            icon: IconFlask,
+                            title: c.name,
+                            url: `/lab/courses/${c.slug}`,
+                        })) || []
+                    }
                 />
                 <NavSecondary items={navSecondary} className="mt-auto" />
             </SidebarContent>
