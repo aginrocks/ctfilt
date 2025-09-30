@@ -28,7 +28,7 @@ sudo pacman -S caddy nodejs pnpm docker docker-compose docker-buildx
 
 ```bash
 sudo dnf install -y caddy nodejs tailscale dnf-plugins-core
-corepack enable
+wget -qO- https://get.pnpm.io/install.sh | sh -
 
 # Installing Docker
 sudo dnf-3 config-manager --add-repo https://download.docker.com/linux/fedora/docker-ce.repo
