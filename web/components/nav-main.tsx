@@ -32,7 +32,7 @@ export function NavMain({ items, title }: NavMainProps) {
             {title && <SidebarGroupLabel>{title}</SidebarGroupLabel>}
             <SidebarMenu>
                 {items.map((item) => (
-                    <NavMainItemComponent key={item.title} item={item} />
+                    <NavMainItemComponent key={item.url} item={item} />
                 ))}
             </SidebarMenu>
         </SidebarGroup>
