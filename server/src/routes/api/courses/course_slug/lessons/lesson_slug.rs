@@ -35,7 +35,7 @@ pub fn routes() -> OpenApiRouter<AppState> {
         ("lesson_slug" = String, Path, description = "Lesson slug"),
     ),
     responses(
-        (status = OK, description = "Success", body = Vec<LessonMetadata>, content_type = "application/json"),
+        (status = OK, description = "Success", body = Lesson, content_type = "application/json"),
         (status = UNAUTHORIZED, description = "Unauthorized", body = UnauthorizedError, content_type = "application/json"),
         (status = NOT_FOUND, description = "Course or lesson not found", body = NotFoundError, content_type = "application/json")
     ),

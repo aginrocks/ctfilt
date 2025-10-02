@@ -81,6 +81,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/challenges/{challenge_slug}/submit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Submit a flag
+         * @description Submits a flag for the specified challenge. If all correct flags have been submitted, the challenge instance will be stopped.
+         */
+        post: operations["submit_flag"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/courses": {
         parameters: {
             query?: never;
@@ -197,6 +217,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/schema/contest": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Contest schema
+         * @description This endpoint returns JSON schema for the contest manifest.
+         */
+        get: operations["get_contest_schema"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/schema/contest-batch": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Batch schema
+         * @description This endpoint returns JSON schema for the contest batch manifest.
+         */
+        get: operations["get_contest_batch_schema"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/schema/course": {
         parameters: {
             query?: never;
@@ -254,6 +314,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/ws": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * WebSocket
+         * @description Sends real-time updates about challenges and other events.
+         */
+        get: operations["websocket"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -296,7 +376,7 @@ export interface components {
             /** @description Markdown description of the challenge */
             details: string;
             flags: components["schemas"]["ChallengeFlag"][];
-            /** @description A short unique name for the challenge */
+            /** @description A short name for the challenge */
             name: string;
             /** @description A URL-friendly unique identifier for the challenge */
             slug: string;
@@ -316,6 +396,7 @@ export interface components {
         };
         Course: components["schemas"]["CourseMetadata_String"] & {
             _id: string;
+            /** @description Commit hash of the repository the course was imported from */
             ref: string;
         };
         /** @enum {string} */
@@ -359,9 +440,24 @@ export interface components {
             id: string;
             success: boolean;
         };
+        FlagSubmissionRequest: {
+            flag: string;
+        };
+        FlagSubmissionResult: {
+            correct: boolean;
+        };
+        GenericError: {
+            error: string;
+        };
         /** @description Further information can be obtained from Socket.IO connection */
         KubernetesActionResult: {
             success: boolean;
+        };
+        Lesson: components["schemas"]["LessonMetadata"] & {
+            _id: string;
+            attachments: string[];
+            content: string;
+            course_slug: string;
         };
         LessonMetadata: {
             /** @description A short name for the lesson */
@@ -544,6 +640,15 @@ export interface operations {
                     "application/json": components["schemas"]["UnauthorizedError"];
                 };
             };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GenericError"];
+                };
+            };
             /** @description Challenge not found */
             404: {
                 headers: {
@@ -574,6 +679,51 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["KubernetesActionResult"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UnauthorizedError"];
+                };
+            };
+            /** @description Challenge not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NotFoundError"];
+                };
+            };
+        };
+    };
+    submit_flag: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Challenge slug */
+                challenge_slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FlagSubmissionRequest"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FlagSubmissionResult"];
                 };
             };
             /** @description Unauthorized */
@@ -722,7 +872,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["LessonMetadata"][];
+                    "application/json": components["schemas"]["Lesson"];
                 };
             };
             /** @description Unauthorized */
@@ -833,6 +983,46 @@ export interface operations {
             };
         };
     };
+    get_contest_schema: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                };
+            };
+        };
+    };
+    get_contest_batch_schema: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                };
+            };
+        };
+    };
     get_course_schema: {
         parameters: {
             query?: never;
@@ -901,5 +1091,15 @@ export interface operations {
                 };
             };
         };
+    };
+    websocket: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: never;
     };
 }
