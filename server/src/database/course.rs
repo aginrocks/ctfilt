@@ -1,6 +1,6 @@
 use color_eyre::eyre::{Context, eyre};
 use futures::TryStreamExt;
-use manifests::CourseMetadata;
+use manifests::{CourseDifficulty, CourseMetadata};
 use mongodb::{
     Collection, Database,
     bson::{doc, oid::ObjectId},

@@ -43,6 +43,15 @@ pub enum CourseItem<Ref> {
     },
 }
 
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[cfg_attr(feature = "utoipa", derive(ToSchema))]
+#[cfg_attr(feature = "schemars", derive(JsonSchema))]
+#[serde(rename_all = "lowercase")]
+pub enum CourseItemType {
+    Lesson,
+    Challenge,
+}
+
 /// Metadata for a course
 ///
 /// # Generics:

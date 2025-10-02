@@ -5,6 +5,7 @@ pub mod access_token;
 pub mod challenge;
 pub mod contest;
 pub mod course;
+pub mod course_participation;
 pub mod init;
 pub mod lesson;
 pub mod submission;
@@ -14,6 +15,7 @@ pub use access_token::*;
 pub use challenge::*;
 pub use contest::*;
 pub use course::*;
+pub use course_participation::*;
 pub use init::*;
 pub use lesson::*;
 use mongodb::Database;
@@ -27,6 +29,7 @@ pub struct DatabaseStore {
     pub lessons: LessonStore,
     pub challenges: ChallengeStore,
     pub submissions: SubmissionStore,
+    pub course_participations: CourseParticipationStore,
 }
 
 impl DatabaseStore {
@@ -37,6 +40,7 @@ impl DatabaseStore {
             lessons: LessonStore::new(database),
             challenges: ChallengeStore::new(database),
             submissions: SubmissionStore::new(database),
+            course_participations: CourseParticipationStore::new(database),
         }
     }
 }

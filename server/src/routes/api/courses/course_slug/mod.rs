@@ -1,3 +1,4 @@
+mod last;
 mod lessons;
 
 use axum::{Extension, Json, extract::Path, middleware};
@@ -28,6 +29,7 @@ pub fn routes() -> OpenApiRouter<AppState> {
         .merge(system)
         .routes(routes!(get_course))
         .nest("/lessons", lessons::routes())
+        .nest("/last", last::routes())
 }
 
 /// Get course
