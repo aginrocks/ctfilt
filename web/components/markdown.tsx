@@ -29,7 +29,10 @@ export default function MarkdownRenderer({ children }: MarkdownProps) {
                     </h2>
                 ),
                 h3: ({ children, ...props }) => (
-                    <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight first:mt-0 [&:not(:first-child)]:mt-6 mb-3">
+                    <h3
+                        className="scroll-m-20 text-2xl font-semibold tracking-tight first:mt-0 [&:not(:first-child)]:mt-6 mb-3"
+                        {...props}
+                    >
                         {children}
                     </h3>
                 ),
@@ -50,6 +53,7 @@ export default function MarkdownRenderer({ children }: MarkdownProps) {
                         </Table>
                     </div>
                 ),
+                hr: ({ ...props }) => <hr className="my-4" {...props} />,
                 thead: ({ children, ...props }) => <TableHeader {...props}>{children}</TableHeader>,
                 tbody: ({ children, ...props }) => <TableBody {...props}>{children}</TableBody>,
                 th: ({ children, ...props }) => <TableHead {...props}>{children}</TableHead>,
