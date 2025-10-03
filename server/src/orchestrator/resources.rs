@@ -13,8 +13,8 @@ use headscale::{
     models::V1CreatePreAuthKeyRequest,
 };
 use k8s_openapi::api::core::v1::{
-    Capabilities, Container, EnvVar, EnvVarSource, ObjectFieldSelector, Pod, PodSpec, Secret,
-    SecretKeySelector, SecretVolumeSource, SecurityContext, Volume, VolumeMount,
+    Capabilities, Container, EnvVar, EnvVarSource, LocalObjectReference, ObjectFieldSelector, Pod,
+    PodSpec, Secret, SecretKeySelector, SecretVolumeSource, SecurityContext, Volume, VolumeMount,
 };
 use kube::{Api, Client, api::ObjectMeta};
 use manifests::ChallengeContainer;
@@ -309,6 +309,10 @@ impl ResourceProvisisoner {
                         ..Default::default()
                     }),
                     ..Default::default()
+                }]),
+                // TODO: Replace with Harbor
+                image_pull_secrets: Some(vec![LocalObjectReference {
+                    name: "forgejo-secret".to_string(),
                 }]),
                 ..Default::default()
             }),
