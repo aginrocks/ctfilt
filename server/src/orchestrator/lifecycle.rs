@@ -2,6 +2,7 @@ use chrono::Utc;
 use color_eyre::eyre::{Result, bail};
 use manifests::{ChallengeFlagMeta, ChallengeMetadata, ChallengeSpec};
 use mongodb::bson::oid::ObjectId;
+use tracing::{info, instrument};
 
 use crate::{
     orchestrator::{
@@ -14,6 +15,7 @@ use crate::{
 use super::ChallengeOrchestrator;
 
 impl ChallengeOrchestrator {
+    #[instrument(skip(self, metadata, subject, user_id))]
     pub async fn start_challenge(
         &self,
         id: ObjectId,
@@ -27,6 +29,7 @@ impl ChallengeOrchestrator {
         };
 
         let hostname = generate_hostname()?;
+        info!("Generated hostname: {hostname}");
 
         let provisioner = ResourceProvisisonerBuilder::default()
             .kube(self.kube.clone())
@@ -42,9 +45,13 @@ impl ChallengeOrchestrator {
         let key = provisioner.generate_preauth_key().await?;
         let ts_secret_name = provisioner.provision_tailscale_secret(&key).await?;
 
+        info!("Tailscale set up");
+
         // Generating flags
         let flags = self.generate_flags(id, metadata, user_id);
         let secret_name = provisioner.provision_flags_secret(flags.clone()).await?;
+
+        info!("Flags generated");
 
         // TODO: Add expiry
 
@@ -52,6 +59,8 @@ impl ChallengeOrchestrator {
         let hostname = provisioner
             .provision_challenge_pod(&ts_secret_name, &secret_name, flags, containers)
             .await?;
+
+        info!("Kubernetes resources provisioned");
 
         let response = RunningChallengeBuilder::default()
             .id(id)
