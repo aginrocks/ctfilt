@@ -285,6 +285,8 @@ impl ResourceProvisisoner {
                 args: c.args,
                 command: c.command,
                 volume_mounts: Some(flag_mounts.clone()),
+                // TODO: Remove when proper versioning is in place
+                image_pull_policy: Some("Always".to_string()),
                 ..Default::default()
             })
             .collect::<Vec<_>>();
