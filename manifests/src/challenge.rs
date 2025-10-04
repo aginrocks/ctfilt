@@ -26,6 +26,7 @@ pub enum ChallengeFlagMeta {
 
         /// File permissions for the flag file, in octal format (e.g. 644, defaults to 600)
         #[serde(
+            default,
             serialize_with = "serialize_octal_option",
             deserialize_with = "deserialize_octal_option"
         )]
