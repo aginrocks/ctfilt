@@ -17,17 +17,17 @@ pub struct ChallengeFlagMetaOneOf1 {
     #[serde(rename = "mount_path")]
     pub mount_path: String,
     /// File permissions for the flag file, in octal format (e.g. 644, defaults to 600)
-    #[serde(rename = "permissions")]
-    pub permissions: String,
+    #[serde(rename = "permissions", default, with = "::serde_with::rust::double_option", skip_serializing_if = "Option::is_none")]
+    pub permissions: Option<Option<String>>,
     #[serde(rename = "type")]
     pub r#type: Type,
 }
 
 impl ChallengeFlagMetaOneOf1 {
-    pub fn new(mount_path: String, permissions: String, r#type: Type) -> ChallengeFlagMetaOneOf1 {
+    pub fn new(mount_path: String, r#type: Type) -> ChallengeFlagMetaOneOf1 {
         ChallengeFlagMetaOneOf1 {
             mount_path,
-            permissions,
+            permissions: None,
             r#type,
         }
     }
