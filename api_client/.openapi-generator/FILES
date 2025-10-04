@@ -21,6 +21,7 @@ docs/CourseDifficulty.md
 docs/CourseItemString.md
 docs/CourseItemStringOneOf.md
 docs/CourseItemStringOneOf1.md
+docs/CourseItemType.md
 docs/CourseMetadataString.md
 docs/CoursesApi.md
 docs/CreateSuccess.md
@@ -28,6 +29,8 @@ docs/FlagSubmissionRequest.md
 docs/FlagSubmissionResult.md
 docs/GenericError.md
 docs/KubernetesActionResult.md
+docs/LastItem.md
+docs/Lesson.md
 docs/LessonMetadata.md
 docs/NotFoundError.md
 docs/OtherApi.md
@@ -66,12 +69,15 @@ src/models/course_difficulty.rs
 src/models/course_item_string.rs
 src/models/course_item_string_one_of.rs
 src/models/course_item_string_one_of_1.rs
+src/models/course_item_type.rs
 src/models/course_metadata_string.rs
 src/models/create_success.rs
 src/models/flag_submission_request.rs
 src/models/flag_submission_result.rs
 src/models/generic_error.rs
 src/models/kubernetes_action_result.rs
+src/models/last_item.rs
+src/models/lesson.rs
 src/models/lesson_metadata.rs
 src/models/mod.rs
 src/models/not_found_error.rs

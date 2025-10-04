@@ -16,14 +16,18 @@ pub struct ChallengeFlagMetaOneOf1 {
     /// Where the flag should be mounted inside the container
     #[serde(rename = "mount_path")]
     pub mount_path: String,
+    /// File permissions for the flag file, in octal format (e.g. 644, defaults to 600)
+    #[serde(rename = "permissions")]
+    pub permissions: String,
     #[serde(rename = "type")]
     pub r#type: Type,
 }
 
 impl ChallengeFlagMetaOneOf1 {
-    pub fn new(mount_path: String, r#type: Type) -> ChallengeFlagMetaOneOf1 {
+    pub fn new(mount_path: String, permissions: String, r#type: Type) -> ChallengeFlagMetaOneOf1 {
         ChallengeFlagMetaOneOf1 {
             mount_path,
+            permissions,
             r#type,
         }
     }

@@ -6,6 +6,7 @@ Method | HTTP request | Description
 ------------- | ------------- | -------------
 [**get_course**](CourseApi.md#get_course) | **GET** /api/courses/{course_slug} | Get course
 [**get_course_lesson**](CourseApi.md#get_course_lesson) | **GET** /api/courses/{course_slug}/lessons/{lesson_slug} | Get lesson
+[**save_last**](CourseApi.md#save_last) | **PUT** /api/courses/{course_slug}/last | Save last viewed item
 [**update_course**](CourseApi.md#update_course) | **PUT** /api/courses/{course_slug} | Update course
 [**update_course_lesson**](CourseApi.md#update_course_lesson) | **PUT** /api/courses/{course_slug}/lessons/{lesson_slug} | Update lesson
 
@@ -41,7 +42,7 @@ No authorization required
 
 ## get_course_lesson
 
-> Vec<models::LessonMetadata> get_course_lesson(course_slug, lesson_slug)
+> models::Lesson get_course_lesson(course_slug, lesson_slug)
 Get lesson
 
 ### Parameters
@@ -54,7 +55,7 @@ Name | Type | Description  | Required | Notes
 
 ### Return type
 
-[**Vec<models::LessonMetadata>**](LessonMetadata.md)
+[**models::Lesson**](Lesson.md)
 
 ### Authorization
 
@@ -63,6 +64,37 @@ No authorization required
 ### HTTP request headers
 
 - **Content-Type**: Not defined
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+
+## save_last
+
+> models::Course save_last(course_slug, last_item)
+Save last viewed item
+
+Saves the last viewed lesson or challenge in the specified course
+
+### Parameters
+
+
+Name | Type | Description  | Required | Notes
+------------- | ------------- | ------------- | ------------- | -------------
+**course_slug** | **String** | Course slug | [required] |
+**last_item** | [**LastItem**](LastItem.md) |  | [required] |
+
+### Return type
+
+[**models::Course**](Course.md)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+- **Content-Type**: application/json
 - **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)

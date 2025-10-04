@@ -33,6 +33,15 @@ pub enum GetCourseLessonError {
     UnknownValue(serde_json::Value),
 }
 
+/// struct for typed errors of method [`save_last`]
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(untagged)]
+pub enum SaveLastError {
+    Status401(models::UnauthorizedError),
+    Status404(models::NotFoundError),
+    UnknownValue(serde_json::Value),
+}
+
 /// struct for typed errors of method [`update_course`]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(untagged)]
@@ -86,7 +95,7 @@ pub async fn get_course(configuration: &configuration::Configuration, course_slu
     }
 }
 
-pub async fn get_course_lesson(configuration: &configuration::Configuration, course_slug: &str, lesson_slug: &str) -> Result<Vec<models::LessonMetadata>, Error<GetCourseLessonError>> {
+pub async fn get_course_lesson(configuration: &configuration::Configuration, course_slug: &str, lesson_slug: &str) -> Result<models::Lesson, Error<GetCourseLessonError>> {
     // add a prefix to parameters to efficiently prevent name collisions
     let p_path_course_slug = course_slug;
     let p_path_lesson_slug = lesson_slug;
@@ -113,12 +122,51 @@ pub async fn get_course_lesson(configuration: &configuration::Configuration, cou
         let content = resp.text().await?;
         match content_type {
             ContentType::Json => serde_json::from_str(&content).map_err(Error::from),
-            ContentType::Text => return Err(Error::from(serde_json::Error::custom("Received `text/plain` content type response that cannot be converted to `Vec&lt;models::LessonMetadata&gt;`"))),
-            ContentType::Unsupported(unknown_type) => return Err(Error::from(serde_json::Error::custom(format!("Received `{unknown_type}` content type response that cannot be converted to `Vec&lt;models::LessonMetadata&gt;`")))),
+            ContentType::Text => return Err(Error::from(serde_json::Error::custom("Received `text/plain` content type response that cannot be converted to `models::Lesson`"))),
+            ContentType::Unsupported(unknown_type) => return Err(Error::from(serde_json::Error::custom(format!("Received `{unknown_type}` content type response that cannot be converted to `models::Lesson`")))),
         }
     } else {
         let content = resp.text().await?;
         let entity: Option<GetCourseLessonError> = serde_json::from_str(&content).ok();
+        Err(Error::ResponseError(ResponseContent { status, content, entity }))
+    }
+}
+
+/// Saves the last viewed lesson or challenge in the specified course
+pub async fn save_last(configuration: &configuration::Configuration, course_slug: &str, last_item: models::LastItem) -> Result<models::Course, Error<SaveLastError>> {
+    // add a prefix to parameters to efficiently prevent name collisions
+    let p_path_course_slug = course_slug;
+    let p_body_last_item = last_item;
+
+    let uri_str = format!("{}/api/courses/{course_slug}/last", configuration.base_path, course_slug=crate::apis::urlencode(p_path_course_slug));
+    let mut req_builder = configuration.client.request(reqwest::Method::PUT, &uri_str);
+
+    if let Some(ref user_agent) = configuration.user_agent {
+        req_builder = req_builder.header(reqwest::header::USER_AGENT, user_agent.clone());
+    }
+    req_builder = req_builder.json(&p_body_last_item);
+
+    let req = req_builder.build()?;
+    let resp = configuration.client.execute(req).await?;
+
+    let status = resp.status();
+    let content_type = resp
+        .headers()
+        .get("content-type")
+        .and_then(|v| v.to_str().ok())
+        .unwrap_or("application/octet-stream");
+    let content_type = super::ContentType::from(content_type);
+
+    if !status.is_client_error() && !status.is_server_error() {
+        let content = resp.text().await?;
+        match content_type {
+            ContentType::Json => serde_json::from_str(&content).map_err(Error::from),
+            ContentType::Text => return Err(Error::from(serde_json::Error::custom("Received `text/plain` content type response that cannot be converted to `models::Course`"))),
+            ContentType::Unsupported(unknown_type) => return Err(Error::from(serde_json::Error::custom(format!("Received `{unknown_type}` content type response that cannot be converted to `models::Course`")))),
+        }
+    } else {
+        let content = resp.text().await?;
+        let entity: Option<SaveLastError> = serde_json::from_str(&content).ok();
         Err(Error::ResponseError(ResponseContent { status, content, entity }))
     }
 }

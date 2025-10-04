@@ -36,6 +36,7 @@ Class | Method | HTTP request | Description
 *ChallengeApi* | [**update_challenge**](docs/ChallengeApi.md#update_challenge) | **PUT** /api/challenges/{challenge_slug} | Update challenge
 *CourseApi* | [**get_course**](docs/CourseApi.md#get_course) | **GET** /api/courses/{course_slug} | Get course
 *CourseApi* | [**get_course_lesson**](docs/CourseApi.md#get_course_lesson) | **GET** /api/courses/{course_slug}/lessons/{lesson_slug} | Get lesson
+*CourseApi* | [**save_last**](docs/CourseApi.md#save_last) | **PUT** /api/courses/{course_slug}/last | Save last viewed item
 *CourseApi* | [**update_course**](docs/CourseApi.md#update_course) | **PUT** /api/courses/{course_slug} | Update course
 *CourseApi* | [**update_course_lesson**](docs/CourseApi.md#update_course_lesson) | **PUT** /api/courses/{course_slug}/lessons/{lesson_slug} | Update lesson
 *CoursesApi* | [**get_courses**](docs/CoursesApi.md#get_courses) | **GET** /api/courses | Get all courses
@@ -67,12 +68,15 @@ Class | Method | HTTP request | Description
  - [CourseItemString](docs/CourseItemString.md)
  - [CourseItemStringOneOf](docs/CourseItemStringOneOf.md)
  - [CourseItemStringOneOf1](docs/CourseItemStringOneOf1.md)
+ - [CourseItemType](docs/CourseItemType.md)
  - [CourseMetadataString](docs/CourseMetadataString.md)
  - [CreateSuccess](docs/CreateSuccess.md)
  - [FlagSubmissionRequest](docs/FlagSubmissionRequest.md)
  - [FlagSubmissionResult](docs/FlagSubmissionResult.md)
  - [GenericError](docs/GenericError.md)
  - [KubernetesActionResult](docs/KubernetesActionResult.md)
+ - [LastItem](docs/LastItem.md)
+ - [Lesson](docs/Lesson.md)
  - [LessonMetadata](docs/LessonMetadata.md)
  - [NotFoundError](docs/NotFoundError.md)
  - [UnauthorizedError](docs/UnauthorizedError.md)
