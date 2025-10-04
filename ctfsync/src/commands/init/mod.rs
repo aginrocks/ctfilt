@@ -7,11 +7,13 @@ use miette::Result;
 #[derive(Subcommand, Debug, Clone)]
 pub enum InitCommands {
     /// Initialize a course
+    #[command(alias = "co")]
     Course {
         #[command(flatten)]
         args: course::InitCourseArgs,
     },
     /// Initialize a challenge
+    #[command(alias = "ch")]
     Challenge {
         #[command(flatten)]
         args: challenge::InitChallengeArgs,

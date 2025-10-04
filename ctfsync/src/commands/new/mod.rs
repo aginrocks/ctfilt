@@ -6,6 +6,7 @@ use miette::Result;
 #[derive(Subcommand, Debug, Clone)]
 pub enum NewCommands {
     /// Create a new lesson inside a course
+    #[command(alias = "le")]
     Lesson {
         #[command(flatten)]
         args: lesson::InitLessonArgs,

@@ -42,6 +42,12 @@ enum Commands {
         #[command(subcommand)]
         subcommand: commands::new::NewCommands,
     },
+    /// Generate files
+    #[command(alias = "gen")]
+    Generate {
+        #[command(subcommand)]
+        subcommand: commands::generate::GenerateCommands,
+    },
 }
 
 #[tokio::main]
@@ -68,6 +74,7 @@ async fn main() -> Result<()> {
         Commands::Apply => commands::apply::handle_apply().await,
         Commands::Init { subcommand } => commands::init::handle_init(subcommand).await,
         Commands::New { subcommand } => commands::new::handle_new(subcommand).await,
+        Commands::Generate { subcommand } => commands::generate::handle_generate(subcommand).await,
     };
 
     if let Err(e) = result {

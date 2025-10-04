@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use strum::{AsRefStr, IntoStaticStr, VariantNames};
 
 use crate::utils::{deserialize_octal_option, serialize_octal_option};
 
@@ -11,7 +12,7 @@ use utoipa::ToSchema;
 #[cfg(feature = "validator")]
 use {crate::validators::slug_validator, validator::Validate};
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone, AsRefStr)]
 #[cfg_attr(feature = "utoipa", derive(ToSchema))]
 #[cfg_attr(feature = "schemars", derive(JsonSchema))]
 #[serde(tag = "type", rename_all = "kebab-case")]
