@@ -85,10 +85,14 @@ impl ChallengeOrchestrator {
         generated
             .iter()
             .filter_map(|flag| match flag.meta.spec {
-                ChallengeFlagMeta::DynamicMount { ref mount_path } => Some(DynamicFlag {
+                ChallengeFlagMeta::DynamicMount {
+                    ref mount_path,
+                    permissions,
+                } => Some(DynamicFlag {
                     flag: flag.value.clone(),
                     mount_path: mount_path.clone(),
                     slug: flag.meta.slug.clone(),
+                    permissions,
                 }),
                 _ => None,
             })

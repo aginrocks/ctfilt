@@ -13,8 +13,9 @@ use headscale::{
     models::V1CreatePreAuthKeyRequest,
 };
 use k8s_openapi::api::core::v1::{
-    Capabilities, Container, EnvVar, EnvVarSource, LocalObjectReference, ObjectFieldSelector, Pod,
-    PodSpec, Secret, SecretKeySelector, SecretVolumeSource, SecurityContext, Volume, VolumeMount,
+    Capabilities, Container, EnvVar, EnvVarSource, KeyToPath, LocalObjectReference,
+    ObjectFieldSelector, Pod, PodSpec, Secret, SecretKeySelector, SecretVolumeSource,
+    SecurityContext, Volume, VolumeMount,
 };
 use kube::{Api, Client, api::ObjectMeta};
 use manifests::ChallengeContainer;
@@ -36,6 +37,7 @@ pub struct DynamicFlag {
     pub slug: String,
     pub flag: String,
     pub mount_path: String,
+    pub permissions: Option<i32>,
 }
 
 pub enum LabelResourceType {
@@ -267,11 +269,11 @@ impl ResourceProvisisoner {
         // TODO: Add a challenge container and mount flags
 
         let flag_mounts = flags
-            .into_iter()
+            .iter()
             .map(|flag| VolumeMount {
                 name: "flag".to_string(),
                 mount_path: flag.mount_path.clone(),
-                sub_path: Some(flag.slug),
+                sub_path: Some(flag.slug.clone()),
                 read_only: Some(true),
                 ..Default::default()
             })
@@ -291,6 +293,15 @@ impl ResourceProvisisoner {
             })
             .collect::<Vec<_>>();
 
+        let flag_sources = flags
+            .iter()
+            .map(|f| KeyToPath {
+                key: f.slug.clone(),
+                path: f.slug.clone(),
+                mode: Some(f.permissions.unwrap_or(0o600)),
+            })
+            .collect();
+
         let pod = Pod {
             metadata: ObjectMeta {
                 name: Some(self.hostname.clone()),
@@ -308,6 +319,7 @@ impl ResourceProvisisoner {
                     secret: Some(SecretVolumeSource {
                         secret_name: Some(flags_secret_name.to_string()),
                         default_mode: Some(0o600),
+                        items: Some(flag_sources),
                         ..Default::default()
                     }),
                     ..Default::default()

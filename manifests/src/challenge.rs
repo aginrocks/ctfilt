@@ -1,5 +1,7 @@
 use serde::{Deserialize, Serialize};
 
+use crate::utils::{deserialize_octal_option, serialize_octal_option};
+
 #[cfg(feature = "schemars")]
 use schemars::JsonSchema;
 
@@ -21,6 +23,15 @@ pub enum ChallengeFlagMeta {
     DynamicMount {
         /// Where the flag should be mounted inside the container
         mount_path: String,
+
+        /// File permissions for the flag file, in octal format (e.g. 644, defaults to 600)
+        #[serde(
+            serialize_with = "serialize_octal_option",
+            deserialize_with = "deserialize_octal_option"
+        )]
+        #[cfg_attr(feature = "schemars", schemars(with = "String"))]
+        #[cfg_attr(feature = "utoipa", schema(value_type = String))]
+        permissions: Option<i32>,
     },
 }
 
