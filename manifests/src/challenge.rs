@@ -29,8 +29,8 @@ pub enum ChallengeFlagMeta {
             serialize_with = "serialize_octal_option",
             deserialize_with = "deserialize_octal_option"
         )]
-        #[cfg_attr(feature = "schemars", schemars(with = "String"))]
-        #[cfg_attr(feature = "utoipa", schema(value_type = String))]
+        #[cfg_attr(feature = "schemars", schemars(with = "Option<String>"))]
+        #[cfg_attr(feature = "utoipa", schema(value_type = Option<String>))]
         permissions: Option<i32>,
     },
 }
