@@ -52,15 +52,15 @@ pub async fn evaluate(state: AppState, webhook: &GiteaWebhookEvent) -> Result<()
 pub async fn open_template_pr(
     state: &AppState,
     payload: &PushEventPayload,
-    repo: &Repository,
+    fork: &Repository,
 ) -> Result<()> {
-    let owner = repo
+    let owner = fork
         .owner
         .clone()
         .wrap_err("No owner")?
         .login
         .wrap_err("No owner login")?;
-    let repo_name = repo.name.clone().wrap_err("No repo name")?;
+    let repo_name = fork.name.clone().wrap_err("No repo name")?;
 
     let body = format!(
         "This is an automated pull request to update the challenge with the latest changes from the [template repository]({}).\n\n\
@@ -73,6 +73,8 @@ Please review the changes and merge if everything looks good.\n\n
     let body = CreatePullRequestOption {
         head: Some(format!(
             "{owner}/{repo_name}:{branch}",
+            owner = payload.repository.owner.username,
+            repo_name = payload.repository.name,
             branch = payload.git_ref.replace("refs/heads/", "")
         )),
         body: Some(body),
