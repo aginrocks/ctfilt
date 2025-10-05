@@ -14,13 +14,13 @@ use serde::{Deserialize, Serialize};
 #[derive(Clone, Default, Debug, PartialEq, Serialize, Deserialize)]
 pub struct UpdateCourseRequest {
     #[serde(rename = "metadata")]
-    pub metadata: Box<models::CourseMetadataString>,
+    pub metadata: Box<models::CourseMetadataCourseItemString>,
     #[serde(rename = "ref")]
     pub r#ref: String,
 }
 
 impl UpdateCourseRequest {
-    pub fn new(metadata: models::CourseMetadataString, r#ref: String) -> UpdateCourseRequest {
+    pub fn new(metadata: models::CourseMetadataCourseItemString, r#ref: String) -> UpdateCourseRequest {
         UpdateCourseRequest {
             metadata: Box::new(metadata),
             r#ref,

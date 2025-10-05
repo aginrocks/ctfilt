@@ -14,7 +14,7 @@ Method | HTTP request | Description
 
 ## get_course
 
-> models::Course get_course(course_slug)
+> models::DetailedCourse get_course(course_slug)
 Get course
 
 ### Parameters
@@ -26,7 +26,7 @@ Name | Type | Description  | Required | Notes
 
 ### Return type
 
-[**models::Course**](Course.md)
+[**models::DetailedCourse**](DetailedCourse.md)
 
 ### Authorization
 

@@ -59,7 +59,7 @@ pub enum UpdateCourseLessonError {
 }
 
 
-pub async fn get_course(configuration: &configuration::Configuration, course_slug: &str) -> Result<models::Course, Error<GetCourseError>> {
+pub async fn get_course(configuration: &configuration::Configuration, course_slug: &str) -> Result<models::DetailedCourse, Error<GetCourseError>> {
     // add a prefix to parameters to efficiently prevent name collisions
     let p_path_course_slug = course_slug;
 
@@ -85,8 +85,8 @@ pub async fn get_course(configuration: &configuration::Configuration, course_slu
         let content = resp.text().await?;
         match content_type {
             ContentType::Json => serde_json::from_str(&content).map_err(Error::from),
-            ContentType::Text => return Err(Error::from(serde_json::Error::custom("Received `text/plain` content type response that cannot be converted to `models::Course`"))),
-            ContentType::Unsupported(unknown_type) => return Err(Error::from(serde_json::Error::custom(format!("Received `{unknown_type}` content type response that cannot be converted to `models::Course`")))),
+            ContentType::Text => return Err(Error::from(serde_json::Error::custom("Received `text/plain` content type response that cannot be converted to `models::DetailedCourse`"))),
+            ContentType::Unsupported(unknown_type) => return Err(Error::from(serde_json::Error::custom(format!("Received `{unknown_type}` content type response that cannot be converted to `models::DetailedCourse`")))),
         }
     } else {
         let content = resp.text().await?;

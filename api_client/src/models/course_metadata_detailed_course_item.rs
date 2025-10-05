@@ -11,8 +11,9 @@
 use crate::models;
 use serde::{Deserialize, Serialize};
 
+/// CourseMetadataDetailedCourseItem : Metadata for a course  # Generics:  - `Item`: The type used to store individual course item
 #[derive(Clone, Default, Debug, PartialEq, Serialize, Deserialize)]
-pub struct Course {
+pub struct CourseMetadataDetailedCourseItem {
     /// A short description of the course
     #[serde(rename = "description")]
     pub description: String,
@@ -21,32 +22,28 @@ pub struct Course {
     pub difficulty: models::CourseDifficulty,
     /// Items included in the course (order matters)
     #[serde(rename = "items")]
-    pub items: Vec<models::CourseMetadataCourseItemStringItemsInner>,
+    pub items: Vec<models::CourseMetadataDetailedCourseItemItemsInner>,
     /// A short unique name for the course
     #[serde(rename = "name")]
     pub name: String,
     /// A list of learning objectives for the course
-    #[serde(rename = "objectives", skip_serializing_if = "Option::is_none")]
-    pub objectives: Option<Vec<String>>,
+    #[serde(rename = "objectives", default, with = "::serde_with::rust::double_option", skip_serializing_if = "Option::is_none")]
+    pub objectives: Option<Option<Vec<String>>>,
     /// A list of course slugs that are prerequisites for this course
-    #[serde(rename = "prerequisites", skip_serializing_if = "Option::is_none")]
-    pub prerequisites: Option<Vec<String>>,
+    #[serde(rename = "prerequisites", default, with = "::serde_with::rust::double_option", skip_serializing_if = "Option::is_none")]
+    pub prerequisites: Option<Option<Vec<String>>>,
     /// A URL-friendly unique identifier for the course
     #[serde(rename = "slug")]
     pub slug: String,
     /// Tags associated with the course
-    #[serde(rename = "tags", skip_serializing_if = "Option::is_none")]
-    pub tags: Option<Vec<String>>,
-    #[serde(rename = "_id")]
-    pub _id: String,
-    /// Commit hash of the repository the course was imported from
-    #[serde(rename = "ref")]
-    pub r#ref: String,
+    #[serde(rename = "tags", default, with = "::serde_with::rust::double_option", skip_serializing_if = "Option::is_none")]
+    pub tags: Option<Option<Vec<String>>>,
 }
 
-impl Course {
-    pub fn new(description: String, difficulty: models::CourseDifficulty, items: Vec<models::CourseMetadataCourseItemStringItemsInner>, name: String, slug: String, _id: String, r#ref: String) -> Course {
-        Course {
+impl CourseMetadataDetailedCourseItem {
+    /// Metadata for a course  # Generics:  - `Item`: The type used to store individual course item
+    pub fn new(description: String, difficulty: models::CourseDifficulty, items: Vec<models::CourseMetadataDetailedCourseItemItemsInner>, name: String, slug: String) -> CourseMetadataDetailedCourseItem {
+        CourseMetadataDetailedCourseItem {
             description,
             difficulty,
             items,
@@ -55,8 +52,6 @@ impl Course {
             prerequisites: None,
             slug,
             tags: None,
-            _id,
-            r#ref,
         }
     }
 }

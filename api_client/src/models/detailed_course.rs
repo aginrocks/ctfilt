@@ -12,7 +12,7 @@ use crate::models;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Default, Debug, PartialEq, Serialize, Deserialize)]
-pub struct Course {
+pub struct DetailedCourse {
     /// A short description of the course
     #[serde(rename = "description")]
     pub description: String,
@@ -21,7 +21,7 @@ pub struct Course {
     pub difficulty: models::CourseDifficulty,
     /// Items included in the course (order matters)
     #[serde(rename = "items")]
-    pub items: Vec<models::CourseMetadataCourseItemStringItemsInner>,
+    pub items: Vec<models::CourseMetadataDetailedCourseItemItemsInner>,
     /// A short unique name for the course
     #[serde(rename = "name")]
     pub name: String,
@@ -39,14 +39,13 @@ pub struct Course {
     pub tags: Option<Vec<String>>,
     #[serde(rename = "_id")]
     pub _id: String,
-    /// Commit hash of the repository the course was imported from
     #[serde(rename = "ref")]
     pub r#ref: String,
 }
 
-impl Course {
-    pub fn new(description: String, difficulty: models::CourseDifficulty, items: Vec<models::CourseMetadataCourseItemStringItemsInner>, name: String, slug: String, _id: String, r#ref: String) -> Course {
-        Course {
+impl DetailedCourse {
+    pub fn new(description: String, difficulty: models::CourseDifficulty, items: Vec<models::CourseMetadataDetailedCourseItemItemsInner>, name: String, slug: String, _id: String, r#ref: String) -> DetailedCourse {
+        DetailedCourse {
             description,
             difficulty,
             items,
