@@ -4,9 +4,14 @@ rust-api:
     echo "#![allow(warnings)]" > temp.rs && cat api_client/src/lib.rs >> temp.rs && mv temp.rs api_client/src/lib.rs
 
 # Generate TypeScript API client
-[working-directory: 'web']
-@ts-api:
-    pnpm typegen
+ts-api:
+    cd web && pnpm typegen
+
+# Generate TypeScript types for WebSocket events
+ts-types:
+    cd server && cargo test export_bindings
+
+typegen: rust-api ts-api ts-types
 
 # Generate Rust client for headscale API
 headscale-api:

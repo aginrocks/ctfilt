@@ -4,6 +4,8 @@ import * as React from 'react';
 import {
     IconBell,
     IconBook,
+    IconBook2,
+    IconBox,
     IconBuildings,
     IconFlask,
     IconHistory,
@@ -49,16 +51,16 @@ export function CourseSidebar({ ...props }: React.ComponentProps<typeof Sidebar>
                 </SidebarMenu>
             </SidebarHeader>
             <SidebarContent className="gap-0">
-                {/*<NavMain
+                <NavMain
                     title="Lessons"
                     items={
-                        course.data?.items.map((c, i) => ({
-                            icon: IconFlask,
-                            title: c.lesson.$oid || c.challenge.$oid,
-                            url: `/lab/courses/${i}`,
+                        course.data?.items.map((item, i) => ({
+                            icon: item.type === 'lesson' ? IconBook2 : IconBox,
+                            title: item.name,
+                            url: `/lab/courses/${course_slug}/${item.type}s/${item.slug}`,
                         })) || []
                     }
-                />*/}
+                />
                 <NavSecondary items={navSecondary} className="mt-auto" />
             </SidebarContent>
             <SidebarFooter>
