@@ -1,9 +1,6 @@
 use color_eyre::{Result, eyre::ContextCompat};
 use gitea_client::{
-    apis::{
-        configuration::Configuration,
-        repository_api::{list_forks, repo_create_pull_request},
-    },
+    apis::repository_api::{list_forks, repo_create_pull_request},
     models::{CreatePullRequestOption, Repository},
 };
 use tracing::info;
