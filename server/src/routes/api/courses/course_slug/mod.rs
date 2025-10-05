@@ -4,7 +4,7 @@ mod lessons;
 use axum::{Extension, Json, extract::Path, middleware};
 use axum_valid::Valid;
 use color_eyre::eyre::{Context, eyre};
-use manifests::CourseMetadata;
+use manifests::{CourseItem, CourseMetadata};
 use mongodb::bson::doc;
 use serde::Deserialize;
 use utoipa::ToSchema;
@@ -13,7 +13,7 @@ use validator::Validate;
 
 use crate::{
     axum_error::{AxumError, AxumResult},
-    database::{Course, PartialCourse},
+    database::{Course, DetailedCourse, PartialCourse},
     middlewares::require_auth::{UnauthorizedError, require_system_auth},
     routes::api::{CreateSuccess, NotFoundError},
     state::AppState,
@@ -40,7 +40,7 @@ pub fn routes() -> OpenApiRouter<AppState> {
         ("course_slug" = String, Path, description = "Course slug"),
     ),
     responses(
-        (status = OK, description = "Success", body = Course, content_type = "application/json"),
+        (status = OK, description = "Success", body = DetailedCourse, content_type = "application/json"),
         (status = UNAUTHORIZED, description = "Unauthorized", body = UnauthorizedError, content_type = "application/json"),
         (status = NOT_FOUND, description = "Course not found", body = NotFoundError, content_type = "application/json")
     ),
@@ -49,15 +49,15 @@ pub fn routes() -> OpenApiRouter<AppState> {
 async fn get_course(
     Extension(state): Extension<AppState>,
     Path(course_slug): Path<String>,
-) -> AxumResult<Json<Course>> {
-    let course = state.store.courses.get_by_slug(&course_slug).await?;
+) -> AxumResult<Json<DetailedCourse>> {
+    let course = state.store.courses.get_by_slug_full(&course_slug).await?;
 
     Ok(Json(course))
 }
 
 #[derive(Deserialize, ToSchema, Validate)]
 pub struct UpdateCourseRequest {
-    pub metadata: CourseMetadata<String>,
+    pub metadata: CourseMetadata<CourseItem<String>>,
 
     #[validate(length(min = 40, max = 64))]
     pub r#ref: String,

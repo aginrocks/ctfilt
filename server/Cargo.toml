@@ -71,4 +71,10 @@ validator = { version = "0.20.0", features = ["derive"] }
 axum-valid = "0.24.0"
 dashmap = "6.1.0"
 ts-rs = { version = "11.0.1", features = ["chrono-impl", "bson-uuid-impl"] }
-fred = { version = "10.1.0", features = ["partial-tracing", "serde-json", "replicas", "enable-rustls-ring"] }
+mongo_utils = { version = "0.1.0", path = "../mongo_utils" }
+fred = { version = "10.1.0", features = [
+    "partial-tracing",
+    "serde-json",
+    "replicas",
+    "enable-rustls-ring",
+] }

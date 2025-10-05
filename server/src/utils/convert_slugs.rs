@@ -10,8 +10,11 @@ pub trait ConvertSlugs<To> {
 }
 
 #[async_trait]
-impl ConvertSlugs<CourseMetadata<ObjectId>> for CourseMetadata<String> {
-    async fn convert_slugs(&self, store: DatabaseStore) -> AxumResult<CourseMetadata<ObjectId>> {
+impl ConvertSlugs<CourseMetadata<CourseItem<ObjectId>>> for CourseMetadata<CourseItem<String>> {
+    async fn convert_slugs(
+        &self,
+        store: DatabaseStore,
+    ) -> AxumResult<CourseMetadata<CourseItem<ObjectId>>> {
         let mut result = Vec::new();
 
         let item = self.clone();

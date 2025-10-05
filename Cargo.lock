@@ -5190,6 +5190,7 @@ dependencies = [
  "k8s-openapi",
  "kube",
  "manifests",
+ "mongo_utils",
  "mongodb",
  "names",
  "openidconnect",

@@ -1,9 +1,9 @@
 use serde::{Deserialize, Serialize};
+use strum::{Display, EnumIter, EnumString};
 
 #[cfg(feature = "schemars")]
 use schemars::JsonSchema;
 
-use strum::{Display, EnumIter, EnumString};
 #[cfg(feature = "utoipa")]
 use utoipa::ToSchema;
 
@@ -56,12 +56,12 @@ pub enum CourseItemType {
 ///
 /// # Generics:
 ///
-/// - `Ref`: The type used to reference lessons and challenges
+/// - `Item`: The type used to store individual course item
 #[derive(Debug, Serialize, Deserialize, Clone, Default)]
 #[cfg_attr(feature = "utoipa", derive(ToSchema))]
 #[cfg_attr(feature = "schemars", derive(JsonSchema))]
 #[cfg_attr(feature = "validator", derive(Validate))]
-pub struct CourseMetadata<Ref> {
+pub struct CourseMetadata<Item> {
     /// A short unique name for the course
     #[cfg_attr(feature = "validator", validate(length(min = 1, max = 32)))]
     pub name: String,
@@ -90,5 +90,5 @@ pub struct CourseMetadata<Ref> {
     pub difficulty: CourseDifficulty,
 
     /// Items included in the course (order matters)
-    pub items: Vec<CourseItem<Ref>>,
+    pub items: Vec<Item>,
 }
