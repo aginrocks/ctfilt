@@ -15,7 +15,10 @@ use validator::Validate;
 use crate::{
     axum_error::{AxumError, AxumResult},
     database::{Challenge, PartialChallenge},
-    middlewares::require_auth::{UnauthorizedError, require_system_auth},
+    middlewares::{
+        challenge_middleware,
+        require_auth::{UnauthorizedError, require_system_auth},
+    },
     routes::api::{CreateSuccess, NotFoundError},
     state::AppState,
 };
@@ -26,11 +29,12 @@ pub fn routes() -> OpenApiRouter<AppState> {
         .layer(middleware::from_fn(require_system_auth));
 
     OpenApiRouter::new()
-        .merge(system)
         .routes(routes!(get_challenge))
         .nest("/start", start::routes())
         .nest("/stop", stop::routes())
         .nest("/submit", submit::routes())
+        .layer(middleware::from_fn(challenge_middleware))
+        .merge(system)
 }
 
 /// Get challenge

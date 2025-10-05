@@ -1,9 +1,10 @@
-use axum::{Extension, Json, extract::Path, middleware};
+use axum::{Extension, Json, middleware};
 use color_eyre::eyre::{ContextCompat, eyre};
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 use crate::{
     axum_error::{AxumError, AxumResult},
+    database::Challenge,
     middlewares::require_auth::{UnauthorizedError, UserId, require_auth},
     routes::api::{NotFoundError, challenges::challenge_slug::KubernetesActionResult},
     state::AppState,
@@ -32,10 +33,8 @@ pub fn routes() -> OpenApiRouter<AppState> {
 async fn stop_challenge(
     Extension(state): Extension<AppState>,
     Extension(user_id): Extension<UserId>,
-    Path(challenge_slug): Path<String>,
+    Extension(challenge): Extension<Challenge>,
 ) -> AxumResult<Json<KubernetesActionResult>> {
-    let challenge = state.store.challenges.get_by_slug(&challenge_slug).await?;
-
     let pod_name = state
         .orchestrator
         .watcher

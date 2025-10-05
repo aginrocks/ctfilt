@@ -67,4 +67,14 @@ impl CourseStore {
 
         Ok(course)
     }
+
+    pub async fn count_with_challenge(&self, id: ObjectId) -> AxumResult<u64> {
+        let count = self
+            .collection
+            .count_documents(doc! { "items.challenge": id })
+            .await
+            .wrap_err("Failed to fetch course")?;
+
+        Ok(count)
+    }
 }

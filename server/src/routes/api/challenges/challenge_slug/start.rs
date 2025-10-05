@@ -1,9 +1,10 @@
-use axum::{Extension, Json, extract::Path, middleware};
+use axum::{Extension, Json, middleware};
 use color_eyre::eyre::eyre;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 use crate::{
     axum_error::{AxumError, AxumResult},
+    database::Challenge,
     middlewares::require_auth::{UnauthorizedError, UserData, require_auth},
     routes::api::{
         GenericError, NotFoundError, challenges::challenge_slug::KubernetesActionResult,
@@ -35,11 +36,9 @@ pub fn routes() -> OpenApiRouter<AppState> {
 )]
 async fn start_challenge(
     Extension(state): Extension<AppState>,
-    Path(course_slug): Path<String>,
     Extension(user): Extension<UserData>,
+    Extension(challenge): Extension<Challenge>,
 ) -> AxumResult<Json<KubernetesActionResult>> {
-    let challenge = state.store.challenges.get_by_slug(&course_slug).await?;
-
     let running_challenges = state.orchestrator.watcher.users_state.get(&user.id);
     if let Some(running_challenges) = running_challenges {
         let challenges = running_challenges.value().challenges.clone();
