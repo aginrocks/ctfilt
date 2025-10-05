@@ -91,6 +91,7 @@ async fn update_course(
         metadata: body.metadata.convert_slugs(state.store).await?,
         r#ref: body.r#ref,
     };
+    dbg!(&new_course);
 
     state
         .database

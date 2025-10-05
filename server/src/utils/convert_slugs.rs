@@ -19,6 +19,7 @@ impl ConvertSlugs<CourseMetadata<CourseItem<ObjectId>>> for CourseMetadata<Cours
 
         let item = self.clone();
 
+        // TODO: Batch the queries
         for item in item.items.clone() {
             match item {
                 CourseItem::Lesson { lesson } => {
@@ -26,7 +27,12 @@ impl ConvertSlugs<CourseMetadata<CourseItem<ObjectId>>> for CourseMetadata<Cours
                     result.push(CourseItem::<ObjectId>::Lesson { lesson: lesson.id })
                 }
                 // TODO
-                CourseItem::Challenge { .. } => {}
+                CourseItem::Challenge { challenge } => {
+                    let challenge = store.challenges.get_by_slug(&challenge).await?;
+                    result.push(CourseItem::<ObjectId>::Challenge {
+                        challenge: challenge.id,
+                    })
+                }
             }
         }
 

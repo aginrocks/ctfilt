@@ -1,5 +1,5 @@
 use axum::Json;
-use manifests::CourseMetadata;
+use manifests::{CourseItem, CourseMetadata};
 use schemars::schema_for;
 use serde::Serialize;
 use serde_json::Value;
@@ -23,7 +23,7 @@ pub fn routes() -> OpenApiRouter<AppState> {
     tag = "Schema"
 )]
 pub async fn get_course_schema() -> Json<Value> {
-    let schema = schema_for!(CourseMetadata<String>);
+    let schema = schema_for!(CourseMetadata<CourseItem<String>>);
     Json(
         schema
             .serialize(serde_json::value::Serializer)

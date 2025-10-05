@@ -1,4 +1,7 @@
-use color_eyre::eyre::{Context, eyre};
+use std::collections::HashMap;
+
+use color_eyre::Result;
+use color_eyre::eyre::{Context, ContextCompat, eyre};
 use futures::TryStreamExt;
 use manifests::{CourseItem, CourseMetadata};
 use mongodb::{
@@ -36,7 +39,6 @@ pub struct DetailedCourse {
     id: ObjectId,
 
     #[serde(flatten)]
-    #[schema(value_type = CourseMetadata<CourseItem<String>>)]
     metadata: CourseMetadata<DetailedCourseItem>,
 
     r#ref: String,
@@ -136,6 +138,10 @@ impl CourseStore {
 
         // TODO: Drop unused fields
         let lessons = lesson_store.get_many(lesson_ids).await?;
+        let lessons = lessons
+            .into_iter()
+            .map(|l| (l.id, l))
+            .collect::<HashMap<_, _>>();
 
         let challenge_store = ChallengeStore::new(&self.database);
         let challenge_ids = items
@@ -148,9 +154,54 @@ impl CourseStore {
             .collect::<Vec<_>>();
 
         let challenges = challenge_store.get_many(challenge_ids).await?;
+        let challenges = challenges
+            .into_iter()
+            .map(|c| (c.id, c))
+            .collect::<HashMap<_, _>>();
 
-        // Ok(course)
-        todo!()
+        let detailed_items = items
+            .iter()
+            .map(|item| -> Result<DetailedCourseItem> {
+                match item {
+                    CourseItem::Lesson { lesson } => {
+                        let lesson = lessons.get(lesson).wrap_err("Lesson not found")?;
+                        Ok(DetailedCourseItem::Lesson(DetailedCourseLesson {
+                            id: lesson.id,
+                            name: lesson.metadata.name.clone(),
+                            slug: lesson.metadata.slug.clone(),
+                        }))
+                    }
+                    CourseItem::Challenge { challenge } => {
+                        let challenge =
+                            challenges.get(challenge).wrap_err("Challenge not found")?;
+                        Ok(DetailedCourseItem::Challenge(DetailedCourseChallenge {
+                            id: challenge.id,
+                            name: challenge.metadata.name.clone(),
+                            slug: challenge.metadata.slug.clone(),
+                        }))
+                    }
+                }
+            })
+            .filter_map(Result::ok)
+            .collect::<Vec<_>>();
+
+        // TODO: Find a better way to do this
+        let detailed_course = DetailedCourse {
+            id: course.id,
+            metadata: CourseMetadata {
+                name: course.metadata.name,
+                slug: course.metadata.slug,
+                tags: course.metadata.tags,
+                description: course.metadata.description,
+                objectives: course.metadata.objectives,
+                prerequisites: course.metadata.prerequisites,
+                difficulty: course.metadata.difficulty,
+                items: detailed_items,
+            },
+            r#ref: course.r#ref,
+        };
+
+        Ok(detailed_course)
     }
 
     pub async fn count_with_challenge(&self, id: ObjectId) -> AxumResult<u64> {

@@ -139,6 +139,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/courses/{course_slug}/last": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Save last viewed item
+         * @description Saves the last viewed lesson or challenge in the specified course
+         */
+        put: operations["save_last"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/courses/{course_slug}/lessons/{lesson_slug}": {
         parameters: {
             query?: never;
@@ -367,6 +387,8 @@ export interface components {
         } | {
             /** @description Where the flag should be mounted inside the container */
             mount_path: string;
+            /** @description File permissions for the flag file, in octal format (e.g. 644, defaults to 600) */
+            permissions?: string | null;
             /** @enum {string} */
             type: "dynamic-mount";
         };
@@ -394,33 +416,60 @@ export interface components {
             /** @enum {string} */
             type: "container";
         };
-        Course: components["schemas"]["CourseMetadata_String"] & {
+        Course: components["schemas"]["CourseMetadata_CourseItem_String"] & {
             _id: string;
             /** @description Commit hash of the repository the course was imported from */
             ref: string;
         };
         /** @enum {string} */
         CourseDifficulty: "beginner" | "intermediate" | "advanced";
-        /** @description # Generics:
-         *
-         *     - `Ref`: The type used to reference lessons and challenges */
-        CourseItem_String: {
-            lesson: string;
-        } | {
-            challenge: string;
-        };
+        /** @enum {string} */
+        CourseItemType: "lesson" | "challenge";
         /** @description Metadata for a course
          *
          *     # Generics:
          *
-         *     - `Ref`: The type used to reference lessons and challenges */
-        CourseMetadata_String: {
+         *     - `Item`: The type used to store individual course item */
+        CourseMetadata_CourseItem_String: {
             /** @description A short description of the course */
             description: string;
             /** @description The difficulty level of the course */
             difficulty: components["schemas"]["CourseDifficulty"];
             /** @description Items included in the course (order matters) */
-            items: components["schemas"]["CourseItem_String"][];
+            items: ({
+                lesson: string;
+            } | {
+                challenge: string;
+            })[];
+            /** @description A short unique name for the course */
+            name: string;
+            /** @description A list of learning objectives for the course */
+            objectives?: string[] | null;
+            /** @description A list of course slugs that are prerequisites for this course */
+            prerequisites?: string[] | null;
+            /** @description A URL-friendly unique identifier for the course */
+            slug: string;
+            /** @description Tags associated with the course */
+            tags?: string[] | null;
+        };
+        /** @description Metadata for a course
+         *
+         *     # Generics:
+         *
+         *     - `Item`: The type used to store individual course item */
+        CourseMetadata_DetailedCourseItem: {
+            /** @description A short description of the course */
+            description: string;
+            /** @description The difficulty level of the course */
+            difficulty: components["schemas"]["CourseDifficulty"];
+            /** @description Items included in the course (order matters) */
+            items: ((components["schemas"]["DetailedCourseLesson"] & {
+                /** @enum {string} */
+                type: "lesson";
+            }) | (components["schemas"]["DetailedCourseChallenge"] & {
+                /** @enum {string} */
+                type: "challenge";
+            }))[];
             /** @description A short unique name for the course */
             name: string;
             /** @description A list of learning objectives for the course */
@@ -440,6 +489,20 @@ export interface components {
             id: string;
             success: boolean;
         };
+        DetailedCourse: components["schemas"]["CourseMetadata_DetailedCourseItem"] & {
+            _id: string;
+            ref: string;
+        };
+        DetailedCourseChallenge: {
+            _id: string;
+            name: string;
+            slug: string;
+        };
+        DetailedCourseLesson: {
+            _id: string;
+            name: string;
+            slug: string;
+        };
         FlagSubmissionRequest: {
             flag: string;
         };
@@ -452,6 +515,10 @@ export interface components {
         /** @description Further information can be obtained from Socket.IO connection */
         KubernetesActionResult: {
             success: boolean;
+        };
+        LastItem: {
+            slug: string;
+            type: components["schemas"]["CourseItemType"];
         };
         Lesson: components["schemas"]["LessonMetadata"] & {
             _id: string;
@@ -482,7 +549,7 @@ export interface components {
             ref: string;
         };
         UpdateCourseRequest: {
-            metadata: components["schemas"]["CourseMetadata_String"];
+            metadata: components["schemas"]["CourseMetadata_CourseItem_String"];
             ref: string;
         };
         UpdateLessonRequest: {
@@ -793,7 +860,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["Course"];
+                    "application/json": components["schemas"]["DetailedCourse"];
                 };
             };
             /** @description Unauthorized */
@@ -848,6 +915,51 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["UnauthorizedError"];
+                };
+            };
+        };
+    };
+    save_last: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Course slug */
+                course_slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LastItem"];
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Course"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UnauthorizedError"];
+                };
+            };
+            /** @description Course not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NotFoundError"];
                 };
             };
         };

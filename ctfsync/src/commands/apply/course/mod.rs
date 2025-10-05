@@ -5,7 +5,7 @@ use std::{path::Path, str::FromStr};
 
 use api_client::{
     apis::course_api,
-    models::{CourseMetadataString, UpdateCourseRequest},
+    models::{CourseMetadataCourseItemString, UpdateCourseRequest},
 };
 use gix::{
     ObjectId, Repository,
@@ -29,7 +29,7 @@ pub async fn run(repo: Repository, directory: &Path) -> Result<()> {
         .id
         .to_string();
 
-    let manifest = load_course_manifest::<CourseMetadataString>(directory).await?;
+    let manifest = load_course_manifest::<CourseMetadataCourseItemString>(directory).await?;
 
     let config = init_api_config().await?;
 
@@ -52,7 +52,10 @@ pub async fn run(repo: Repository, directory: &Path) -> Result<()> {
                 }
             }
         }
-        Err(_) => repo.empty_tree(),
+        Err(err) => {
+            warn!("Could not determine server commit, diffing with an empty tree. {err}");
+            repo.empty_tree()
+        }
     };
 
     let head_tree = repo.head_tree().into_diagnostic()?;
