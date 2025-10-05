@@ -3,7 +3,6 @@ use std::sync::LazyLock;
 use base64::{Engine, engine::general_purpose};
 use color_eyre::Result;
 use gitea_client::{apis::repository_api::repo_update_avatar, models::UpdateRepoAvatarOption};
-use serde::Serialize;
 use tracing::info;
 
 use crate::{
@@ -17,7 +16,7 @@ static CHALLENGE_AVATAR: LazyLock<String> = LazyLock::new(|| {
     general_purpose::STANDARD.encode(bytes)
 });
 
-pub async fn evaluate(state: AppState, webhook: GiteaWebhookEvent) -> Result<()> {
+pub async fn evaluate(state: AppState, webhook: &GiteaWebhookEvent) -> Result<()> {
     if let GiteaWebhookEvent::Repository(payload) = webhook
         && payload.action == RepositoryAction::Created
         && payload.repository.name.starts_with("challenge-")

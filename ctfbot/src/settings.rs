@@ -1,4 +1,7 @@
-use std::net::{Ipv4Addr, Ipv6Addr, SocketAddr};
+use std::{
+    collections::HashSet,
+    net::{Ipv4Addr, Ipv6Addr, SocketAddr},
+};
 
 use color_eyre::{Section as _, eyre::Context as _};
 use config::{Config, ConfigError, Environment, File};
@@ -81,7 +84,7 @@ impl Default for Git {
 
 #[derive(Debug, Deserialize, Serialize, Default)]
 pub struct Repositories {
-    pub templates: Vec<String>,
+    pub templates: HashSet<String>,
 }
 
 #[derive(Debug, Deserialize, Serialize, Default)]
