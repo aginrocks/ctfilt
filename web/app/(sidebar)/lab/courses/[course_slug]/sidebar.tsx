@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import {
+    IconArrowNarrowLeft,
     IconBell,
     IconBook,
     IconBook2,
@@ -22,6 +23,7 @@ import {
     Sidebar,
     SidebarContent,
     SidebarFooter,
+    SidebarGroup,
     SidebarHeader,
     SidebarMenu,
     SidebarMenuItem,
@@ -34,6 +36,7 @@ import { useParams } from 'next/navigation';
 import { useAtomValue } from 'jotai';
 import { RunningChallenges } from '@lib/atoms';
 import clsx from 'clsx';
+import { Button } from '@components/ui/button';
 
 export function CourseSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     const { course_slug } = useParams<{ course_slug: string }>();
@@ -57,6 +60,26 @@ export function CourseSidebar({ ...props }: React.ComponentProps<typeof Sidebar>
                 </SidebarMenu>
             </SidebarHeader>
             <SidebarContent className="gap-0">
+                <SidebarGroup className="pb-1">
+                    <div className="-ml-0.5">
+                        <Button variant="link" size="sm">
+                            <IconArrowNarrowLeft />
+                            Back
+                        </Button>
+                    </div>
+                    <div className="px-2 mt-1.5">
+                        <h3 className="font-semibold">{course?.data?.name}</h3>
+                    </div>
+                </SidebarGroup>
+                <NavMain
+                    items={[
+                        {
+                            title: 'Overview',
+                            url: `/lab/courses/${course_slug}`,
+                            icon: IconBook,
+                        },
+                    ]}
+                />
                 <NavMain
                     title="Lessons"
                     items={

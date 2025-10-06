@@ -20,7 +20,7 @@ export function Copyable({ value, copyValue }: CopyableProps) {
             <Button
                 size="icon-xs"
                 variant="ghost"
-                className={clsx('mt-0.5 transition-none', { 'text-green-400': copied })}
+                className={clsx('mt-0.5 transition-none', { '!text-green-300': copied })}
             >
                 {copied ? <IconCheck /> : <IconCopy />}
             </Button>
