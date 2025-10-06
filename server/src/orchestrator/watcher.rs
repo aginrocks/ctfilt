@@ -142,11 +142,14 @@ impl PodWatcher {
             DateTime::from_timestamp(expires_at, 0).wrap_err("Invalid expires-at value")?;
 
         let status = pod.status.wrap_err("Missing pod status")?;
-        let status = match status.phase.wrap_err("Missing pod phase")?.as_str() {
-            "Pending" => ChallengeStatus::Starting,
-            "Running" => ChallengeStatus::Running,
-            "Succeeded" | "Failed" => ChallengeStatus::Stopping,
-            _ => ChallengeStatus::Unknown,
+        let status = match pod.metadata.deletion_timestamp.is_some() {
+            true => ChallengeStatus::Stopping,
+            false => match status.phase.wrap_err("Missing pod phase")?.as_str() {
+                "Pending" => ChallengeStatus::Starting,
+                "Running" => ChallengeStatus::Running,
+                "Succeeded" | "Failed" => ChallengeStatus::Stopping,
+                _ => ChallengeStatus::Unknown,
+            },
         };
 
         Ok((
