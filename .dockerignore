@@ -1,0 +1,8 @@
+target
+*.md
+compose.dev.yaml
+Dockerfile
+node_modules
+*.hcl
+Justfile
+node_modules

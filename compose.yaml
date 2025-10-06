@@ -1,0 +1,46 @@
+services:
+  mongodb:
+    image: mongodb/mongodb-community-server:6.0.19-ubi8
+    volumes:
+      - ./data/mongodb:/data/db
+    restart: always
+    user: 1000:1000
+  valkey:
+    image: valkey/valkey:latest
+    restart: unless-stopped
+    volumes:
+      - ./data/valkey:/data
+
+  web:
+    image: git.agin.rocks/ctfilt-2/web:dev
+    restart: unless-stopped
+    labels:
+      traefik.enable: true
+      traefik.port: 3000
+      traefik.http.services.ctfilt-web.loadbalancer.server.port: "3000"
+      traefik.http.routers.ctfilt-web.rule: "Host(`ctf.agin.rocks`)"
+    networks:
+      - proxy
+      - default
+  server:
+    image: git.agin.rocks/ctfilt-2/server:dev
+    restart: unless-stopped
+    labels:
+      traefik.enable: true
+      traefik.port: 8080
+      traefik.http.services.ctfilt-api.loadbalancer.server.port: "8080"
+      traefik.http.routers.ctfilt-api.rule: "Host(`ctf.agin.rocks`) && (PathPrefix(`/api`) || PathPrefix(`/oidc`))"
+    networks:
+      - proxy
+      - default
+    volumes:
+      - ./config.toml:/app/config.toml:ro
+      - ./kubeconfig:/app/kubeconfig:ro
+    environment:
+      - KUBECONFIG=/app/kubeconfig
+
+networks:
+  default:
+  proxy:
+    external: true
+    name: proxy-network
