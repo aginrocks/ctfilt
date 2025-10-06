@@ -12,6 +12,13 @@ function deriveCountdown(to: Moment | null): CountdownResult | null {
 
     const diff = moment.duration(to.diff(moment()));
     const isOver = diff.asMilliseconds() <= 0;
+    if (isOver) {
+        return {
+            formatted: '00m 00s',
+            diff,
+            isOver: true,
+        };
+    }
 
     let formatted = '';
     if (diff.asHours() >= 1) {
