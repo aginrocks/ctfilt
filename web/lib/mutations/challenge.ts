@@ -54,3 +54,20 @@ export function useSubmitFlag(params?: AdditionalParams) {
 
     return mutation;
 }
+
+export function useExtendChallenge(params?: AdditionalParams) {
+    const mutation = $api.useMutation('post', '/api/challenges/{challenge_slug}/extend', {
+        onSuccess: (data, options) => {
+            toast.success('Challenge has been extended');
+            params?.onSuccess?.();
+        },
+        onError: (error) => {
+            toast.error('Failed to extend challenge', {
+                description: error.error,
+            });
+            params?.onError?.();
+        },
+    });
+
+    return mutation;
+}

@@ -106,12 +106,14 @@ impl ChallengeOrchestrator {
             .clone()
             .wrap_err("Missing hostname")?;
 
-        let assassin_label = format!("{}/expires_at", self.exterminator.settings.labels_prefix);
+        let assassin_label = format!("{}/expires-at", self.exterminator.settings.labels_prefix);
 
         let patch = json!({
-            "labels": {
-                assassin_label: exp.timestamp().to_string()
-            }
+            "metadata": {
+                "labels": {
+                    assassin_label: exp.timestamp().to_string()
+                },
+            },
         });
 
         pods.patch_metadata(&hostname, &PatchParams::default(), &Patch::Merge(patch))

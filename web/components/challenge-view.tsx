@@ -10,7 +10,7 @@ import {
 } from '@tabler/icons-react';
 import { Button } from './ui/button';
 import { useRunning } from '@lib/atoms';
-import { useStartChallenge, useStopChallenge } from '@lib/mutations';
+import { useExtendChallenge, useStartChallenge, useStopChallenge } from '@lib/mutations';
 import { useCallback } from 'react';
 import { Spinner } from './ui/spinner';
 import { useClipboard } from '@mantine/hooks';
@@ -26,6 +26,7 @@ export function ChallengeView({ challenge }: ChallengeViewProps) {
     const running = useRunning(challenge._id);
     const start = useStartChallenge();
     const stop = useStopChallenge();
+    const extend = useExtendChallenge();
 
     const remaining = useCountdown(running?.expires_at);
 
@@ -48,6 +49,16 @@ export function ChallengeView({ challenge }: ChallengeViewProps) {
             },
         });
     }, [stop.mutate, challenge.slug]);
+
+    const extendChallenge = useCallback(() => {
+        extend.mutate({
+            params: {
+                path: {
+                    challenge_slug: challenge.slug,
+                },
+            },
+        });
+    }, [extend.mutate, challenge.slug]);
 
     return (
         <div>
@@ -101,7 +112,7 @@ export function ChallengeView({ challenge }: ChallengeViewProps) {
                                     {stop.isPending ? <Spinner /> : <IconPlayerStop />} Stop
                                     Challenge
                                 </Button>
-                                <Button size="lg" variant="secondary">
+                                <Button size="lg" variant="secondary" onClick={extendChallenge}>
                                     <IconClockPlus />
                                     Extend Time
                                 </Button>

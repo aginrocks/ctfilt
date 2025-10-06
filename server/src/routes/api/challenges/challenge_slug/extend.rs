@@ -42,7 +42,7 @@ async fn extend_challenge(
 ) -> AxumResult<Json<KubernetesActionResult>> {
     state
         .orchestrator
-        .add_time(*user_id, challenge.id, Duration::minutes(30))
+        .add_time(challenge.id, *user_id, Duration::minutes(30))
         .await?;
 
     Ok(Json(KubernetesActionResult { success: true }))
