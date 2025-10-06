@@ -37,6 +37,7 @@ import { useAtomValue } from 'jotai';
 import { RunningChallenges } from '@lib/atoms';
 import clsx from 'clsx';
 import { Button } from '@components/ui/button';
+import Link from 'next/link';
 
 export function CourseSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     const { course_slug } = useParams<{ course_slug: string }>();
@@ -62,9 +63,11 @@ export function CourseSidebar({ ...props }: React.ComponentProps<typeof Sidebar>
             <SidebarContent className="gap-0">
                 <SidebarGroup className="pb-1">
                     <div className="-ml-0.5">
-                        <Button variant="link" size="sm">
-                            <IconArrowNarrowLeft />
-                            Back
+                        <Button variant="link" size="sm" asChild>
+                            <Link href="/lab">
+                                <IconArrowNarrowLeft />
+                                Back
+                            </Link>
                         </Button>
                     </div>
                     <div className="px-2 mt-1.5">

@@ -2,6 +2,7 @@
 import { ChallengeView } from '@components/challenge-view';
 import MarkdownRenderer from '@components/markdown';
 import { PageHeader } from '@components/page-header';
+import { Tag } from '@components/ui/tag';
 import { $api } from '@lib/providers/api';
 import { IconBox } from '@tabler/icons-react';
 import { useQuery } from '@tanstack/react-query';
@@ -48,10 +49,10 @@ export default function Page() {
             />
             <div className="flex justify-center p-6">
                 <div className="max-w-2xl w-full rounded-lg border shadow-md p-6">
-                    <div className="px-3.5 py-2 rounded-full bg-secondary/50 text-secondary-foreground text-sm font-medium max-w-max mb-3 flex items-center gap-1.5">
-                        <IconBox className="size-4" />
+                    <Tag>
+                        <IconBox />
                         Challenge
-                    </div>
+                    </Tag>
                     {challenge.data && <ChallengeView challenge={challenge.data} />}
                 </div>
             </div>
