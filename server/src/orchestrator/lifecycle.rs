@@ -1,10 +1,17 @@
-use chrono::Utc;
-use color_eyre::eyre::{Result, bail};
+use chrono::{Duration, Utc};
+use color_eyre::eyre::{Context, ContextCompat, Result, bail, eyre};
+use k8s_openapi::api::core::v1::Pod;
+use kube::{
+    Api,
+    api::{Patch, PatchParams},
+};
 use manifests::{ChallengeFlagMeta, ChallengeMetadata, ChallengeSpec};
 use mongodb::bson::oid::ObjectId;
+use serde_json::json;
 use tracing::{info, instrument};
 
 use crate::{
+    axum_error::{AxumError, AxumResult},
     orchestrator::{
         ChallengeStatus, RunningChallenge, RunningChallengeBuilder,
         resources::{DynamicFlag, ResourceProvisisonerBuilder},
@@ -70,6 +77,48 @@ impl ChallengeOrchestrator {
             .status(ChallengeStatus::Starting)
             .build()?;
         Ok(response)
+    }
+
+    pub async fn add_time(
+        &self,
+        id: ObjectId,
+        user_id: ObjectId,
+        time: Duration,
+    ) -> AxumResult<()> {
+        let user_challenges = self
+            .watcher
+            .users_state
+            .get(&user_id)
+            .ok_or_else(|| AxumError::not_found(eyre!("Challenge is not running")))?;
+
+        let challenge_data = user_challenges
+            .value()
+            .challenges
+            .get(&id)
+            .ok_or_else(|| AxumError::not_found(eyre!("Challenge is not running")))?;
+
+        let exp = challenge_data.expires_at + time;
+
+        let pods: Api<Pod> = Api::default_namespaced(self.kube.clone());
+
+        let hostname = challenge_data
+            .hostname
+            .clone()
+            .wrap_err("Missing hostname")?;
+
+        let assassin_label = format!("{}/expires_at", self.exterminator.settings.labels_prefix);
+
+        let patch = json!({
+            "labels": {
+                assassin_label: exp.timestamp().to_string()
+            }
+        });
+
+        pods.patch_metadata(&hostname, &PatchParams::default(), &Patch::Merge(patch))
+            .await
+            .wrap_err("Failed to modify expiry date")?;
+
+        Ok(())
     }
 
     pub fn generate_flags(

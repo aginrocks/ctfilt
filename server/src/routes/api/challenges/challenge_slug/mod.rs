@@ -1,3 +1,4 @@
+mod extend;
 mod start;
 mod stop;
 mod submit;
@@ -33,6 +34,7 @@ pub fn routes() -> OpenApiRouter<AppState> {
         .nest("/start", start::routes())
         .nest("/stop", stop::routes())
         .nest("/submit", submit::routes())
+        .nest("/extend", extend::routes())
         .layer(middleware::from_fn(challenge_middleware))
         .merge(system)
 }

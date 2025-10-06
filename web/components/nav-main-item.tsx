@@ -41,6 +41,7 @@ export function NavMainItemComponent({ item }: NavMainItemProps) {
                     <Link href={item.url}>
                         <item.icon />
                         <span>{item.title}</span>
+                        {item.rightSection}
                     </Link>
                 </SidebarMenuButton>
                 {item.items?.length ? (

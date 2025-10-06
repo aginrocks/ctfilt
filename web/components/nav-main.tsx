@@ -19,6 +19,7 @@ export type NavMainItem = {
     isActive?: boolean;
     defaultOpen?: boolean;
     items?: NavMainSubItem[];
+    rightSection?: React.ReactNode;
 };
 
 export type NavMainProps = {

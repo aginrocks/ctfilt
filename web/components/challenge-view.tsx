@@ -3,6 +3,7 @@ import MarkdownRenderer from './markdown';
 import {
     IconBox,
     IconCheck,
+    IconClockPlus,
     IconCopy,
     IconPlayerPlayFilled,
     IconPlayerStop,
@@ -69,7 +70,7 @@ export function ChallengeView({ challenge }: ChallengeViewProps) {
                         <div className="font-medium text-xs text-muted-foreground mb-0.5">
                             IP Address
                         </div>
-                        <Copyable value={'100.64.0.10'} />
+                        <Copyable value={running.ip || 'Unknown'} />
                     </div>
                     <div className="flex-2">
                         <div className="font-medium text-xs text-muted-foreground mb-0.5">
@@ -81,7 +82,7 @@ export function ChallengeView({ challenge }: ChallengeViewProps) {
                     </div>
                 </div>
             )}
-            <div className="mt-4">
+            <div className="mt-4 flex gap-3">
                 {running ? (
                     <>
                         {running.status === 'starting' && (
@@ -95,9 +96,16 @@ export function ChallengeView({ challenge }: ChallengeViewProps) {
                             </Button>
                         )}
                         {running.status === 'running' && (
-                            <Button size="lg" variant="lightRed" onClick={stopChallenge}>
-                                {stop.isPending ? <Spinner /> : <IconPlayerStop />} Stop Challenge
-                            </Button>
+                            <>
+                                <Button size="lg" variant="lightRed" onClick={stopChallenge}>
+                                    {stop.isPending ? <Spinner /> : <IconPlayerStop />} Stop
+                                    Challenge
+                                </Button>
+                                <Button size="lg" variant="secondary">
+                                    <IconClockPlus />
+                                    Extend Time
+                                </Button>
+                            </>
                         )}
                     </>
                 ) : (

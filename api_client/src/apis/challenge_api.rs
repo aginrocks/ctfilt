@@ -15,6 +15,16 @@ use crate::{apis::ResponseContent, models};
 use super::{Error, configuration, ContentType};
 
 
+/// struct for typed errors of method [`extend_challenge`]
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(untagged)]
+pub enum ExtendChallengeError {
+    Status401(models::UnauthorizedError),
+    Status403(models::GenericError),
+    Status404(models::NotFoundError),
+    UnknownValue(serde_json::Value),
+}
+
 /// struct for typed errors of method [`get_challenge`]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(untagged)]
@@ -60,6 +70,43 @@ pub enum UpdateChallengeError {
     UnknownValue(serde_json::Value),
 }
 
+
+/// This endpoint adds more time to a challenge instance.
+pub async fn extend_challenge(configuration: &configuration::Configuration, challenge_slug: &str) -> Result<models::KubernetesActionResult, Error<ExtendChallengeError>> {
+    // add a prefix to parameters to efficiently prevent name collisions
+    let p_path_challenge_slug = challenge_slug;
+
+    let uri_str = format!("{}/api/challenges/{challenge_slug}/extend", configuration.base_path, challenge_slug=crate::apis::urlencode(p_path_challenge_slug));
+    let mut req_builder = configuration.client.request(reqwest::Method::POST, &uri_str);
+
+    if let Some(ref user_agent) = configuration.user_agent {
+        req_builder = req_builder.header(reqwest::header::USER_AGENT, user_agent.clone());
+    }
+
+    let req = req_builder.build()?;
+    let resp = configuration.client.execute(req).await?;
+
+    let status = resp.status();
+    let content_type = resp
+        .headers()
+        .get("content-type")
+        .and_then(|v| v.to_str().ok())
+        .unwrap_or("application/octet-stream");
+    let content_type = super::ContentType::from(content_type);
+
+    if !status.is_client_error() && !status.is_server_error() {
+        let content = resp.text().await?;
+        match content_type {
+            ContentType::Json => serde_json::from_str(&content).map_err(Error::from),
+            ContentType::Text => return Err(Error::from(serde_json::Error::custom("Received `text/plain` content type response that cannot be converted to `models::KubernetesActionResult`"))),
+            ContentType::Unsupported(unknown_type) => return Err(Error::from(serde_json::Error::custom(format!("Received `{unknown_type}` content type response that cannot be converted to `models::KubernetesActionResult`")))),
+        }
+    } else {
+        let content = resp.text().await?;
+        let entity: Option<ExtendChallengeError> = serde_json::from_str(&content).ok();
+        Err(Error::ResponseError(ResponseContent { status, content, entity }))
+    }
+}
 
 pub async fn get_challenge(configuration: &configuration::Configuration, challenge_slug: &str) -> Result<models::Challenge, Error<GetChallengeError>> {
     // add a prefix to parameters to efficiently prevent name collisions
