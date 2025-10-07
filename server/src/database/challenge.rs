@@ -3,7 +3,7 @@ use futures::TryStreamExt;
 use manifests::ChallengeMetadata;
 use mongodb::{
     Collection, Database,
-    bson::{Document, doc, oid::ObjectId},
+    bson::{doc, oid::ObjectId},
 };
 use partial_struct::Partial;
 use serde::{Deserialize, Serialize};

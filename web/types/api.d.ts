@@ -431,10 +431,35 @@ export interface components {
             /** @enum {string} */
             type: "dynamic";
         } | {
+            /** @description Connection hints for the user to connect to the challenge */
+            connection_hints?: components["schemas"]["ConnectionHint"][] | null;
             /** @description Containers that should be created in the challenge Pod */
             containers: components["schemas"]["ChallengeContainer"][];
             /** @enum {string} */
             type: "container";
+        };
+        ConnectionHint: {
+            password?: string | null;
+            /** Format: int32 */
+            port: number;
+            /** @enum {string} */
+            type: "ssh";
+            username: string;
+        } | {
+            /** Format: int32 */
+            port: number;
+            /** @enum {string} */
+            type: "http";
+        } | {
+            /** Format: int32 */
+            port: number;
+            /** @enum {string} */
+            type: "tcp";
+        } | {
+            /** Format: int32 */
+            port: number;
+            /** @enum {string} */
+            type: "udp";
         };
         Course: components["schemas"]["CourseMetadata_CourseItem_String"] & {
             _id: string;

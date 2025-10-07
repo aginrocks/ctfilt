@@ -6,8 +6,10 @@ use std::convert::Infallible;
 use clap::Subcommand;
 use gix::{Repository, ThreadSafeRepository, status};
 use miette::{IntoDiagnostic, Result};
+use owo_colors::OwoColorize;
 
 use crate::{
+    config::init_config,
     errors::{DityWorktree, NoGitRepo, NoGitWorkdir, NoManifest},
     git::{RepoType, detect_repo_type},
 };
@@ -31,6 +33,10 @@ pub async fn handle_apply() -> Result<()> {
 
     let directory = local_repo.workdir().ok_or(NoGitWorkdir)?;
     let repo_type = detect_repo_type(directory).await;
+
+    let config = init_config().await?;
+
+    println!("Applying to {}", config.base_url.green().bold());
 
     match repo_type {
         RepoType::Course => course::run(repo, directory).await,

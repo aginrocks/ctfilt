@@ -31,7 +31,7 @@ impl ChallengeOrchestrator {
         subject: &str,
     ) -> Result<RunningChallenge> {
         let containers = match metadata.spec {
-            ChallengeSpec::Container { ref containers } => containers.clone(),
+            ChallengeSpec::Container { ref containers, .. } => containers.clone(),
             _ => bail!("This challenge cannot be started"),
         };
 
