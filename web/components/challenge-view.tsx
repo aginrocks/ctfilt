@@ -7,6 +7,7 @@ import {
     IconCopy,
     IconPlayerPlayFilled,
     IconPlayerStop,
+    IconSend,
 } from '@tabler/icons-react';
 import { Button } from './ui/button';
 import { useRunning } from '@lib/atoms';
@@ -17,6 +18,8 @@ import { useClipboard } from '@mantine/hooks';
 import clsx from 'clsx';
 import { Copyable } from './copyable';
 import { useCountdown } from '@lib/hooks';
+import { FlagInput } from './flag-input';
+import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 
 export type ChallengeViewProps = {
     challenge: paths['/api/challenges/{challenge_slug}']['get']['responses']['200']['content']['application/json'];
@@ -29,6 +32,7 @@ export function ChallengeView({ challenge }: ChallengeViewProps) {
     const extend = useExtendChallenge();
 
     const remaining = useCountdown(running?.expires_at);
+    const canExtend = remaining.seconds <= 30 * 60;
 
     const startChallenge = useCallback(() => {
         start.mutate({
@@ -69,6 +73,11 @@ export function ChallengeView({ challenge }: ChallengeViewProps) {
                 <p className="italic font-medium text-muted-foreground">{challenge.description}</p>
             </div>
             <MarkdownRenderer>{challenge.details}</MarkdownRenderer>
+            {/*{running?.status === 'running' && (
+                <div className="mt-4">
+                    <FlagInput challengeSlug={challenge.slug} />
+                </div>
+            )}*/}
             {running?.status === 'running' && (
                 <div className="px-3 py-2.5 border rounded-md mt-4 flex gap-4">
                     <div className="flex-3">
@@ -88,12 +97,12 @@ export function ChallengeView({ challenge }: ChallengeViewProps) {
                             Expires in
                         </div>
                         <h3 className="font-lg font-medium font-mono hover:foreground/90">
-                            {remaining}
+                            {remaining.formatted}
                         </h3>
                     </div>
                 </div>
             )}
-            <div className="mt-4 flex gap-3">
+            <div className="mt-3 flex gap-2.5">
                 {running ? (
                     <>
                         {running.status === 'starting' && (
@@ -108,13 +117,50 @@ export function ChallengeView({ challenge }: ChallengeViewProps) {
                         )}
                         {running.status === 'running' && (
                             <>
-                                <Button size="lg" variant="lightRed" onClick={stopChallenge}>
-                                    {stop.isPending ? <Spinner /> : <IconPlayerStop />} Stop
-                                    Challenge
-                                </Button>
-                                <Button size="lg" variant="secondary" onClick={extendChallenge}>
-                                    <IconClockPlus />
-                                    Extend Time
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <Button
+                                            size="icon-lg"
+                                            variant="lightRed"
+                                            onClick={stopChallenge}
+                                        >
+                                            {stop.isPending ? <Spinner /> : <IconPlayerStop />}
+                                        </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent>Stop challenge</TooltipContent>
+                                </Tooltip>
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <div>
+                                            <Button
+                                                size="icon-lg"
+                                                variant="secondary"
+                                                onClick={extendChallenge}
+                                                disabled={!canExtend || extend.isPending}
+                                            >
+                                                {extend.isPending ? <Spinner /> : <IconClockPlus />}
+                                            </Button>
+                                        </div>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                        {canExtend ? (
+                                            'Extend challenge time'
+                                        ) : (
+                                            <div className="w-50 py-0.5">
+                                                <div className="font-bold text-sm">
+                                                    Unable to Extend
+                                                </div>
+                                                <div>
+                                                    You can only extend the challenge if less than
+                                                    <b> 30 minutes </b>remain
+                                                </div>
+                                            </div>
+                                        )}
+                                    </TooltipContent>
+                                </Tooltip>
+                                <FlagInput challengeSlug={challenge.slug} />
+                                <Button size="icon-lg" variant="default">
+                                    <IconSend />
                                 </Button>
                             </>
                         )}
