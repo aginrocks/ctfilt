@@ -159,9 +159,6 @@ export function ChallengeView({ challenge }: ChallengeViewProps) {
                                     </TooltipContent>
                                 </Tooltip>
                                 <FlagInput challengeSlug={challenge.slug} />
-                                <Button size="icon-lg" variant="default">
-                                    <IconSend />
-                                </Button>
                             </>
                         )}
                     </>
