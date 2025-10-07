@@ -1,4 +1,7 @@
-use std::{collections::BTreeMap, sync::Arc};
+use std::{
+    collections::{BTreeMap, HashMap},
+    sync::Arc,
+};
 
 use chrono::{Duration, Utc};
 use color_eyre::eyre::{Context, ContextCompat, Result};
@@ -37,6 +40,7 @@ pub struct DynamicFlag {
     pub slug: String,
     pub flag: String,
     pub mount_path: String,
+    pub container: Option<String>,
     pub permissions: Option<i32>,
 }
 
@@ -268,28 +272,40 @@ impl ResourceProvisisoner {
         // TODO: Add support for mounting flags to specific containers (for now they will be mounted to all containers)
         // TODO: Add a challenge container and mount flags
 
-        let flag_mounts = flags
-            .iter()
-            .map(|flag| VolumeMount {
-                name: "flag".to_string(),
-                mount_path: flag.mount_path.clone(),
-                sub_path: Some(flag.slug.clone()),
-                read_only: Some(true),
-                ..Default::default()
-            })
-            .collect::<Vec<_>>();
+        let mut flag_mounts: HashMap<String, Vec<VolumeMount>> = HashMap::new();
+
+        for flag in &flags {
+            flag_mounts
+                .entry(flag.container.clone().unwrap_or("_default".to_string()))
+                .or_default()
+                .push(VolumeMount {
+                    name: "flag".to_string(),
+                    mount_path: flag.mount_path.clone(),
+                    sub_path: Some(flag.slug.clone()),
+                    read_only: Some(true),
+                    ..Default::default()
+                })
+        }
 
         let containers = spec_containers
             .into_iter()
-            .map(|c| Container {
-                name: c.name,
-                image: Some(c.image),
-                args: c.args,
-                command: c.command,
-                volume_mounts: Some(flag_mounts.clone()),
-                // TODO: Remove when proper versioning is in place
-                image_pull_policy: Some("Always".to_string()),
-                ..Default::default()
+            .map(|c| {
+                let mounts = [
+                    flag_mounts.get(&c.name).cloned().unwrap_or_default(),
+                    flag_mounts.get("_default").cloned().unwrap_or_default(),
+                ]
+                .concat();
+
+                Container {
+                    name: c.name,
+                    image: Some(c.image),
+                    args: c.args,
+                    command: c.command,
+                    volume_mounts: Some(mounts),
+                    // TODO: Remove when proper versioning is in place
+                    image_pull_policy: Some("Always".to_string()),
+                    ..Default::default()
+                }
             })
             .collect::<Vec<_>>();
 

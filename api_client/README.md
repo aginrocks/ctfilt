@@ -69,6 +69,7 @@ Class | Method | HTTP request | Description
  - [ConnectionHintOneOf1](docs/ConnectionHintOneOf1.md)
  - [ConnectionHintOneOf2](docs/ConnectionHintOneOf2.md)
  - [ConnectionHintOneOf3](docs/ConnectionHintOneOf3.md)
+ - [ConnectionHintOneOf4](docs/ConnectionHintOneOf4.md)
  - [Course](docs/Course.md)
  - [CourseDifficulty](docs/CourseDifficulty.md)
  - [CourseItemType](docs/CourseItemType.md)

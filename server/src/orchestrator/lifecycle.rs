@@ -138,11 +138,13 @@ impl ChallengeOrchestrator {
             .filter_map(|flag| match flag.meta.spec {
                 ChallengeFlagMeta::DynamicMount {
                     ref mount_path,
+                    ref container,
                     permissions,
                 } => Some(DynamicFlag {
                     flag: flag.value.clone(),
                     mount_path: mount_path.clone(),
                     slug: flag.meta.slug.clone(),
+                    container: container.clone(),
                     permissions,
                 }),
                 _ => None,

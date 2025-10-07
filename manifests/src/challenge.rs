@@ -25,6 +25,9 @@ pub enum ChallengeFlagMeta {
         /// Where the flag should be mounted inside the container
         mount_path: String,
 
+        /// To which container the flag should be mounted (if not provided, will be mounted to all containers)
+        container: Option<String>,
+
         /// File permissions for the flag file, in octal format (e.g. 644, defaults to 600)
         #[serde(
             default,

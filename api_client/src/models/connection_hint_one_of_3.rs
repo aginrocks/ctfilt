@@ -13,16 +13,16 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Default, Debug, PartialEq, Serialize, Deserialize)]
 pub struct ConnectionHintOneOf3 {
-    #[serde(rename = "port")]
-    pub port: i32,
+    #[serde(rename = "port", default, with = "::serde_with::rust::double_option", skip_serializing_if = "Option::is_none")]
+    pub port: Option<Option<i32>>,
     #[serde(rename = "type")]
     pub r#type: Type,
 }
 
 impl ConnectionHintOneOf3 {
-    pub fn new(port: i32, r#type: Type) -> ConnectionHintOneOf3 {
+    pub fn new(r#type: Type) -> ConnectionHintOneOf3 {
         ConnectionHintOneOf3 {
-            port,
+            port: None,
             r#type,
         }
     }

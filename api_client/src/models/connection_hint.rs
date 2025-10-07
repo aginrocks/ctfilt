@@ -18,6 +18,7 @@ pub enum ConnectionHint {
     ConnectionHintOneOf1(Box<models::ConnectionHintOneOf1>),
     ConnectionHintOneOf2(Box<models::ConnectionHintOneOf2>),
     ConnectionHintOneOf3(Box<models::ConnectionHintOneOf3>),
+    ConnectionHintOneOf4(Box<models::ConnectionHintOneOf4>),
 }
 
 impl Default for ConnectionHint {
@@ -36,6 +37,8 @@ pub enum Type {
     Tcp,
     #[serde(rename = "udp")]
     Udp,
+    #[serde(rename = "other")]
+    Other,
 }
 
 impl Default for Type {

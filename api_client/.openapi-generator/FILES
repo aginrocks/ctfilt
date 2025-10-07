@@ -20,6 +20,7 @@ docs/ConnectionHintOneOf.md
 docs/ConnectionHintOneOf1.md
 docs/ConnectionHintOneOf2.md
 docs/ConnectionHintOneOf3.md
+docs/ConnectionHintOneOf4.md
 docs/Course.md
 docs/CourseApi.md
 docs/CourseDifficulty.md
@@ -81,6 +82,7 @@ src/models/connection_hint_one_of.rs
 src/models/connection_hint_one_of_1.rs
 src/models/connection_hint_one_of_2.rs
 src/models/connection_hint_one_of_3.rs
+src/models/connection_hint_one_of_4.rs
 src/models/course.rs
 src/models/course_difficulty.rs
 src/models/course_item_type.rs

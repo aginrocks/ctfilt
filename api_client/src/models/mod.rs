@@ -32,6 +32,8 @@ pub mod connection_hint_one_of_2;
 pub use self::connection_hint_one_of_2::ConnectionHintOneOf2;
 pub mod connection_hint_one_of_3;
 pub use self::connection_hint_one_of_3::ConnectionHintOneOf3;
+pub mod connection_hint_one_of_4;
+pub use self::connection_hint_one_of_4::ConnectionHintOneOf4;
 pub mod course;
 pub use self::course::Course;
 pub mod course_difficulty;

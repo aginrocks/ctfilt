@@ -12,17 +12,20 @@ use crate::models;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Default, Debug, PartialEq, Serialize, Deserialize)]
-pub struct ConnectionHintOneOf2 {
+pub struct ConnectionHintOneOf4 {
     #[serde(rename = "port", default, with = "::serde_with::rust::double_option", skip_serializing_if = "Option::is_none")]
     pub port: Option<Option<i32>>,
+    #[serde(rename = "protocol")]
+    pub protocol: String,
     #[serde(rename = "type")]
     pub r#type: Type,
 }
 
-impl ConnectionHintOneOf2 {
-    pub fn new(r#type: Type) -> ConnectionHintOneOf2 {
-        ConnectionHintOneOf2 {
+impl ConnectionHintOneOf4 {
+    pub fn new(protocol: String, r#type: Type) -> ConnectionHintOneOf4 {
+        ConnectionHintOneOf4 {
             port: None,
+            protocol,
             r#type,
         }
     }
@@ -30,13 +33,13 @@ impl ConnectionHintOneOf2 {
 /// 
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Serialize, Deserialize)]
 pub enum Type {
-    #[serde(rename = "tcp")]
-    Tcp,
+    #[serde(rename = "other")]
+    Other,
 }
 
 impl Default for Type {
     fn default() -> Type {
-        Self::Tcp
+        Self::Other
     }
 }
 

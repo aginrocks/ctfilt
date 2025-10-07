@@ -15,21 +15,21 @@ use serde::{Deserialize, Serialize};
 pub struct ConnectionHintOneOf {
     #[serde(rename = "password", default, with = "::serde_with::rust::double_option", skip_serializing_if = "Option::is_none")]
     pub password: Option<Option<String>>,
-    #[serde(rename = "port")]
-    pub port: i32,
+    #[serde(rename = "port", default, with = "::serde_with::rust::double_option", skip_serializing_if = "Option::is_none")]
+    pub port: Option<Option<i32>>,
     #[serde(rename = "type")]
     pub r#type: Type,
-    #[serde(rename = "username")]
-    pub username: String,
+    #[serde(rename = "username", default, with = "::serde_with::rust::double_option", skip_serializing_if = "Option::is_none")]
+    pub username: Option<Option<String>>,
 }
 
 impl ConnectionHintOneOf {
-    pub fn new(port: i32, r#type: Type, username: String) -> ConnectionHintOneOf {
+    pub fn new(r#type: Type) -> ConnectionHintOneOf {
         ConnectionHintOneOf {
             password: None,
-            port,
+            port: None,
             r#type,
-            username,
+            username: None,
         }
     }
 }
