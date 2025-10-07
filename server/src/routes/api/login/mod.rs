@@ -28,5 +28,5 @@ pub fn routes() -> OpenApiRouter<AppState> {
 /// Log in
 #[utoipa::path(method(get), path = "/", tag = "Auth")]
 async fn log_in() -> impl IntoResponse {
-    Redirect::to("/")
+    Redirect::to("/lab")
 }

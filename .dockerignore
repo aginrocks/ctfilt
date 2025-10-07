@@ -6,3 +6,4 @@ node_modules
 *.hcl
 Justfile
 node_modules
+config.toml
