@@ -1,6 +1,7 @@
 import { RunningChallenge } from '@/types/server/RunningChallenge';
 import { Icon, IconStopwatch, IconWorld } from '@tabler/icons-react';
 import { useCountdown } from '@lib/hooks';
+import { useModals } from '@lib/modals/manager';
 
 export type ChallengeLabelProps = {
     icon: Icon;
@@ -19,8 +20,17 @@ function ChallengeLabel({ icon: Icon, label }: ChallengeLabelProps) {
 export function RunningChallengeBox({ hostname, expires_at }: RunningChallenge) {
     const countdown = useCountdown(expires_at);
 
+    const modals = useModals();
+
     return (
-        <div className="p-2.5 border rounded-md cursor-pointer hover:bg-secondary bg-secondary/80 transition-colors">
+        <div
+            className="p-2.5 border rounded-md cursor-pointer hover:bg-secondary bg-secondary/80 transition-colors"
+            onClick={() =>
+                modals.show('Challenge', {
+                    slug: 'traversing-trust',
+                })
+            }
+        >
             {/*<div className="flex items-center gap-1 text-muted-foreground mb-1">
                 <IconBox className="size-3.5" />
                 <p className="text-xs font-medium">Challenge</p>

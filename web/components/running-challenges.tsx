@@ -7,7 +7,7 @@ export function RunningChallengesView() {
 
     if (challenges?.length === 0) return null;
     return (
-        <div>
+        <div className="flex flex-col gap-2">
             {challenges?.map((c) => (
                 <RunningChallengeBox key={c._id} {...c} />
             ))}
