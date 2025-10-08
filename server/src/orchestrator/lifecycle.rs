@@ -29,7 +29,7 @@ impl ChallengeOrchestrator {
         metadata: &ChallengeMetadata,
         user_id: ObjectId,
         subject: &str,
-    ) -> Result<RunningChallenge> {
+    ) -> Result<()> {
         let containers = match metadata.spec {
             ChallengeSpec::Container { ref containers, .. } => containers.clone(),
             _ => bail!("This challenge cannot be started"),
@@ -63,20 +63,13 @@ impl ChallengeOrchestrator {
         // TODO: Add expiry
 
         // Creating a Deployment
-        let hostname = provisioner
+        let _hostname = provisioner
             .provision_challenge_pod(&ts_secret_name, &secret_name, flags, containers)
             .await?;
 
         info!("Kubernetes resources provisioned");
 
-        let response = RunningChallengeBuilder::default()
-            .id(id)
-            .ip(None)
-            .expires_at(Utc::now())
-            .hostname(Some(hostname))
-            .status(ChallengeStatus::Starting)
-            .build()?;
-        Ok(response)
+        Ok(())
     }
 
     pub async fn add_time(
