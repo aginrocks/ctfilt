@@ -63,8 +63,8 @@ export default function Page() {
                     </div>
                     <p className="text-muted-foreground">{course?.data?.description}</p>
                     <div className="px-4 py-3.5 mt-4 border rounded-md">
-                        <h3 className="text-lg font-semibold">This course includes</h3>
-                        <ul className="ml-1 mt-0.5 list-disc list-inside">
+                        <h3 className="text-lg font-bold">This course includes</h3>
+                        <ul className="ml-1 list-disc list-inside [&>li]:mt-2">
                             {course.data?.objectives?.map((obj, i) => (
                                 <li key={i}>{obj}</li>
                             ))}

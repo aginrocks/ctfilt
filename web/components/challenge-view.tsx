@@ -78,95 +78,103 @@ export function ChallengeView({ challenge }: ChallengeViewProps) {
                     <FlagInput challengeSlug={challenge.slug} />
                 </div>
             )}*/}
-            {running?.status === 'running' && (
-                <div className="px-3 py-2.5 border rounded-md mt-4 flex gap-4">
-                    <div className="flex-3">
-                        <div className="font-medium text-xs text-muted-foreground mb-0.5">
-                            Hostname
+            <div className="flex flex-col gap-3 mt-4">
+                {running?.status === 'running' && (
+                    <div className="px-3 py-2.5 border rounded-md flex gap-4">
+                        <div className="flex-3">
+                            <div className="font-medium text-xs text-muted-foreground mb-0.5">
+                                Hostname
+                            </div>
+                            <Copyable value={running.hostname} />
                         </div>
-                        <Copyable value={running.hostname} />
-                    </div>
-                    <div className="flex-2">
-                        <div className="font-medium text-xs text-muted-foreground mb-0.5">
-                            IP Address
+                        <div className="flex-2">
+                            <div className="font-medium text-xs text-muted-foreground mb-0.5">
+                                IP Address
+                            </div>
+                            <Copyable value={running.ip || 'Unknown'} />
                         </div>
-                        <Copyable value={running.ip || 'Unknown'} />
-                    </div>
-                    <div className="flex-2">
-                        <div className="font-medium text-xs text-muted-foreground mb-0.5">
-                            Expires in
+                        <div className="flex-2">
+                            <div className="font-medium text-xs text-muted-foreground mb-0.5">
+                                Expires in
+                            </div>
+                            <h3 className="font-lg font-medium font-mono hover:foreground/90">
+                                {remaining.formatted}
+                            </h3>
                         </div>
-                        <h3 className="font-lg font-medium font-mono hover:foreground/90">
-                            {remaining.formatted}
-                        </h3>
                     </div>
-                </div>
-            )}
-            <div className="mt-3 flex gap-2.5">
-                {running ? (
-                    <>
-                        {running.status === 'starting' && (
-                            <Button size="lg" variant="lightOrange">
-                                <Spinner /> Starting Challenge
-                            </Button>
-                        )}
-                        {running.status === 'stopping' && (
-                            <Button size="lg" variant="lightOrange">
-                                <Spinner /> Stopping Challenge
-                            </Button>
-                        )}
-                        {running.status === 'running' && (
-                            <>
-                                <Tooltip>
-                                    <TooltipTrigger asChild>
-                                        <Button
-                                            size="icon-lg"
-                                            variant="lightRed"
-                                            onClick={stopChallenge}
-                                        >
-                                            {stop.isPending ? <Spinner /> : <IconPlayerStop />}
-                                        </Button>
-                                    </TooltipTrigger>
-                                    <TooltipContent>Stop challenge</TooltipContent>
-                                </Tooltip>
-                                <Tooltip>
-                                    <TooltipTrigger asChild>
-                                        <div>
+                )}
+                <div className="flex gap-2.5">
+                    {running ? (
+                        <>
+                            {running.status === 'starting' && (
+                                <Button size="lg" variant="lightOrange">
+                                    <Spinner /> Starting Challenge
+                                </Button>
+                            )}
+                            {running.status === 'stopping' && (
+                                <Button size="lg" variant="lightOrange">
+                                    <Spinner /> Stopping Challenge
+                                </Button>
+                            )}
+                            {running.status === 'running' && (
+                                <>
+                                    <Tooltip>
+                                        <TooltipTrigger asChild>
                                             <Button
                                                 size="icon-lg"
-                                                variant="secondary"
-                                                onClick={extendChallenge}
-                                                disabled={!canExtend || extend.isPending}
+                                                variant="lightRed"
+                                                onClick={stopChallenge}
                                             >
-                                                {extend.isPending ? <Spinner /> : <IconClockPlus />}
+                                                {stop.isPending ? <Spinner /> : <IconPlayerStop />}
                                             </Button>
-                                        </div>
-                                    </TooltipTrigger>
-                                    <TooltipContent>
-                                        {canExtend ? (
-                                            'Extend challenge time'
-                                        ) : (
-                                            <div className="w-50 py-0.5">
-                                                <div className="font-bold text-sm">
-                                                    Unable to Extend
-                                                </div>
-                                                <div>
-                                                    You can only extend the challenge if less than
-                                                    <b> 30 minutes </b>remain
-                                                </div>
+                                        </TooltipTrigger>
+                                        <TooltipContent>Stop challenge</TooltipContent>
+                                    </Tooltip>
+                                    <Tooltip>
+                                        <TooltipTrigger asChild>
+                                            <div>
+                                                <Button
+                                                    size="icon-lg"
+                                                    variant="secondary"
+                                                    onClick={extendChallenge}
+                                                    disabled={!canExtend || extend.isPending}
+                                                >
+                                                    {extend.isPending ? (
+                                                        <Spinner />
+                                                    ) : (
+                                                        <IconClockPlus />
+                                                    )}
+                                                </Button>
                                             </div>
-                                        )}
-                                    </TooltipContent>
-                                </Tooltip>
-                                <FlagInput challengeSlug={challenge.slug} />
-                            </>
-                        )}
-                    </>
-                ) : (
-                    <Button size="lg" onClick={startChallenge}>
-                        {start.isPending ? <Spinner /> : <IconPlayerPlayFilled />} Start Challenge
-                    </Button>
-                )}
+                                        </TooltipTrigger>
+                                        <TooltipContent>
+                                            {canExtend ? (
+                                                'Extend challenge time'
+                                            ) : (
+                                                <div className="w-50 py-0.5">
+                                                    <div className="font-bold text-sm">
+                                                        Unable to Extend
+                                                    </div>
+                                                    <div>
+                                                        You can only extend the challenge if less
+                                                        than
+                                                        <b> 30 minutes </b>remain
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </TooltipContent>
+                                    </Tooltip>
+                                    <FlagInput challengeSlug={challenge.slug} />
+                                </>
+                            )}
+                        </>
+                    ) : (
+                        <Button size="lg" onClick={startChallenge}>
+                            {start.isPending ? <Spinner /> : <IconPlayerPlayFilled />} Start
+                            Challenge
+                        </Button>
+                    )}
+                </div>
             </div>
         </div>
     );
