@@ -111,6 +111,7 @@ async fn main() -> Result<()> {
         headscale_config.clone(),
         settings.headscale.public_url.clone(),
         settings.extermination.clone(),
+        store.clone(),
     ));
 
     let orchestrator_watcher = orchestrator.clone();

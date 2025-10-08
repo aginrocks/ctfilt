@@ -8,7 +8,7 @@ use headscale::apis::configuration::Configuration;
 use kube::Client;
 use std::sync::Arc;
 
-use crate::utils::FlagGenerator;
+use crate::{database::DatabaseStore, utils::FlagGenerator};
 
 pub use lifecycle::*;
 pub use types::*;
@@ -30,6 +30,7 @@ impl ChallengeOrchestrator {
         headscale_config: Arc<Configuration>,
         headscale_public_url: String,
         extermination: Extermination,
+        db_store: DatabaseStore,
     ) -> Self {
         Self {
             kube: kube.clone(),
@@ -37,7 +38,7 @@ impl ChallengeOrchestrator {
             headscale_config,
             headscale_public_url,
             exterminator: Exterminator::new(kube.clone(), extermination.clone()),
-            watcher: PodWatcher::new(kube, extermination),
+            watcher: PodWatcher::new(kube, extermination, db_store),
         }
     }
 }

@@ -17,7 +17,13 @@ function ChallengeLabel({ icon: Icon, label }: ChallengeLabelProps) {
     );
 }
 
-export function RunningChallengeBox({ hostname, expires_at }: RunningChallenge) {
+export function RunningChallengeBox({
+    hostname,
+    expires_at,
+    status,
+    name,
+    slug,
+}: RunningChallenge) {
     const countdown = useCountdown(expires_at);
 
     const modals = useModals();
@@ -27,7 +33,7 @@ export function RunningChallengeBox({ hostname, expires_at }: RunningChallenge) 
             className="p-2.5 border rounded-md cursor-pointer hover:bg-secondary bg-secondary/80 transition-colors"
             onClick={() =>
                 modals.show('Challenge', {
-                    slug: 'traversing-trust',
+                    slug,
                 })
             }
         >
@@ -35,10 +41,12 @@ export function RunningChallengeBox({ hostname, expires_at }: RunningChallenge) 
                 <IconBox className="size-3.5" />
                 <p className="text-xs font-medium">Challenge</p>
             </div>*/}
-            <p className="font-medium text-sm mb-1.5">Challenge Name</p>
+            <p className="font-medium text-sm mb-1.5">{name}</p>
             <div className="flex flex-col gap-1">
                 <ChallengeLabel icon={IconStopwatch} label={countdown.formatted} />
-                <ChallengeLabel icon={IconWorld} label={hostname ?? 'Unknown'} />
+                {status === 'running' && (
+                    <ChallengeLabel icon={IconWorld} label={hostname ?? 'Unknown'} />
+                )}
             </div>
         </div>
     );

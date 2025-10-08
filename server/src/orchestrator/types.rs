@@ -24,8 +24,22 @@ pub struct RunningChallenge {
     #[schema(value_type = String)]
     #[ts(as = "String")]
     pub id: ObjectId,
+
     pub status: ChallengeStatus,
+
     pub hostname: Option<String>,
+
     pub ip: Option<String>,
+
     pub expires_at: DateTime<Utc>,
+
+    #[serde(flatten)]
+    pub metadata: PodCachedMetadata,
+}
+
+#[derive(Debug, Serialize, Deserialize, ToSchema, Clone, Default, TS, PartialEq, Eq)]
+pub struct PodCachedMetadata {
+    pub name: String,
+
+    pub slug: String,
 }

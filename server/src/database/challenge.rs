@@ -44,6 +44,17 @@ impl ChallengeStore {
         }
     }
 
+    pub async fn get(&self, id: ObjectId) -> AxumResult<Challenge> {
+        let challenge = self
+            .collection
+            .find_one(doc! { "_id": id })
+            .await
+            .wrap_err("Failed to fetch challenge")?
+            .ok_or_else(|| AxumError::not_found(eyre!("Challenge not found")))?;
+
+        Ok(challenge)
+    }
+
     pub async fn get_by_slug(&self, slug: &str) -> AxumResult<Challenge> {
         let challenge = self
             .collection
