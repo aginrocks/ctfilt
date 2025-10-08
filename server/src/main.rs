@@ -226,6 +226,11 @@ async fn init_axum(
         .layer(oidc_auth_service)
         .layer(session_layer)
         .fallback(|| async { (StatusCode::NOT_FOUND, "Not found").into_response() });
+    // .layer(
+    //     TraceLayer::new_for_http()
+    //         .make_span_with(DefaultMakeSpan::new().level(Level::INFO))
+    //         .on_response(DefaultOnResponse::new().level(Level::INFO)),
+    // );
 
     Ok(router)
 }

@@ -3,6 +3,7 @@ import { ChallengeView } from '@components/challenge-view';
 import MarkdownRenderer from '@components/markdown';
 import { PageHeader } from '@components/page-header';
 import { Tag } from '@components/ui/tag';
+import { useSaveLast } from '@lib/hooks';
 import { $api } from '@lib/providers/api';
 import { IconBox } from '@tabler/icons-react';
 import { useQuery } from '@tanstack/react-query';
@@ -13,6 +14,7 @@ export default function Page() {
         course_slug: string;
         challenge_slug: string;
     }>();
+    useSaveLast(course_slug, challenge_slug, 'challenge');
 
     const course = useQuery(
         $api.queryOptions('get', '/api/courses/{course_slug}', {

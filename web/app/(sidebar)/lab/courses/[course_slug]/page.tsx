@@ -62,7 +62,14 @@ export default function Page() {
                         ))}
                     </div>
                     <p className="text-muted-foreground">{course?.data?.description}</p>
-                    <h3 className="text-xl font-semibold mt-2">In this course you'll learn:</h3>
+                    <div className="px-4 py-3.5 mt-4 border rounded-md">
+                        <h3 className="text-lg font-semibold">This course includes</h3>
+                        <ul className="ml-1 mt-0.5 list-disc list-inside">
+                            {course.data?.objectives?.map((obj, i) => (
+                                <li key={i}>{obj}</li>
+                            ))}
+                        </ul>
+                    </div>
                 </div>
             </div>
         </>
