@@ -1,27 +1,19 @@
 import { paths } from '@/types/api';
 import MarkdownRenderer from './markdown';
-import {
-    IconBox,
-    IconCheck,
-    IconClockPlus,
-    IconCopy,
-    IconPlayerPlayFilled,
-    IconPlayerStop,
-    IconSend,
-} from '@tabler/icons-react';
-import { Button } from './ui/button';
+import { IconClockPlus, IconPlayerPlayFilled, IconPlayerStop } from '@tabler/icons-react';
+import { Button, buttonVariants } from './ui/button';
 import { useRunning } from '@lib/atoms';
 import { useExtendChallenge, useStartChallenge, useStopChallenge } from '@lib/mutations';
 import { useCallback } from 'react';
 import { Spinner } from './ui/spinner';
-import { useClipboard } from '@mantine/hooks';
-import clsx from 'clsx';
 import { Copyable } from './copyable';
 import { useCountdown } from '@lib/hooks';
 import { FlagInput } from './flag-input';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 import { EXTEND_TRESHOLD_SECONDS } from '@lib/constants';
 import { RunningChallenge } from '@/types/server/RunningChallenge';
+import { VariantProps } from 'class-variance-authority';
+import { MouseEvent } from 'react';
 
 export type ChallengeViewProps = {
     challenge: paths['/api/challenges/{challenge_slug}']['get']['responses']['200']['content']['application/json'];
@@ -42,57 +34,74 @@ export function ExtendTooltip({ canExtend }: { canExtend: boolean }) {
     );
 }
 
-function ChallengeActions({
+export function ChallengeActions({
     running,
     canExtend,
-    challenge,
+    slug,
+    variant = 'full',
 }: {
     running?: RunningChallenge;
     canExtend: boolean;
-    challenge: ChallengeViewProps['challenge'];
+    slug: string;
+    variant?: 'full' | 'compact';
 }) {
     const start = useStartChallenge();
     const stop = useStopChallenge();
     const extend = useExtendChallenge();
-    const startChallenge = useCallback(() => {
-        start.mutate({
-            params: {
-                path: {
-                    challenge_slug: challenge.slug,
+    const startChallenge = useCallback(
+        (e: MouseEvent) => {
+            e.stopPropagation();
+            start.mutate({
+                params: {
+                    path: {
+                        challenge_slug: slug,
+                    },
                 },
-            },
-        });
-    }, [start.mutate, challenge.slug]);
+            });
+        },
+        [start.mutate, slug]
+    );
 
-    const stopChallenge = useCallback(() => {
-        stop.mutate({
-            params: {
-                path: {
-                    challenge_slug: challenge.slug,
+    const stopChallenge = useCallback(
+        (e: MouseEvent) => {
+            e.stopPropagation();
+            stop.mutate({
+                params: {
+                    path: {
+                        challenge_slug: slug,
+                    },
                 },
-            },
-        });
-    }, [stop.mutate, challenge.slug]);
+            });
+        },
+        [stop.mutate, slug]
+    );
 
-    const extendChallenge = useCallback(() => {
-        extend.mutate({
-            params: {
-                path: {
-                    challenge_slug: challenge.slug,
+    const extendChallenge = useCallback(
+        (e: MouseEvent) => {
+            e.stopPropagation();
+            extend.mutate({
+                params: {
+                    path: {
+                        challenge_slug: slug,
+                    },
                 },
-            },
-        });
-    }, [extend.mutate, challenge.slug]);
+            });
+        },
+        [extend.mutate, slug]
+    );
+
+    const fullButtonProps: Partial<VariantProps<typeof buttonVariants>> & { className?: string } =
+        variant === 'full' ? { size: 'lg' } : { size: 'default', className: 'rounded-sm w-full' };
 
     return running ? (
         <>
             {running.status === 'starting' && (
-                <Button size="lg" variant="lightOrange">
+                <Button {...fullButtonProps} variant="lightOrange">
                     <Spinner /> Starting Challenge
                 </Button>
             )}
             {running.status === 'stopping' && (
-                <Button size="lg" variant="lightOrange">
+                <Button {...fullButtonProps} variant="lightOrange">
                     <Spinner /> Stopping Challenge
                 </Button>
             )}
@@ -100,35 +109,43 @@ function ChallengeActions({
                 <>
                     <Tooltip>
                         <TooltipTrigger asChild>
-                            <Button size="icon-lg" variant="lightRed" onClick={stopChallenge}>
+                            <Button
+                                size={variant === 'full' ? 'icon-lg' : 'default'}
+                                variant="lightRed"
+                                onClick={stopChallenge}
+                                className={variant === 'compact' ? 'flex-1' : ''}
+                            >
                                 {stop.isPending ? <Spinner /> : <IconPlayerStop />}
+                                {variant === 'compact' && ' Stop Challenge'}
                             </Button>
                         </TooltipTrigger>
-                        <TooltipContent>Stop challenge</TooltipContent>
+                        {variant !== 'compact' && <TooltipContent>Stop challenge</TooltipContent>}
                     </Tooltip>
-                    <Tooltip>
-                        <TooltipTrigger asChild>
-                            <div>
-                                <Button
-                                    size="icon-lg"
-                                    variant="secondary"
-                                    onClick={extendChallenge}
-                                    disabled={!canExtend || extend.isPending}
-                                >
-                                    {extend.isPending ? <Spinner /> : <IconClockPlus />}
-                                </Button>
-                            </div>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                            <ExtendTooltip canExtend={canExtend} />
-                        </TooltipContent>
-                    </Tooltip>
-                    <FlagInput challengeSlug={challenge.slug} />
+                    {variant !== 'compact' && (
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <div>
+                                    <Button
+                                        size="icon-lg"
+                                        variant="secondary"
+                                        onClick={extendChallenge}
+                                        disabled={!canExtend || extend.isPending}
+                                    >
+                                        {extend.isPending ? <Spinner /> : <IconClockPlus />}
+                                    </Button>
+                                </div>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                                <ExtendTooltip canExtend={canExtend} />
+                            </TooltipContent>
+                        </Tooltip>
+                    )}
+                    {variant !== 'compact' && <FlagInput challengeSlug={slug} />}
                 </>
             )}
         </>
     ) : (
-        <Button size="lg" onClick={startChallenge}>
+        <Button {...fullButtonProps} onClick={startChallenge}>
             {start.isPending ? <Spinner /> : <IconPlayerPlayFilled />} Start Challenge
         </Button>
     );
@@ -178,7 +195,7 @@ export function ChallengeView({ challenge }: ChallengeViewProps) {
                     <ChallengeActions
                         running={running}
                         canExtend={canExtend}
-                        challenge={challenge}
+                        slug={challenge.slug}
                     />
                 </div>
             </div>
