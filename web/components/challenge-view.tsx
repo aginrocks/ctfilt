@@ -113,7 +113,7 @@ export function ChallengeActions({
                                 size={variant === 'full' ? 'icon-lg' : 'default'}
                                 variant="lightRed"
                                 onClick={stopChallenge}
-                                className={variant === 'compact' ? 'flex-1' : ''}
+                                className={variant === 'compact' ? 'flex-1 rounded-sm' : ''}
                             >
                                 {stop.isPending ? <Spinner /> : <IconPlayerStop />}
                                 {variant === 'compact' && ' Stop Challenge'}

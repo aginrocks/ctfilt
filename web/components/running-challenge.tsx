@@ -35,7 +35,7 @@ export function RunningChallengeBox({
 
     return (
         <div
-            className="p-2.5 border rounded-md cursor-pointer hover:bg-secondary bg-secondary/80 transition-colors"
+            className="p-2 pt-2.5 border rounded-lg cursor-pointer hover:bg-secondary/30 transition-colors"
             onClick={() =>
                 modals.show('Challenge', {
                     slug,
@@ -52,7 +52,7 @@ export function RunningChallengeBox({
                 {status === 'running' && (
                     <ChallengeLabel icon={IconWorld} label={hostname ?? 'Unknown'} />
                 )}
-                <div className="flex gap-2 mt-2 w-full flex-1">
+                <div className="flex gap-2 mt-1.5 w-full flex-1">
                     <ChallengeActions
                         canExtend={canExtend}
                         slug={slug}
