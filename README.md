@@ -8,6 +8,11 @@
 
 **CTFILT** is a comprehensive platform for creating and managing Capture The Flag (CTF) challenges and courses. It consists of a central server, various supporting services, and command-line tools for administration. The project is built primarily in Rust and leverages technologies like Kubernetes and OpenAPI.
 
+> [!WARNING]
+> This project is currently in active development. For now, the only feature that works correctly is the course viewing. Other items may have a 404 or be partially funcitonal.
+
+**If you want to test this project, use username `demo` and password `demo`**.
+
 ## Project Overview
 
 This project provides a complete infrastructure for hosting CTF challenges and educational cybersecurity courses. The platform allows for the creation, deployment, and management of containerized challenges while providing a user-friendly interface for both administrators and participants.
