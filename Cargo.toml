@@ -1,3 +1,3 @@
 [workspace]
 resolver = "2"
-members = ["server", "headscale", "pod_assassin", "exterminator", "manifests", "ctfsync", "api_client", "mongo_utils", "mongo_utils/mongo_utils_derive", "ctfbot"]
+members = ["server", "headscale", "pod_assassin", "exterminator", "manifests", "ctfsync", "api_client", "mongo_utils", "mongo_utils/mongo_utils_derive", "ctfbot", "headscale_bridge"]

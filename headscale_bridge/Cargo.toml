@@ -1,0 +1,30 @@
+[package]
+name = "headscale_bridge"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+color-eyre = "0.6.5"
+config = "0.15.18"
+dotenvy = "0.15.7"
+fred = { version = "10.1.0", features = ["enable-rustls", "partial-tracing", "serde-json", "replicas"] }
+reqwest = { version = "0.12.15", features = [
+    "rustls-tls",
+    "http2",
+    "charset",
+], default-features = false }
+serde = { version = "1.0.219", features = ["derive"] }
+serde_json = "1.0.140"
+strum = { version = "0.27.2", features = ["derive"] }
+tokio = { version = "1.47.1", features = ["full"] }
+toml = "0.9.8"
+tracing = "0.1.41"
+tracing-error = "0.2.1"
+tracing-subscriber = { version = "0.3.19", features = [
+    "json",
+    "env-filter",
+    "local-time",
+    "serde",
+    "serde_json",
+    "time",
+] }

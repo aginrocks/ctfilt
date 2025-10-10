@@ -4,7 +4,6 @@ mod types;
 mod watcher;
 
 use exterminator::{Extermination, Exterminator};
-use headscale::apis::configuration::Configuration;
 use kube::Client;
 use std::sync::Arc;
 

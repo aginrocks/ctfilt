@@ -116,6 +116,16 @@ A crate providing useful derive macros for working with MongoDB.
 - **Key Features**:
   - Custom derive macros for MongoDB pipelines
 
+#### [`headscale_bridge`](headscale_bridge)
+
+A server that bridges Headscale to the rest of the systems.
+
+- **Purpose**: Bridges Headscale data to Valkey until a better streaming solution is found.
+- **Key Features**:
+  - Polls Headscale for changes
+  - Writes data to Valkey
+  - Uses TOML configuration with environment variable overrides
+
 ### Top-Level Files
 
 - **`Caddyfile`**: Configuration for the Caddy web server, acting as a development reverse proxy for the application.
