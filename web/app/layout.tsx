@@ -32,9 +32,17 @@ export default function RootLayout({
                 <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
                     <ThemeProvider
                         attribute="class"
-                        defaultTheme="dark"
+                        defaultTheme="system"
                         enableSystem
                         disableTransitionOnChange
+                        themes={[
+                            'light',
+                            'dark',
+                            'mocha-mauve',
+                            'frappe-mauve',
+                            'latte-mauve',
+                            'macchiato-mauve',
+                        ]}
                     >
                         <ModalsManagerProvider>
                             {children}
