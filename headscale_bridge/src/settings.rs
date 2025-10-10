@@ -8,6 +8,11 @@ const ENV_PREFIX: &str = "HSBRIDGE";
 const ENV_SEPARATOR: &str = "__";
 
 #[derive(Debug, Deserialize, Serialize)]
+pub struct Polling {
+    pub interval_millis: u64,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
 pub struct Redis {
     pub connection_string: String,
 }
@@ -15,6 +20,7 @@ pub struct Redis {
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Settings {
     pub redis: Redis,
+    pub polling: Polling,
 }
 
 impl Default for Settings {
@@ -22,6 +28,9 @@ impl Default for Settings {
         Self {
             redis: Redis {
                 connection_string: "redis://localhost:6379".to_string(),
+            },
+            polling: Polling {
+                interval_millis: 3000,
             },
         }
     }

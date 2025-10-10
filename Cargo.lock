@@ -2724,6 +2724,7 @@ dependencies = [
  "config",
  "dotenvy",
  "fred",
+ "headscale",
  "reqwest",
  "serde",
  "serde_json",
