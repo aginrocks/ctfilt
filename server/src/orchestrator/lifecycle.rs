@@ -1,4 +1,4 @@
-use chrono::{Duration, Utc};
+use chrono::Duration;
 use color_eyre::eyre::{Context, ContextCompat, Result, bail, eyre};
 use k8s_openapi::api::core::v1::Pod;
 use kube::{
@@ -12,10 +12,7 @@ use tracing::{info, instrument};
 
 use crate::{
     axum_error::{AxumError, AxumResult},
-    orchestrator::{
-        ChallengeStatus, RunningChallenge, RunningChallengeBuilder,
-        resources::{DynamicFlag, ResourceProvisisonerBuilder},
-    },
+    orchestrator::resources::{DynamicFlag, ResourceProvisisonerBuilder},
     utils::generate_hostname,
 };
 
@@ -40,12 +37,11 @@ impl ChallengeOrchestrator {
 
         let provisioner = ResourceProvisisonerBuilder::default()
             .kube(self.kube.clone())
-            .headscale_config(self.headscale_config.clone())
             .subject(subject.to_string())
             .challenge_id(id)
             .user_id(user_id)
             .hostname(hostname)
-            .headscale_public_url(self.headscale_public_url.clone())
+            .vpn(self.vpn.clone())
             .build()?;
 
         // Setting up Tailscale access

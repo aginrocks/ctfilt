@@ -10,6 +10,7 @@ mod routes;
 mod settings;
 mod state;
 mod utils;
+mod vpn;
 
 use std::{net::SocketAddr, ops::Deref, sync::Arc};
 
@@ -48,6 +49,7 @@ use crate::{
     settings::Settings,
     state::AppState,
     utils::{FlagGenerator, create_token},
+    vpn::{VpnCore, headscale::HeadscaleClient},
 };
 
 #[derive(OpenApi)]
@@ -105,13 +107,14 @@ async fn main() -> Result<()> {
         settings.flags.length,
     ));
 
+    let vpn = Arc::new(HeadscaleClient::new(&settings)?);
+
     let orchestrator = Arc::new(ChallengeOrchestrator::new(
         kube_client.clone(),
         flags.clone(),
-        headscale_config.clone(),
-        settings.headscale.public_url.clone(),
         settings.extermination.clone(),
         store.clone(),
+        vpn.clone(),
     ));
 
     let orchestrator_watcher = orchestrator.clone();
@@ -133,6 +136,7 @@ async fn main() -> Result<()> {
         orchestrator: orchestrator.clone(),
         headscale_config,
         fred: fred.clone(),
+        vpn,
     };
 
     let session_layer = init_session_store(&settings, fred).await?;
