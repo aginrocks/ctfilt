@@ -7,14 +7,35 @@ edition = "2024"
 async-trait = "0.1.88"
 axum = { version = "0.8.4", features = ["macros", "ws"] }
 axum-oidc = { git = "https://github.com/pfzetto/axum-oidc.git", branch = "pfzetto" }
+axum-valid = "0.24.0"
+chrono = { version = "0.4.42", features = ["serde"] }
+clap = { version = "4.5.47", features = ["derive"] }
 color-eyre = "0.6.4"
 config = "0.15.11"
+dashmap = "6.1.0"
+derive_builder = "0.20.2"
 dotenvy = "0.15.7"
+exterminator = { version = "0.1.0", path = "../exterminator" }
+fred = { version = "10.1.0", features = [
+    "partial-tracing",
+    "serde-json",
+    "replicas",
+    "enable-rustls-ring",
+] }
+futures = "0.3.31"
+headscale = { version = "2.0.0", path = "../headscale" }
 http = "1.3.1"
 http-serde-ext = "1.0.2"
-kube = { version = "2.0.0", features = ["runtime", "derive"] }
 k8s-openapi = { version = "0.26.0", features = ["latest", "schemars"] }
+kube = { version = "2.0.0", features = ["runtime", "derive"] }
+manifests = { version = "0.1.0", path = "../manifests", features = [
+    "schemars",
+    "utoipa",
+    "validator",
+] }
+mongo_utils = { version = "0.1.0", path = "../mongo_utils" }
 mongodb = "3.2.3"
+names = { version = "0.14.0", default-features = false }
 openidconnect = { version = "4.0.0", default-features = false, features = [
     "reqwest",
     "rustls-tls",
@@ -28,12 +49,15 @@ reqwest = { version = "0.12.15", features = [
     "http2",
     "charset",
 ], default-features = false }
+schemars = { version = "1.0.4", features = ["derive", "preserve_order"] }
 serde = { version = "1.0.219", features = ["derive"] }
 serde_json = "1.0.140"
+sha2 = "0.10.9"
 strum = { version = "0.27.1", features = ["derive"] }
 tokio = { version = "1.45.0", features = ["full"] }
 toml = "0.8.22"
 tower = { version = "0.5.2", features = ["full", "tokio", "log"] }
+tower-http = { version = "0.6.6", features = ["trace"] }
 tower-sessions = "0.14.0"
 tower-sessions-redis-store = "0.16.0"
 tracing = "0.1.41"
@@ -47,35 +71,11 @@ tracing-subscriber = { version = "0.3.19", features = [
     "serde_json",
     "time",
 ] }
+ts-rs = { version = "11.0.1", features = ["chrono-impl", "bson-uuid-impl"] }
 utoipa = { version = "5.3.1", features = ["axum_extras", "chrono"] }
 utoipa-axum = "0.2.0"
 utoipa-rapidoc = { version = "6.0.0", features = ["axum"] }
 utoipa-redoc = { version = "6.0.0", features = ["axum"] }
 utoipa-scalar = { version = "0.3.0", features = ["axum"] }
-visible = "0.0.1"
-schemars = { version = "1.0.4", features = ["derive", "preserve_order"] }
-sha2 = "0.10.9"
-chrono = { version = "0.4.42", features = ["serde"] }
-derive_builder = "0.20.2"
-names = { version = "0.14.0", default-features = false }
-headscale = { version = "2.0.0", path = "../headscale" }
-exterminator = { version = "0.1.0", path = "../exterminator" }
-manifests = { version = "0.1.0", path = "../manifests", features = [
-    "schemars",
-    "utoipa",
-    "validator",
-] }
-clap = { version = "4.5.47", features = ["derive"] }
-futures = "0.3.31"
 validator = { version = "0.20.0", features = ["derive"] }
-axum-valid = "0.24.0"
-dashmap = "6.1.0"
-ts-rs = { version = "11.0.1", features = ["chrono-impl", "bson-uuid-impl"] }
-mongo_utils = { version = "0.1.0", path = "../mongo_utils" }
-fred = { version = "10.1.0", features = [
-    "partial-tracing",
-    "serde-json",
-    "replicas",
-    "enable-rustls-ring",
-] }
-tower-http = { version = "0.6.6", features = ["trace"] }
+visible = "0.0.1"
