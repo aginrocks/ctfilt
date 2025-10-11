@@ -1,15 +1,16 @@
+mod headscale_client;
 mod poll;
 mod redis_client;
 mod settings;
-
-use std::sync::Arc;
 
 use color_eyre::{Result, eyre::Context};
 use tracing::{info, level_filters::LevelFilter};
 use tracing_error::ErrorLayer;
 use tracing_subscriber::{fmt::format::FmtSpan, layer::SubscriberExt, util::SubscriberInitExt};
 
-use crate::{poll::poll, redis_client::init_redis, settings::Settings};
+use crate::{
+    headscale_client::init_headscale, poll::poll, redis_client::init_redis, settings::Settings,
+};
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -26,8 +27,9 @@ async fn main() -> Result<()> {
 
     let settings = Settings::try_load()?;
     let redis = init_redis(&settings).await?;
+    let headscale = init_headscale(&settings)?;
 
-    poll(&settings, redis).await;
+    poll(&settings, redis, headscale).await;
 
     Ok(())
 }

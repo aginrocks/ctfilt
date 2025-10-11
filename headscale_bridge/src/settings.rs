@@ -18,9 +18,16 @@ pub struct Redis {
 }
 
 #[derive(Debug, Deserialize, Serialize)]
+pub struct Headscale {
+    pub url: String,
+    pub api_key: String,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
 pub struct Settings {
     pub redis: Redis,
     pub polling: Polling,
+    pub headscale: Headscale,
 }
 
 impl Default for Settings {
@@ -31,6 +38,10 @@ impl Default for Settings {
             },
             polling: Polling {
                 interval_millis: 3000,
+            },
+            headscale: Headscale {
+                url: "http://headscale".to_string(),
+                api_key: "api_key".to_string(),
             },
         }
     }
