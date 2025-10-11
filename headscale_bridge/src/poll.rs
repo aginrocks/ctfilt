@@ -7,10 +7,7 @@ use headscale::{
 use tokio::time::{Duration, interval};
 
 use color_eyre::Result;
-use fred::{
-    prelude::{KeysInterface, Pool},
-    types::Expiration,
-};
+use fred::prelude::{KeysInterface, Pool, PubsubInterface};
 use tracing::{debug, error, info, instrument, warn};
 
 use crate::settings::Settings;
@@ -52,24 +49,36 @@ pub async fn sync_data(redis: Pool, config: &Configuration) -> Result<()> {
         };
         let user_id = user_id.split('/').next_back().unwrap_or(&user_id);
 
-        let key = format!("hs:user:{user_id}:nodes");
-
-        nodes_map.entry(key).or_default().push(node);
+        nodes_map.entry(user_id.into()).or_default().push(node);
     }
 
     let users_count = nodes_map.len();
 
-    let pipeline = redis.next_connected().pipeline();
+    update_cache_and_publish(&redis, nodes_map).await?;
+
+    info!("Synced {nodes_count} nodes across {users_count} users");
+
+    Ok(())
+}
+
+async fn update_cache_and_publish(
+    redis: &Pool,
+    nodes_map: HashMap<String, Vec<V1Node>>,
+) -> Result<()> {
     for (user_id, nodes) in nodes_map {
         let serialized = serde_json::to_string(&nodes)?;
 
-        let _: () = pipeline
-            .set(&user_id, serialized, Some(Expiration::EX(30)), None, false)
-            .await?;
-    }
-    let _: () = pipeline.all().await?;
+        let topic = format!("hs:user:{}:nodes", user_id);
+        let old_value: Option<String> = redis.getset(&topic, &serialized).await?;
 
-    info!("Synced {nodes_count} nodes across {users_count} users");
+        let _: () = redis.expire(&topic, 30, None).await?;
+
+        // Publish only if the value actually changed
+        if old_value.as_deref() != Some(&serialized) {
+            debug!(user_id = %user_id, "Nodes changed");
+            let _: i64 = redis.next().publish(&topic, serialized).await?;
+        }
+    }
 
     Ok(())
 }
