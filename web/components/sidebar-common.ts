@@ -3,7 +3,7 @@ import { IconWorld } from '@tabler/icons-react';
 export const navSecondary = [
     {
         title: 'VPN Devices',
-        url: '/vpn',
+        url: '/lab/vpn',
         icon: IconWorld,
     },
 ];
