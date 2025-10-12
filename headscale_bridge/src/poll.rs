@@ -69,7 +69,7 @@ async fn update_cache_and_publish(
     for (user_id, nodes) in nodes_map {
         let serialized = serde_json::to_string(&nodes)?;
 
-        let topic = format!("vpn:user:{}:nodes", user_id);
+        let topic = format!("vpn:user:{user_id}:nodes");
         let old_value: Option<String> = redis.getset(&topic, &serialized).await?;
 
         let _: () = redis.expire(&topic, 30, None).await?;

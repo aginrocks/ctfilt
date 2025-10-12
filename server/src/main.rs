@@ -31,7 +31,7 @@ use tokio::net::TcpListener;
 use tower::ServiceBuilder;
 use tower_sessions::SessionManagerLayer;
 use tower_sessions_redis_store::{RedisStore, fred::prelude::Pool};
-use tracing::{Instrument, error, info, info_span, instrument, level_filters::LevelFilter};
+use tracing::{Instrument, error, info, info_span, instrument, level_filters::LevelFilter, warn};
 use tracing_error::ErrorLayer;
 use tracing_subscriber::{
     fmt::format::FmtSpan, layer::SubscriberExt as _, util::SubscriberInitExt as _,
@@ -114,7 +114,7 @@ async fn main() -> Result<()> {
     let vpn_watcher = vpn.clone();
     tokio::spawn(async move {
         match vpn_watcher.watch().await {
-            Ok(_) => info!("VPN watcher exited"),
+            Ok(_) => warn!("VPN watcher exited"),
             Err(e) => error!(error = ?e, "VPN watcher exited with error"),
         }
     });
@@ -130,7 +130,7 @@ async fn main() -> Result<()> {
     let orchestrator_watcher = orchestrator.clone();
     tokio::spawn(async move {
         match orchestrator_watcher.watcher.watch_pods().await {
-            Ok(_) => info!("Pod watcher exited"),
+            Ok(_) => warn!("Pod watcher exited"),
             Err(e) => error!(error = ?e, "Pod watcher exited with error"),
         }
     });
