@@ -37,7 +37,7 @@ impl Default for Settings {
                 connection_string: "redis://localhost:6379".to_string(),
             },
             polling: Polling {
-                interval_millis: 3000,
+                interval_millis: 1000,
             },
             headscale: Headscale {
                 url: "http://headscale".to_string(),

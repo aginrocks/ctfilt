@@ -6,7 +6,7 @@ use color_eyre::Result;
 use k8s_openapi::api::core::v1::Container;
 use tokio::sync::broadcast::Receiver;
 
-use crate::vpn::models::VpnEvent;
+use crate::vpn::models::{VpnDevice, VpnEvent};
 
 /// Core functionality including provisioning and sidecar creation
 #[async_trait]
@@ -23,6 +23,9 @@ pub trait VpnCore: Send + Sync {
 pub trait VpnDevices: Send + Sync {
     /// Starts watching for device changes and updates the internal state accordingly. Should be run in a separate task.
     async fn watch(&self) -> Result<()>;
+
+    /// Returns the list of devices for a user
+    async fn get_devices(&self, user_subject: String) -> Result<Vec<VpnDevice>>;
 
     fn subscribe(&self) -> Receiver<VpnEvent>;
 }
