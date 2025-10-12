@@ -5,60 +5,17 @@ use color_eyre::{
     eyre::{Context, ContextCompat},
 };
 use headscale::{
-    apis::{
-        configuration::Configuration,
-        headscale_service_api::{
-            headscale_service_create_pre_auth_key, headscale_service_list_users,
-        },
+    apis::headscale_service_api::{
+        headscale_service_create_pre_auth_key, headscale_service_list_users,
     },
     models::V1CreatePreAuthKeyRequest,
 };
-use http::{HeaderMap, header::AUTHORIZATION};
 use k8s_openapi::api::core::v1::{
     Capabilities, Container, EnvVar, EnvVarSource, ObjectFieldSelector, SecretKeySelector,
     SecurityContext,
 };
 
-use crate::{
-    settings::Settings,
-    vpn::{Vpn, VpnCore},
-};
-
-pub struct HeadscaleClient {
-    pub config: Configuration,
-    pub public_url: String,
-}
-
-impl HeadscaleClient {
-    pub fn new(settings: &Settings) -> Result<Self> {
-        let headers = HeaderMap::from_iter([(
-            AUTHORIZATION,
-            format!("Bearer {}", settings.headscale.api_key).parse()?,
-        )]);
-
-        let client = reqwest::Client::builder()
-            .default_headers(headers)
-            .build()?;
-
-        let config = Configuration {
-            base_path: settings.headscale.url.clone(),
-            user_agent: Some(format!(
-                "{}/{}",
-                env!("CARGO_PKG_NAME"),
-                env!("CARGO_PKG_VERSION")
-            )),
-            client,
-            ..Default::default()
-        };
-
-        Ok(Self {
-            config,
-            public_url: settings.headscale.public_url.clone(),
-        })
-    }
-}
-
-impl Vpn for HeadscaleClient {}
+use crate::vpn::{VpnCore, headscale::HeadscaleClient};
 
 #[async_trait]
 impl VpnCore for HeadscaleClient {

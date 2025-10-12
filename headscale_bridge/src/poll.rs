@@ -4,6 +4,7 @@ use headscale::{
     apis::{configuration::Configuration, headscale_service_api::headscale_service_list_nodes},
     models::V1Node,
 };
+use headscale_common::NodesChangedMessage;
 use tokio::time::{Duration, interval};
 
 use color_eyre::Result;
@@ -18,7 +19,7 @@ pub async fn poll(settings: &Settings, redis: Pool, config: Configuration) {
     loop {
         interval.tick().await;
         if let Err(e) = sync_data(redis.clone(), &config).await {
-            error!("Failed to poll data: {e:?}");
+            error!(error = ?e, "Failed to poll data");
         }
     }
 }
@@ -68,7 +69,7 @@ async fn update_cache_and_publish(
     for (user_id, nodes) in nodes_map {
         let serialized = serde_json::to_string(&nodes)?;
 
-        let topic = format!("hs:user:{}:nodes", user_id);
+        let topic = format!("vpn:user:{}:nodes", user_id);
         let old_value: Option<String> = redis.getset(&topic, &serialized).await?;
 
         let _: () = redis.expire(&topic, 30, None).await?;
@@ -76,7 +77,12 @@ async fn update_cache_and_publish(
         // Publish only if the value actually changed
         if old_value.as_deref() != Some(&serialized) {
             debug!(user_id = %user_id, "Nodes changed");
-            let _: i64 = redis.next().publish(&topic, serialized).await?;
+            let message = NodesChangedMessage {
+                user: user_id.clone(),
+                nodes: nodes.clone(),
+            };
+            let serialized = serde_json::to_string(&message)?;
+            let _: i64 = redis.next().publish("vpn:nodes", serialized).await?;
         }
     }
 

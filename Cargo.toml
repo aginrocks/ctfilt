@@ -6,7 +6,7 @@ members = [
     "ctfsync",
     "exterminator",
     "headscale",
-    "headscale_bridge",
+    "headscale_bridge", "headscale_common",
     "manifests",
     "mongo_utils",
     "mongo_utils/mongo_utils_derive",

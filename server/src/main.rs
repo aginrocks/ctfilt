@@ -49,7 +49,7 @@ use crate::{
     settings::Settings,
     state::AppState,
     utils::{FlagGenerator, create_token},
-    vpn::{VpnCore, headscale::HeadscaleClient},
+    vpn::{VpnDevices, headscale::HeadscaleClient},
 };
 
 #[derive(OpenApi)]
@@ -102,12 +102,22 @@ async fn main() -> Result<()> {
 
     let headscale_config = Arc::new(headscale_client::init_headscale(&settings)?);
 
+    let fred = init_redis(&settings).await?;
+
     let flags = Arc::new(FlagGenerator::new(
         settings.flags.secret.clone(),
         settings.flags.length,
     ));
 
-    let vpn = Arc::new(HeadscaleClient::new(&settings)?);
+    let vpn = Arc::new(HeadscaleClient::new(&settings, fred.clone())?);
+
+    let vpn_watcher = vpn.clone();
+    tokio::spawn(async move {
+        match vpn_watcher.watch().await {
+            Ok(_) => info!("VPN watcher exited"),
+            Err(e) => error!(error = ?e, "VPN watcher exited with error"),
+        }
+    });
 
     let orchestrator = Arc::new(ChallengeOrchestrator::new(
         kube_client.clone(),
@@ -124,8 +134,6 @@ async fn main() -> Result<()> {
             Err(e) => error!(error = ?e, "Pod watcher exited with error"),
         }
     });
-
-    let fred = init_redis(&settings).await?;
 
     let app_state = AppState {
         database,

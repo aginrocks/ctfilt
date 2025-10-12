@@ -9,15 +9,17 @@ use axum::{
     response::Response,
 };
 use color_eyre::eyre::Result;
-use mongodb::bson::oid::ObjectId;
+use tokio::select;
 use tracing::info;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 use crate::{
-    middlewares::require_auth::UserId,
+    database::User,
+    middlewares::require_auth::UserData,
     orchestrator::PodEvent,
-    routes::api::ws::types::{ChallengesUpdate, ServerMessage},
+    routes::api::ws::types::{ChallengesUpdate, ServerMessage, VpnState},
     state::AppState,
+    vpn::models::{VpnEvent, VpnEventCore},
 };
 
 pub fn routes() -> OpenApiRouter<AppState> {
@@ -31,31 +33,55 @@ pub fn routes() -> OpenApiRouter<AppState> {
 async fn websocket(
     ws: WebSocketUpgrade,
     Extension(state): Extension<AppState>,
-    Extension(user_id): Extension<UserId>,
+    Extension(user): Extension<UserData>,
 ) -> Response {
     info!("New WS Conenction");
-    ws.on_upgrade(move |socket| handle_socket(socket, state, *user_id))
+    ws.on_upgrade(move |socket| handle_socket(socket, state, user.0))
 }
 
-async fn handle_socket(mut socket: WebSocket, state: AppState, user_id: ObjectId) {
-    let latest = state.orchestrator.watcher.get_latest_event(user_id);
+async fn handle_socket(mut socket: WebSocket, state: AppState, user: User) {
+    let latest = state.orchestrator.watcher.get_latest_event(user.id);
     if let Ok(latest) = latest {
-        handle_event(latest, &mut socket).await.ok();
+        handle_pod_event(latest, &mut socket).await.ok();
     }
 
-    let mut rx = state.orchestrator.watcher.sender.subscribe();
-    while let Ok(event) = rx.recv().await {
-        if event.user != user_id {
-            continue;
+    let mut kube_rx = state.orchestrator.watcher.sender.subscribe();
+    let mut vpn_rx = state.vpn.subscribe();
+    loop {
+        select! {
+            Ok(event) = kube_rx.recv() => {
+                if event.user != user.id {
+                    continue;
+                }
+                handle_pod_event(event, &mut socket).await.ok();
+            }
+            Ok(event) = vpn_rx.recv() => {
+                info!("Received VPN event: {:?}", event);
+                if event.user_subject != user.subject {
+                    continue;
+                }
+                handle_vpn_event(event, &mut socket).await.ok();
+            }
         }
-        handle_event(event, &mut socket).await.ok();
     }
 }
 
-async fn handle_event(event: PodEvent, socket: &mut WebSocket) -> Result<()> {
+async fn handle_pod_event(event: PodEvent, socket: &mut WebSocket) -> Result<()> {
     let msg = ServerMessage::ChallengesUpdate(ChallengesUpdate {
         challenges: event.challenges,
     });
+
+    let msg = serde_json::to_string(&msg)?;
+    socket.send(Message::Text(msg.into())).await?;
+
+    Ok(())
+}
+
+async fn handle_vpn_event(event: VpnEvent, socket: &mut WebSocket) -> Result<()> {
+    let msg = match event.event {
+        VpnEventCore::StateChanged { data } => ServerMessage::VpnState(VpnState { devices: data }),
+        _ => todo!(),
+    };
 
     let msg = serde_json::to_string(&msg)?;
     socket.send(Message::Text(msg.into())).await?;

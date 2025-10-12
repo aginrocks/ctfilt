@@ -21,9 +21,11 @@ fred = { version = "10.1.0", features = [
     "serde-json",
     "replicas",
     "enable-rustls-ring",
+    "subscriber-client",
 ] }
 futures = "0.3.31"
 headscale = { version = "2.0.0", path = "../headscale" }
+headscale_common = { version = "0.1.0", path = "../headscale_common" }
 http = "1.3.1"
 http-serde-ext = "1.0.2"
 k8s-openapi = { version = "0.26.0", features = ["latest", "schemars"] }
