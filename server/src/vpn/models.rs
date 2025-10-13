@@ -17,6 +17,7 @@ pub struct VpnDevice {
     pub name: String,
     pub ip_addresses: Vec<String>,
     pub last_seen: Option<String>,
+    pub created_at: Option<String>,
     pub online: bool,
 }
 

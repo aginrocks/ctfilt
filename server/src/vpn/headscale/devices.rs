@@ -29,6 +29,7 @@ impl From<V1Node> for VpnDevice {
             name: value.name.unwrap_or_default(),
             ip_addresses: value.ip_addresses.unwrap_or_default(),
             last_seen: value.last_seen,
+            created_at: value.created_at,
             online: value.online.unwrap_or_default(),
         }
     }
