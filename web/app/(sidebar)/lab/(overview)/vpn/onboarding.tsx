@@ -204,6 +204,11 @@ export default function VpnOnboarding() {
                                         />
                                     ))}
                                 </div>
+                                <p className="text-muted-foreground mt-3">
+                                    If you are presented with a Tailscale login screen
+                                    (login.tailscale.com) after launching the app, click the back
+                                    button in the top left corner to return to the main screen.
+                                </p>
                             </>
                         )}
                     </div>
