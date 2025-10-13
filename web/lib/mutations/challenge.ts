@@ -34,27 +34,6 @@ export function useStopChallenge(params?: AdditionalParams) {
     return mutation;
 }
 
-export function useSubmitFlag(params?: AdditionalParams) {
-    const mutation = $api.useMutation('post', '/api/challenges/{challenge_slug}/submit', {
-        onSuccess: (data, options) => {
-            if (data.correct) {
-                toast.success('Good boy!');
-            } else {
-                toast.error('Nuh uh!');
-            }
-            params?.onSuccess?.();
-        },
-        onError: (error) => {
-            toast.error('Failed to submit flag', {
-                description: error.error,
-            });
-            params?.onError?.();
-        },
-    });
-
-    return mutation;
-}
-
 export function useExtendChallenge(params?: AdditionalParams) {
     const mutation = $api.useMutation('post', '/api/challenges/{challenge_slug}/extend', {
         onSuccess: (data, options) => {

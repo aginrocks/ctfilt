@@ -15,6 +15,12 @@ docs/ChallengeSpec.md
 docs/ChallengeSpecOneOf.md
 docs/ChallengeSpecOneOf1.md
 docs/ChallengeSpecOneOf2.md
+docs/ConnectionHint.md
+docs/ConnectionHintOneOf.md
+docs/ConnectionHintOneOf1.md
+docs/ConnectionHintOneOf2.md
+docs/ConnectionHintOneOf3.md
+docs/ConnectionHintOneOf4.md
 docs/Course.md
 docs/CourseApi.md
 docs/CourseDifficulty.md
@@ -71,6 +77,12 @@ src/models/challenge_spec.rs
 src/models/challenge_spec_one_of.rs
 src/models/challenge_spec_one_of_1.rs
 src/models/challenge_spec_one_of_2.rs
+src/models/connection_hint.rs
+src/models/connection_hint_one_of.rs
+src/models/connection_hint_one_of_1.rs
+src/models/connection_hint_one_of_2.rs
+src/models/connection_hint_one_of_3.rs
+src/models/connection_hint_one_of_4.rs
 src/models/course.rs
 src/models/course_difficulty.rs
 src/models/course_item_type.rs

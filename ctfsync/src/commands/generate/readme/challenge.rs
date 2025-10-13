@@ -32,10 +32,12 @@ pub async fn run(directory: &Path) -> Result<()> {
 
         // Mount Path
         let mount_path = match &flag.spec {
-            ChallengeFlagMeta::DynamicMount { mount_path, .. } => mount_path.clone(),
+            ChallengeFlagMeta::DynamicMount { mount_path, .. } => {
+                format!("`{}`", mount_path.clone())
+            }
             _ => "–".to_string(),
         };
-        readme.push_str(&format!("|`{}`", mount_path));
+        readme.push_str(&format!("|{}", mount_path));
 
         // Flag Content
         let flag_content = match &flag.spec {

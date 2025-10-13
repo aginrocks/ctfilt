@@ -6,11 +6,15 @@ use api_client::{
 };
 use gix::Repository;
 use miette::{IntoDiagnostic, Result};
+use owo_colors::OwoColorize;
 use serde::Deserialize;
 
 use crate::{api::init_api_config, errors::NoManifest};
 
 pub async fn run(_repo: Repository, directory: &Path) -> Result<()> {
+    // TODO: Integrate with Git
+    println!("Applying {}", "challenge.yaml".yellow().bold());
+
     let manifest = load_challenge_manifest::<ChallengeMetadata>(directory).await?;
 
     let config = init_api_config().await?;

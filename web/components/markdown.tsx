@@ -9,6 +9,17 @@ export type MarkdownProps = {
     children: string | null;
 };
 
+export function InlineCode({ children, ...props }: React.ComponentProps<'span'>) {
+    return (
+        <span
+            className="px-1.5 py-0.5 rounded-sm bg-accent text-accent-foreground font-mono text-sm"
+            {...props}
+        >
+            {children}
+        </span>
+    );
+}
+
 export default function MarkdownRenderer({ children }: MarkdownProps) {
     return (
         <Markdown
@@ -66,14 +77,7 @@ export default function MarkdownRenderer({ children }: MarkdownProps) {
                     const lang = match?.[1] || 'text';
 
                     if (isInline) {
-                        return (
-                            <span
-                                className="px-1.5 py-0.5 rounded-sm bg-accent text-accent-foreground font-mono text-sm"
-                                {...props}
-                            >
-                                {children}
-                            </span>
-                        );
+                        return <InlineCode {...props}>{children}</InlineCode>;
                     }
 
                     return (

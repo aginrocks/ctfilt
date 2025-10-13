@@ -19,7 +19,10 @@ use serde::Serialize;
 use tokio::sync::broadcast::{self, Sender};
 use tracing::{info, info_span, warn};
 
-use crate::orchestrator::{ChallengeStatus, RunningChallenge};
+use crate::{
+    database::DatabaseStore,
+    orchestrator::{ChallengeStatus, PodCachedMetadata, RunningChallenge},
+};
 
 #[derive(Clone)]
 pub struct UserState {
@@ -35,18 +38,22 @@ pub struct PodEvent {
 pub struct PodWatcher {
     pub client: Client,
     pub users_state: DashMap<ObjectId, UserState>,
+    pub challenges_cache: DashMap<ObjectId, PodCachedMetadata>,
     pub extermination: Extermination,
     pub sender: Sender<PodEvent>,
+    pub db_store: DatabaseStore,
 }
 
 impl PodWatcher {
-    pub fn new(client: Client, extermination: Extermination) -> Self {
+    pub fn new(client: Client, extermination: Extermination, db_store: DatabaseStore) -> Self {
         let (sender, _) = broadcast::channel(64);
         Self {
             client,
             users_state: DashMap::new(),
             extermination,
             sender,
+            db_store,
+            challenges_cache: DashMap::new(),
         }
     }
 
@@ -119,7 +126,25 @@ impl PodWatcher {
         }
     }
 
-    fn summarize_pod(&self, pod: Pod) -> Result<(ObjectId, RunningChallenge)> {
+    async fn fetch_cached_metadata(&self, id: ObjectId) -> Result<PodCachedMetadata> {
+        let challenge = self
+            .db_store
+            .challenges
+            .get(id)
+            .await
+            .map_err(|_| eyre!("Failed to fetch challenge"))?;
+
+        let metadata = PodCachedMetadata {
+            name: challenge.metadata.name,
+            slug: challenge.metadata.slug,
+        };
+
+        self.challenges_cache.insert(id, metadata.clone());
+
+        Ok(metadata)
+    }
+
+    async fn summarize_pod(&self, pod: Pod) -> Result<(ObjectId, RunningChallenge)> {
         let pod_name = pod.metadata.name.wrap_err("Missing pod name")?;
 
         let labels = pod.metadata.labels.wrap_err("Missing pod labels")?;
@@ -152,6 +177,11 @@ impl PodWatcher {
             },
         };
 
+        let metadata = match self.challenges_cache.get(&challenge) {
+            Some(cached) => cached.clone(),
+            None => self.fetch_cached_metadata(challenge).await?,
+        };
+
         Ok((
             user,
             RunningChallenge {
@@ -160,12 +190,13 @@ impl PodWatcher {
                 hostname: Some(pod_name),
                 ip: Some("".to_string()),
                 expires_at,
+                metadata,
             },
         ))
     }
 
     async fn handle_pod(&self, pod: Pod) -> Result<()> {
-        let (user, summary) = self.summarize_pod(pod)?;
+        let (user, summary) = self.summarize_pod(pod).await?;
 
         let mut user_state = self.users_state.entry(user).or_insert_with(|| UserState {
             challenges: HashMap::new(),
@@ -185,7 +216,7 @@ impl PodWatcher {
     }
 
     async fn handle_pod_deletion(&self, pod: Pod) -> Result<()> {
-        let (user, summary) = self.summarize_pod(pod)?;
+        let (user, summary) = self.summarize_pod(pod).await?;
 
         let mut user_state = self.users_state.entry(user).or_insert_with(|| UserState {
             challenges: HashMap::new(),

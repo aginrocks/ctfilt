@@ -3,7 +3,7 @@ use futures::TryStreamExt;
 use manifests::ChallengeMetadata;
 use mongodb::{
     Collection, Database,
-    bson::{Document, doc, oid::ObjectId},
+    bson::{doc, oid::ObjectId},
 };
 use partial_struct::Partial;
 use serde::{Deserialize, Serialize};
@@ -42,6 +42,17 @@ impl ChallengeStore {
             collection,
             partial_collection,
         }
+    }
+
+    pub async fn get(&self, id: ObjectId) -> AxumResult<Challenge> {
+        let challenge = self
+            .collection
+            .find_one(doc! { "_id": id })
+            .await
+            .wrap_err("Failed to fetch challenge")?
+            .ok_or_else(|| AxumError::not_found(eyre!("Challenge not found")))?;
+
+        Ok(challenge)
     }
 
     pub async fn get_by_slug(&self, slug: &str) -> AxumResult<Challenge> {

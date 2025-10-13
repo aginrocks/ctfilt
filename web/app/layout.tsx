@@ -4,6 +4,7 @@ import './globals.css';
 import { ThemeProvider } from '@/components/theme-provider';
 import Query from '@/lib/providers/query';
 import { Toaster } from '@components/ui/sonner';
+import { ModalsManagerProvider } from '@lib/modals/manager';
 
 const geistSans = Geist({
     variable: '--font-geist-sans',
@@ -31,12 +32,22 @@ export default function RootLayout({
                 <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
                     <ThemeProvider
                         attribute="class"
-                        defaultTheme="dark"
+                        defaultTheme="system"
                         enableSystem
                         disableTransitionOnChange
+                        themes={[
+                            'light',
+                            'dark',
+                            'mocha-mauve',
+                            'frappe-mauve',
+                            'latte-mauve',
+                            'macchiato-mauve',
+                        ]}
                     >
-                        {children}
-                        <Toaster />
+                        <ModalsManagerProvider>
+                            {children}
+                            <Toaster />
+                        </ModalsManagerProvider>
                     </ThemeProvider>
                 </body>
             </html>

@@ -10,6 +10,7 @@ mod routes;
 mod settings;
 mod state;
 mod utils;
+mod vpn;
 
 use std::{net::SocketAddr, ops::Deref, sync::Arc};
 
@@ -30,7 +31,7 @@ use tokio::net::TcpListener;
 use tower::ServiceBuilder;
 use tower_sessions::SessionManagerLayer;
 use tower_sessions_redis_store::{RedisStore, fred::prelude::Pool};
-use tracing::{Instrument, error, info, info_span, instrument, level_filters::LevelFilter};
+use tracing::{Instrument, error, info, info_span, instrument, level_filters::LevelFilter, warn};
 use tracing_error::ErrorLayer;
 use tracing_subscriber::{
     fmt::format::FmtSpan, layer::SubscriberExt as _, util::SubscriberInitExt as _,
@@ -48,6 +49,7 @@ use crate::{
     settings::Settings,
     state::AppState,
     utils::{FlagGenerator, create_token},
+    vpn::{VpnDevices, headscale::HeadscaleClient},
 };
 
 #[derive(OpenApi)]
@@ -100,28 +102,38 @@ async fn main() -> Result<()> {
 
     let headscale_config = Arc::new(headscale_client::init_headscale(&settings)?);
 
+    let fred = init_redis(&settings).await?;
+
     let flags = Arc::new(FlagGenerator::new(
         settings.flags.secret.clone(),
         settings.flags.length,
     ));
 
+    let vpn = Arc::new(HeadscaleClient::new(&settings, fred.clone())?);
+
+    let vpn_watcher = vpn.clone();
+    tokio::spawn(async move {
+        match vpn_watcher.watch().await {
+            Ok(_) => warn!("VPN watcher exited"),
+            Err(e) => error!(error = ?e, "VPN watcher exited with error"),
+        }
+    });
+
     let orchestrator = Arc::new(ChallengeOrchestrator::new(
         kube_client.clone(),
         flags.clone(),
-        headscale_config.clone(),
-        settings.headscale.public_url.clone(),
         settings.extermination.clone(),
+        store.clone(),
+        vpn.clone(),
     ));
 
     let orchestrator_watcher = orchestrator.clone();
     tokio::spawn(async move {
         match orchestrator_watcher.watcher.watch_pods().await {
-            Ok(_) => info!("Pod watcher exited"),
+            Ok(_) => warn!("Pod watcher exited"),
             Err(e) => error!(error = ?e, "Pod watcher exited with error"),
         }
     });
-
-    let fred = init_redis(&settings).await?;
 
     let app_state = AppState {
         database,
@@ -132,6 +144,7 @@ async fn main() -> Result<()> {
         orchestrator: orchestrator.clone(),
         headscale_config,
         fred: fred.clone(),
+        vpn,
     };
 
     let session_layer = init_session_store(&settings, fred).await?;
@@ -226,6 +239,11 @@ async fn init_axum(
         .layer(oidc_auth_service)
         .layer(session_layer)
         .fallback(|| async { (StatusCode::NOT_FOUND, "Not found").into_response() });
+    // .layer(
+    //     TraceLayer::new_for_http()
+    //         .make_span_with(DefaultMakeSpan::new().level(Level::INFO))
+    //         .on_response(DefaultOnResponse::new().level(Level::INFO)),
+    // );
 
     Ok(router)
 }

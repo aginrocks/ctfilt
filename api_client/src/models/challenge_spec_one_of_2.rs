@@ -14,6 +14,9 @@ use serde::{Deserialize, Serialize};
 /// ChallengeSpecOneOf2 : A challenge that requires VPN use and is created per user
 #[derive(Clone, Default, Debug, PartialEq, Serialize, Deserialize)]
 pub struct ChallengeSpecOneOf2 {
+    /// Connection hints for the user to connect to the challenge
+    #[serde(rename = "connection_hints", default, with = "::serde_with::rust::double_option", skip_serializing_if = "Option::is_none")]
+    pub connection_hints: Option<Option<Vec<models::ConnectionHint>>>,
     /// Containers that should be created in the challenge Pod
     #[serde(rename = "containers")]
     pub containers: Vec<models::ChallengeContainer>,
@@ -25,6 +28,7 @@ impl ChallengeSpecOneOf2 {
     /// A challenge that requires VPN use and is created per user
     pub fn new(containers: Vec<models::ChallengeContainer>, r#type: Type) -> ChallengeSpecOneOf2 {
         ChallengeSpecOneOf2 {
+            connection_hints: None,
             containers,
             r#type,
         }

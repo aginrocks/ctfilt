@@ -1,5 +1,5 @@
 use serde::{Deserialize, Serialize};
-use strum::{AsRefStr, IntoStaticStr, VariantNames};
+use strum::AsRefStr;
 
 use crate::utils::{deserialize_octal_option, serialize_octal_option};
 
@@ -24,6 +24,9 @@ pub enum ChallengeFlagMeta {
     DynamicMount {
         /// Where the flag should be mounted inside the container
         mount_path: String,
+
+        /// To which container the flag should be mounted (if not provided, will be mounted to all containers)
+        container: Option<String>,
 
         /// File permissions for the flag file, in octal format (e.g. 644, defaults to 600)
         #[serde(
@@ -105,6 +108,7 @@ pub enum PublicFlag {
     },
 }
 
+// TODO: Add challenge type
 #[derive(Debug, Serialize, Deserialize, Clone, Default)]
 #[cfg_attr(feature = "utoipa", derive(ToSchema))]
 #[cfg_attr(feature = "schemars", derive(JsonSchema))]
@@ -138,6 +142,31 @@ pub struct ChallengeContainer {
 #[cfg_attr(feature = "utoipa", derive(ToSchema))]
 #[cfg_attr(feature = "schemars", derive(JsonSchema))]
 #[serde(tag = "type", rename_all = "lowercase")]
+pub enum ConnectionHint {
+    Ssh {
+        port: Option<u16>,
+        username: Option<String>,
+        password: Option<String>,
+    },
+    Http {
+        port: Option<u16>,
+    },
+    Tcp {
+        port: Option<u16>,
+    },
+    Udp {
+        port: Option<u16>,
+    },
+    Other {
+        protocol: String,
+        port: Option<u16>,
+    },
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[cfg_attr(feature = "utoipa", derive(ToSchema))]
+#[cfg_attr(feature = "schemars", derive(JsonSchema))]
+#[serde(tag = "type", rename_all = "lowercase")]
 pub enum ChallengeSpec {
     /// A fully static challenge with one answer
     Static {},
@@ -149,6 +178,9 @@ pub enum ChallengeSpec {
     Container {
         /// Containers that should be created in the challenge Pod
         containers: Vec<ChallengeContainer>,
+
+        /// Connection hints for the user to connect to the challenge
+        connection_hints: Option<Vec<ConnectionHint>>,
     },
 }
 

@@ -14,7 +14,7 @@ function deriveCountdown(to: Moment | null): CountdownResult | null {
     const isOver = diff.asMilliseconds() <= 0;
     if (isOver) {
         return {
-            formatted: '00m 00s',
+            formatted: '0m 00s',
             diff,
             isOver: true,
         };
@@ -24,7 +24,7 @@ function deriveCountdown(to: Moment | null): CountdownResult | null {
     if (diff.asHours() >= 1) {
         formatted += `${Math.floor(diff.asHours())}h `;
     }
-    formatted += `${diff.minutes().toString().padStart(2, '0')}m ${diff.seconds().toString().padStart(2, '0')}s`;
+    formatted += `${diff.minutes()}m ${diff.seconds().toString().padStart(2, '0')}s`;
 
     return {
         formatted,
@@ -33,7 +33,7 @@ function deriveCountdown(to: Moment | null): CountdownResult | null {
     };
 }
 
-export function useCountdown(toStr?: string): string {
+export function useCountdown(toStr?: string) {
     const to = toStr ? moment(toStr) : null;
     const [timeRemaining, setTimeRemaining] = useState(() => deriveCountdown(to));
 
@@ -52,5 +52,9 @@ export function useCountdown(toStr?: string): string {
         return () => clearInterval(interval);
     }, [to]);
 
-    return timeRemaining?.formatted ?? '';
+    return {
+        formatted: timeRemaining?.formatted ?? '',
+        seconds: timeRemaining?.diff.asSeconds() ?? 0,
+        isOver: timeRemaining?.isOver ?? false,
+    };
 }

@@ -1,12 +1,14 @@
 'use client';
 import MarkdownRenderer from '@components/markdown';
 import { PageHeader } from '@components/page-header';
+import { useSaveLast } from '@lib/hooks';
 import { $api } from '@lib/providers/api';
 import { useQuery } from '@tanstack/react-query';
 import { useParams } from 'next/navigation';
 
 export default function Page() {
     const { course_slug, lesson_slug } = useParams<{ course_slug: string; lesson_slug: string }>();
+    useSaveLast(course_slug, lesson_slug, 'lesson');
 
     const course = useQuery(
         $api.queryOptions('get', '/api/courses/{course_slug}', {

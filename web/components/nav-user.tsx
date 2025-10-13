@@ -25,8 +25,10 @@ import {
 import { useAvatar } from '@lib/hooks';
 import { useQuery } from '@tanstack/react-query';
 import { $api } from '@lib/providers/api';
-import { IconBrush, IconKey, IconSettings } from '@tabler/icons-react';
+import { IconBrush, IconCheck, IconKey, IconSettings } from '@tabler/icons-react';
 import { useTheme } from 'next-themes';
+import { Fragment } from 'react';
+import { THEMES } from '@lib/themes';
 
 export function NavUser() {
     const { isMobile } = useSidebar();
@@ -97,7 +99,7 @@ export function NavUser() {
                                 </DropdownMenuSubTrigger>
                                 <DropdownMenuPortal>
                                     <DropdownMenuSubContent className="w-48">
-                                        {/*{THEMES.map((t, i) =>
+                                        {THEMES.map((t, i) =>
                                             t.type === 'separator' ? (
                                                 <Fragment key={i}>
                                                     <DropdownMenuSeparator />
@@ -117,7 +119,7 @@ export function NavUser() {
                                                     {theme === t.className && <IconCheck />}
                                                 </DropdownMenuItem>
                                             )
-                                        )}*/}
+                                        )}
                                     </DropdownMenuSubContent>
                                 </DropdownMenuPortal>
                             </DropdownMenuSub>

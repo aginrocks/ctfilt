@@ -405,6 +405,8 @@ export interface components {
             /** @enum {string} */
             type: "static";
         } | {
+            /** @description To which container the flag should be mounted (if not provided, will be mounted to all containers) */
+            container?: string | null;
             /** @description Where the flag should be mounted inside the container */
             mount_path: string;
             /** @description File permissions for the flag file, in octal format (e.g. 644, defaults to 600) */
@@ -431,10 +433,41 @@ export interface components {
             /** @enum {string} */
             type: "dynamic";
         } | {
+            /** @description Connection hints for the user to connect to the challenge */
+            connection_hints?: components["schemas"]["ConnectionHint"][] | null;
             /** @description Containers that should be created in the challenge Pod */
             containers: components["schemas"]["ChallengeContainer"][];
             /** @enum {string} */
             type: "container";
+        };
+        ConnectionHint: {
+            password?: string | null;
+            /** Format: int32 */
+            port?: number | null;
+            /** @enum {string} */
+            type: "ssh";
+            username?: string | null;
+        } | {
+            /** Format: int32 */
+            port?: number | null;
+            /** @enum {string} */
+            type: "http";
+        } | {
+            /** Format: int32 */
+            port?: number | null;
+            /** @enum {string} */
+            type: "tcp";
+        } | {
+            /** Format: int32 */
+            port?: number | null;
+            /** @enum {string} */
+            type: "udp";
+        } | {
+            /** Format: int32 */
+            port?: number | null;
+            protocol: string;
+            /** @enum {string} */
+            type: "other";
         };
         Course: components["schemas"]["CourseMetadata_CourseItem_String"] & {
             _id: string;

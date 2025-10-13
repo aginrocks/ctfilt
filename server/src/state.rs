@@ -5,7 +5,7 @@ use mongodb::Database;
 
 use crate::{
     database::DatabaseStore, orchestrator::ChallengeOrchestrator, settings::Settings,
-    utils::FlagGenerator,
+    utils::FlagGenerator, vpn::Vpn,
 };
 
 #[derive(Clone)]
@@ -18,4 +18,5 @@ pub struct AppState {
     pub orchestrator: Arc<ChallengeOrchestrator>,
     pub headscale_config: Arc<Configuration>,
     pub fred: fred::prelude::Pool,
+    pub vpn: Arc<dyn Vpn>,
 }

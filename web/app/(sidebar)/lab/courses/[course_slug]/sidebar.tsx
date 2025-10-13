@@ -38,6 +38,7 @@ import { RunningChallenges } from '@lib/atoms';
 import clsx from 'clsx';
 import { Button } from '@components/ui/button';
 import Link from 'next/link';
+import { RunningChallengesView } from '@components/running-challenges';
 
 export function CourseSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     const { course_slug } = useParams<{ course_slug: string }>();
@@ -109,9 +110,10 @@ export function CourseSidebar({ ...props }: React.ComponentProps<typeof Sidebar>
                         }) || []
                     }
                 />
-                <NavSecondary items={navSecondary} className="mt-auto" />
             </SidebarContent>
             <SidebarFooter>
+                <RunningChallengesView />
+                <NavSecondary items={navSecondary} className="px-0" />
                 <NavUser />
             </SidebarFooter>
         </Sidebar>

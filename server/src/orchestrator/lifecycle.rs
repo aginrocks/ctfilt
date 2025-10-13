@@ -1,4 +1,4 @@
-use chrono::{Duration, Utc};
+use chrono::Duration;
 use color_eyre::eyre::{Context, ContextCompat, Result, bail, eyre};
 use k8s_openapi::api::core::v1::Pod;
 use kube::{
@@ -12,10 +12,7 @@ use tracing::{info, instrument};
 
 use crate::{
     axum_error::{AxumError, AxumResult},
-    orchestrator::{
-        ChallengeStatus, RunningChallenge, RunningChallengeBuilder,
-        resources::{DynamicFlag, ResourceProvisisonerBuilder},
-    },
+    orchestrator::resources::{DynamicFlag, ResourceProvisisonerBuilder},
     utils::generate_hostname,
 };
 
@@ -29,9 +26,9 @@ impl ChallengeOrchestrator {
         metadata: &ChallengeMetadata,
         user_id: ObjectId,
         subject: &str,
-    ) -> Result<RunningChallenge> {
+    ) -> Result<()> {
         let containers = match metadata.spec {
-            ChallengeSpec::Container { ref containers } => containers.clone(),
+            ChallengeSpec::Container { ref containers, .. } => containers.clone(),
             _ => bail!("This challenge cannot be started"),
         };
 
@@ -40,12 +37,11 @@ impl ChallengeOrchestrator {
 
         let provisioner = ResourceProvisisonerBuilder::default()
             .kube(self.kube.clone())
-            .headscale_config(self.headscale_config.clone())
             .subject(subject.to_string())
             .challenge_id(id)
             .user_id(user_id)
             .hostname(hostname)
-            .headscale_public_url(self.headscale_public_url.clone())
+            .vpn(self.vpn.clone())
             .build()?;
 
         // Setting up Tailscale access
@@ -63,20 +59,13 @@ impl ChallengeOrchestrator {
         // TODO: Add expiry
 
         // Creating a Deployment
-        let hostname = provisioner
+        let _hostname = provisioner
             .provision_challenge_pod(&ts_secret_name, &secret_name, flags, containers)
             .await?;
 
         info!("Kubernetes resources provisioned");
 
-        let response = RunningChallengeBuilder::default()
-            .id(id)
-            .ip(None)
-            .expires_at(Utc::now())
-            .hostname(Some(hostname))
-            .status(ChallengeStatus::Starting)
-            .build()?;
-        Ok(response)
+        Ok(())
     }
 
     pub async fn add_time(
@@ -138,11 +127,13 @@ impl ChallengeOrchestrator {
             .filter_map(|flag| match flag.meta.spec {
                 ChallengeFlagMeta::DynamicMount {
                     ref mount_path,
+                    ref container,
                     permissions,
                 } => Some(DynamicFlag {
                     flag: flag.value.clone(),
                     mount_path: mount_path.clone(),
                     slug: flag.meta.slug.clone(),
+                    container: container.clone(),
                     permissions,
                 }),
                 _ => None,

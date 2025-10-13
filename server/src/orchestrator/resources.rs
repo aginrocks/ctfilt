@@ -1,35 +1,29 @@
-use std::{collections::BTreeMap, sync::Arc};
+use std::{
+    collections::{BTreeMap, HashMap},
+    sync::Arc,
+};
 
 use chrono::{Duration, Utc};
-use color_eyre::eyre::{Context, ContextCompat, Result};
+use color_eyre::eyre::{Context, Result};
 use derive_builder::Builder;
-use headscale::{
-    apis::{
-        configuration::Configuration,
-        headscale_service_api::{
-            headscale_service_create_pre_auth_key, headscale_service_list_users,
-        },
-    },
-    models::V1CreatePreAuthKeyRequest,
-};
 use k8s_openapi::api::core::v1::{
-    Capabilities, Container, EnvVar, EnvVarSource, KeyToPath, LocalObjectReference,
-    ObjectFieldSelector, Pod, PodSpec, Secret, SecretKeySelector, SecretVolumeSource,
-    SecurityContext, Volume, VolumeMount,
+    Container, KeyToPath, LocalObjectReference, Pod, PodSpec, Secret, SecretVolumeSource, Volume,
+    VolumeMount,
 };
 use kube::{Api, Client, api::ObjectMeta};
 use manifests::ChallengeContainer;
 use mongodb::bson::oid::ObjectId;
 
+use crate::vpn::Vpn;
+
 #[derive(Builder, Clone)]
 pub struct ResourceProvisisoner {
     pub kube: Client,
-    pub headscale_config: Arc<Configuration>,
-    pub headscale_public_url: String,
     pub subject: String,
     pub challenge_id: ObjectId,
     pub user_id: ObjectId,
     pub hostname: String,
+    pub vpn: Arc<dyn Vpn>,
 }
 
 #[derive(Clone)]
@@ -37,6 +31,7 @@ pub struct DynamicFlag {
     pub slug: String,
     pub flag: String,
     pub mount_path: String,
+    pub container: Option<String>,
     pub permissions: Option<i32>,
 }
 
@@ -78,42 +73,7 @@ impl ResourceProvisisoner {
     }
 
     pub async fn generate_preauth_key(&self) -> Result<String> {
-        // TODO: Cache user mappings in Redis
-        let users = headscale_service_list_users(&self.headscale_config, None, None, None)
-            .await
-            .wrap_err("Failed to fetch VPN users")?;
-
-        let user_id = users
-            .users
-            .wrap_err("No users found in VPN")?
-            .into_iter()
-            .find_map(|user| {
-                user.provider_id
-                    .map(|id_url| id_url.split('/').next_back().unwrap_or("").to_string())
-                    .and_then(|id| if id == self.subject { user.id } else { None })
-            })
-            .wrap_err("User does not exist in VPN")?;
-
-        let exp = Utc::now() + Duration::hours(1);
-
-        let options = V1CreatePreAuthKeyRequest {
-            user: Some(user_id),
-            ephemeral: Some(true),
-            reusable: Some(false),
-            expiration: Some(exp.to_rfc3339()),
-            ..Default::default()
-        };
-        let response = headscale_service_create_pre_auth_key(&self.headscale_config, options)
-            .await
-            .wrap_err("Failed to create preauth key")?;
-
-        let key = response
-            .pre_auth_key
-            .wrap_err("Missing preauth key")?
-            .key
-            .wrap_err("Missing preauth key")?;
-
-        Ok(key)
+        self.vpn.generate_key(&self.subject).await
     }
 
     /// Creates a Tailscale secret in the cluster and returns its name
@@ -170,95 +130,10 @@ impl ResourceProvisisoner {
         Ok(secret_name)
     }
 
-    /// Crestes a Tailscale sidecar container spec
-    pub fn get_tailscale_sidecar(&self, ts_secret_name: &str) -> Container {
-        // TODO: Migrate to configmaps
-        let env = vec![
-            EnvVar {
-                name: "TS_KUBE_SECRET".to_string(),
-                value: Some("".to_string()),
-                ..Default::default()
-            },
-            EnvVar {
-                name: "TS_STATE_DIR".to_string(),
-                value: Some("/tmp".to_string()),
-                ..Default::default()
-            },
-            EnvVar {
-                name: "TS_EPHEMERAL".to_string(),
-                value: Some("true".to_string()),
-                ..Default::default()
-            },
-            EnvVar {
-                name: "TS_USERSPACE".to_string(),
-                value: Some("false".to_string()),
-                ..Default::default()
-            },
-            EnvVar {
-                name: "TS_DEBUG_FIREWALL_MODE".to_string(),
-                value: Some("auto".to_string()),
-                ..Default::default()
-            },
-            EnvVar {
-                name: "TS_AUTHKEY".to_string(),
-                value_from: Some(EnvVarSource {
-                    secret_key_ref: Some(SecretKeySelector {
-                        name: ts_secret_name.to_string(),
-                        key: "TS_AUTHKEY".to_string(),
-                        optional: Some(true),
-                    }),
-                    ..Default::default()
-                }),
-                ..Default::default()
-            },
-            EnvVar {
-                name: "TS_EXTRA_ARGS".to_string(),
-                value: Some(format!("--login-server={}", self.headscale_public_url)),
-                ..Default::default()
-            },
-            EnvVar {
-                name: "POD_NAME".to_string(),
-                value_from: Some(EnvVarSource {
-                    field_ref: Some(ObjectFieldSelector {
-                        field_path: "metadata.name".to_string(),
-                        ..Default::default()
-                    }),
-                    ..Default::default()
-                }),
-                ..Default::default()
-            },
-            EnvVar {
-                name: "POD_UID".to_string(),
-                value_from: Some(EnvVarSource {
-                    field_ref: Some(ObjectFieldSelector {
-                        field_path: "metadata.uid".to_string(),
-                        ..Default::default()
-                    }),
-                    ..Default::default()
-                }),
-                ..Default::default()
-            },
-        ];
-
-        Container {
-            name: "ts-sidecar".to_string(),
-            image: Some("ghcr.io/tailscale/tailscale:latest".to_string()),
-            env: Some(env),
-            security_context: Some(SecurityContext {
-                capabilities: Some(Capabilities {
-                    add: Some(vec!["NET_ADMIN".to_string()]),
-                    ..Default::default()
-                }),
-                ..Default::default()
-            }),
-            ..Default::default()
-        }
-    }
-
     /// Provisisons a Deployment for the challenge
     pub async fn provision_challenge_pod(
         &self,
-        ts_secret_name: &str,
+        vpn_secret_name: &str,
         flags_secret_name: &str,
         flags: Vec<DynamicFlag>,
         spec_containers: Vec<ChallengeContainer>,
@@ -268,28 +143,40 @@ impl ResourceProvisisoner {
         // TODO: Add support for mounting flags to specific containers (for now they will be mounted to all containers)
         // TODO: Add a challenge container and mount flags
 
-        let flag_mounts = flags
-            .iter()
-            .map(|flag| VolumeMount {
-                name: "flag".to_string(),
-                mount_path: flag.mount_path.clone(),
-                sub_path: Some(flag.slug.clone()),
-                read_only: Some(true),
-                ..Default::default()
-            })
-            .collect::<Vec<_>>();
+        let mut flag_mounts: HashMap<String, Vec<VolumeMount>> = HashMap::new();
+
+        for flag in &flags {
+            flag_mounts
+                .entry(flag.container.clone().unwrap_or("_default".to_string()))
+                .or_default()
+                .push(VolumeMount {
+                    name: "flag".to_string(),
+                    mount_path: flag.mount_path.clone(),
+                    sub_path: Some(flag.slug.clone()),
+                    read_only: Some(true),
+                    ..Default::default()
+                })
+        }
 
         let containers = spec_containers
             .into_iter()
-            .map(|c| Container {
-                name: c.name,
-                image: Some(c.image),
-                args: c.args,
-                command: c.command,
-                volume_mounts: Some(flag_mounts.clone()),
-                // TODO: Remove when proper versioning is in place
-                image_pull_policy: Some("Always".to_string()),
-                ..Default::default()
+            .map(|c| {
+                let mounts = [
+                    flag_mounts.get(&c.name).cloned().unwrap_or_default(),
+                    flag_mounts.get("_default").cloned().unwrap_or_default(),
+                ]
+                .concat();
+
+                Container {
+                    name: c.name,
+                    image: Some(c.image),
+                    args: c.args,
+                    command: c.command,
+                    volume_mounts: Some(mounts),
+                    // TODO: Remove when proper versioning is in place
+                    image_pull_policy: Some("Always".to_string()),
+                    ..Default::default()
+                }
             })
             .collect::<Vec<_>>();
 
@@ -311,7 +198,7 @@ impl ResourceProvisisoner {
             spec: Some(PodSpec {
                 containers: [
                     containers.as_slice(),
-                    &[self.get_tailscale_sidecar(ts_secret_name)],
+                    &[self.vpn.get_sidecar(vpn_secret_name)],
                 ]
                 .concat(),
                 volumes: Some(vec![Volume {

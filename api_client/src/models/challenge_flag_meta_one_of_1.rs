@@ -13,6 +13,9 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Default, Debug, PartialEq, Serialize, Deserialize)]
 pub struct ChallengeFlagMetaOneOf1 {
+    /// To which container the flag should be mounted (if not provided, will be mounted to all containers)
+    #[serde(rename = "container", default, with = "::serde_with::rust::double_option", skip_serializing_if = "Option::is_none")]
+    pub container: Option<Option<String>>,
     /// Where the flag should be mounted inside the container
     #[serde(rename = "mount_path")]
     pub mount_path: String,
@@ -26,6 +29,7 @@ pub struct ChallengeFlagMetaOneOf1 {
 impl ChallengeFlagMetaOneOf1 {
     pub fn new(mount_path: String, r#type: Type) -> ChallengeFlagMetaOneOf1 {
         ChallengeFlagMetaOneOf1 {
+            container: None,
             mount_path,
             permissions: None,
             r#type,

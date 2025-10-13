@@ -4,6 +4,7 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
+**connection_hints** | Option<[**Vec<models::ConnectionHint>**](ConnectionHint.md)> | Connection hints for the user to connect to the challenge | [optional]
 **containers** | [**Vec<models::ChallengeContainer>**](ChallengeContainer.md) | Containers that should be created in the challenge Pod | 
 **r#type** | **String** |  | 
 
