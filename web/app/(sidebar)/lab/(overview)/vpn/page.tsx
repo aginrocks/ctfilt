@@ -12,7 +12,7 @@ export default function Page() {
                 ]}
             />
 
-            <div className="flex justify-center py-4 px-6">
+            <div className="flex justify-center pt-4 p-6">
                 <div className="max-w-2xl w-full">
                     <VpnOnboarding />
                 </div>

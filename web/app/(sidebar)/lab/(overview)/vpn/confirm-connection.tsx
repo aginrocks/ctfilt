@@ -18,7 +18,7 @@ export function ConfirmConnection() {
                     <>
                         <IconCircleCheck className="text-green-500 size-8 mb-2" />
                         <p className="text-lg font-bold">{device.name}</p>
-                        <div className="flex items-center gap-2.5 mt-1 ml-0.5">
+                        <div className="flex items-center gap-2 mt-1 ml-0.5">
                             <PulsingDot speed="slow" color="green" size="sm" />
                             <p className="font-medium text-sm text-muted-foreground">Connected</p>
                         </div>
