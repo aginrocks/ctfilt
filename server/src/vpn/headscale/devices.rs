@@ -27,6 +27,7 @@ impl From<V1Node> for VpnDevice {
                 _ => VpnDeviceType::Client,
             },
             name: value.name.unwrap_or_default(),
+            hostname: value.given_name.unwrap_or_default(),
             ip_addresses: value.ip_addresses.unwrap_or_default(),
             last_seen: value.last_seen,
             created_at: value.created_at,

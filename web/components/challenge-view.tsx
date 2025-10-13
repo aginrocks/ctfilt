@@ -4,7 +4,7 @@ import { IconClockPlus, IconPlayerPlayFilled, IconPlayerStop } from '@tabler/ico
 import { Button, buttonVariants } from './ui/button';
 import { useRunning } from '@lib/atoms';
 import { useExtendChallenge, useStartChallenge, useStopChallenge } from '@lib/mutations';
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { Spinner } from './ui/spinner';
 import { Copyable } from './copyable';
 import { useCountdown } from '@lib/hooks';
@@ -14,6 +14,8 @@ import { EXTEND_TRESHOLD_SECONDS } from '@lib/constants';
 import { RunningChallenge } from '@/types/server/RunningChallenge';
 import { VariantProps } from 'class-variance-authority';
 import { MouseEvent } from 'react';
+import { useAtomValue } from 'jotai';
+import { VpnDevices } from '@lib/atoms/vpn-devices';
 
 export type ChallengeViewProps = {
     challenge: paths['/api/challenges/{challenge_slug}']['get']['responses']['200']['content']['application/json'];
@@ -153,9 +155,15 @@ export function ChallengeActions({
 
 export function ChallengeView({ challenge }: ChallengeViewProps) {
     const running = useRunning(challenge._id);
+    const devices = useAtomValue(VpnDevices);
 
     const remaining = useCountdown(running?.expires_at);
     const canExtend = remaining.seconds <= EXTEND_TRESHOLD_SECONDS;
+
+    const vpnDevice = useMemo(
+        () => devices?.find((d) => d.hostname === running?.hostname),
+        [devices, running?.hostname]
+    );
 
     return (
         <div>
@@ -179,7 +187,9 @@ export function ChallengeView({ challenge }: ChallengeViewProps) {
                             <div className="font-medium text-xs text-muted-foreground mb-0.5">
                                 IP Address
                             </div>
-                            <Copyable value={running.ip || 'Unknown'} />
+                            <Copyable
+                                value={running.ip || vpnDevice?.ip_addresses[0] || 'Loading...'}
+                            />
                         </div>
                         <div className="flex-2">
                             <div className="font-medium text-xs text-muted-foreground mb-0.5">

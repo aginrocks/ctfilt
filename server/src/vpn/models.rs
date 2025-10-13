@@ -15,6 +15,7 @@ pub enum VpnDeviceType {
 pub struct VpnDevice {
     pub r#type: VpnDeviceType,
     pub name: String,
+    pub hostname: String,
     pub ip_addresses: Vec<String>,
     pub last_seen: Option<String>,
     pub created_at: Option<String>,
