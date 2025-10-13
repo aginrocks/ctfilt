@@ -20,13 +20,22 @@ import { CodeBlock } from '@components/ui/codeblock';
 import Image from 'next/image';
 import { InlineCode } from '@components/markdown';
 import { ConfirmConnection } from './confirm-connection';
+import { useOs } from '@mantine/hooks';
+
+const WITH_ISNTRUCTIONS = ['windows', 'macos', 'linux', 'android'];
 
 const formSchema = z.object({
-    os: z.enum(['windows', 'macos', 'linux', 'android']),
+    os: z.enum(WITH_ISNTRUCTIONS).optional(),
 });
 
 export default function VpnOnboarding() {
-    const form = useForm<z.infer<typeof formSchema>>();
+    const detectedOS = useOs();
+
+    const form = useForm<z.infer<typeof formSchema>>({
+        values: {
+            os: WITH_ISNTRUCTIONS.includes(detectedOS) ? detectedOS : undefined,
+        },
+    });
     const os = form.watch('os');
 
     return (
