@@ -81,3 +81,4 @@ utoipa-redoc = { version = "6.0.0", features = ["axum"] }
 utoipa-scalar = { version = "0.3.0", features = ["axum"] }
 validator = { version = "0.20.0", features = ["derive"] }
 visible = "0.0.1"
+rustls = { version = "0.23.31", features = ["ring"] }
