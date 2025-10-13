@@ -1,5 +1,6 @@
 'use client';
 import {
+    IconArrowRight,
     IconBrandAndroid,
     IconBrandApple,
     IconBrandUbuntu,
@@ -132,7 +133,7 @@ export default function VpnOnboarding() {
                                 </p>
                                 <CodeBlock
                                     language="text"
-                                    code="sudo tailscale up --login-server https://vpn.ctf.agin.rocks"
+                                    code="sudo tailscale up --login-server=https://vpn.ctf.agin.rocks"
                                 />
                                 <p className="text-muted-foreground mt-1">
                                     Open the provided link and log in using your CTFILT account.
@@ -160,6 +161,49 @@ export default function VpnOnboarding() {
                                     Click <b>Add Account...</b> and log in using your CTFILT
                                     account.
                                 </p>
+                            </>
+                        )}
+                        {os === 'windows' && (
+                            <>
+                                <p className="text-muted-foreground mt-1">
+                                    In order to use the VPN, you'll need to provide an alternate
+                                    Tailscale server URL. To do so, instead of signing in after
+                                    installation, open Command Prompt and run:
+                                </p>
+                                <CodeBlock
+                                    language="text"
+                                    code="tailscale login --login-server=https://vpn.ctf.agin.rocks"
+                                />
+                                <p className="text-muted-foreground mt-1">
+                                    Open the provided link and log in using your CTFILT account.
+                                </p>
+                            </>
+                        )}
+                        {os === 'android' && (
+                            <>
+                                <p className="text-muted-foreground mt-1">
+                                    In order to use the VPN, you'll need to provide an alternate
+                                    Tailscale server URL. To do so, open the app and go to{' '}
+                                    <b>
+                                        Settings{' '}
+                                        <IconArrowRight className="inline size-4 stroke-3" />{' '}
+                                        Accounts{' '}
+                                        <IconArrowRight className="inline size-4 stroke-3" /> Use an
+                                        alternate server
+                                    </b>
+                                    .
+                                </p>
+                                <div className="gap-2 mt-3 [&_img]:rounded-lg [&_img]:border [&_img]:shadow-md grid grid-cols-4">
+                                    {[1, 2, 3, 4].map((img) => (
+                                        <Image
+                                            key={img}
+                                            src={`/images/tailscale-android-${img}.png`}
+                                            width={300}
+                                            height={600}
+                                            alt=""
+                                        />
+                                    ))}
+                                </div>
                             </>
                         )}
                     </div>
