@@ -26,6 +26,7 @@ use axum_oidc::{OidcAuthLayer, OidcClient, error::MiddlewareError};
 use clap::Parser;
 use color_eyre::Result;
 use color_eyre::eyre::WrapErr;
+use rustls::crypto::{CryptoProvider, aws_lc_rs};
 use serde::{Deserialize, Serialize};
 use tokio::net::TcpListener;
 use tower::ServiceBuilder;
@@ -70,6 +71,9 @@ struct Args {
 #[tokio::main]
 async fn main() -> Result<()> {
     color_eyre::install()?;
+
+    CryptoProvider::install_default(aws_lc_rs::default_provider())
+        .expect("Failed to install default crypto provider");
 
     let args = Args::parse();
 
