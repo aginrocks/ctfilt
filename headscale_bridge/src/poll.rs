@@ -9,7 +9,7 @@ use tokio::time::{Duration, interval};
 
 use color_eyre::Result;
 use fred::prelude::{KeysInterface, Pool, PubsubInterface};
-use tracing::{debug, error, info, instrument, warn};
+use tracing::{debug, error, info, instrument, trace, warn};
 
 use crate::settings::Settings;
 
@@ -26,7 +26,7 @@ pub async fn poll(settings: &Settings, redis: Pool, config: Configuration) {
 
 #[instrument(skip(redis, config))]
 pub async fn sync_data(redis: Pool, config: &Configuration) -> Result<()> {
-    info!("Attempting sync");
+    debug!("Attempting sync");
 
     // Fetching nodes from Headscale
     let nodes = headscale_service_list_nodes(config, None).await?;
@@ -34,7 +34,7 @@ pub async fn sync_data(redis: Pool, config: &Configuration) -> Result<()> {
 
     let nodes_count = nodes_list.len();
 
-    debug!("Fetched {nodes_count} nodes from Headscale");
+    trace!("Fetched {nodes_count} nodes from Headscale");
 
     let mut nodes_map: HashMap<String, Vec<V1Node>> = HashMap::new();
 
@@ -57,7 +57,7 @@ pub async fn sync_data(redis: Pool, config: &Configuration) -> Result<()> {
 
     update_cache_and_publish(&redis, nodes_map).await?;
 
-    info!("Synced {nodes_count} nodes across {users_count} users");
+    debug!("Synced {nodes_count} nodes across {users_count} users");
 
     Ok(())
 }

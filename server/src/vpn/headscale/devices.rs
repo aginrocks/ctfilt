@@ -38,7 +38,7 @@ impl From<V1Node> for VpnDevice {
 
 #[async_trait]
 impl VpnDevices for HeadscaleClient {
-    async fn watch(&self) -> Result<()> {
+    async fn init_watch(&self) -> Result<()> {
         // TODO: Set proper options
         let pubsub = SubscriberClient::new(self.fred.next().client_config(), None, None, None);
         pubsub.init().await?;

@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use chrono::DateTime;
-use color_eyre::eyre::{Context, ContextCompat, Result, eyre};
+use color_eyre::eyre::{Context, ContextCompat, Result, bail, eyre};
 use dashmap::DashMap;
 use exterminator::Extermination;
 use futures::TryStreamExt;
@@ -87,7 +87,7 @@ impl PodWatcher {
             }
         }
 
-        Ok(())
+        bail!("Pod watcher exited unexpectedly");
     }
 
     /// This function won't return an error

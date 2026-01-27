@@ -115,13 +115,7 @@ async fn main() -> Result<()> {
 
     let vpn = Arc::new(HeadscaleClient::new(&settings, fred.clone())?);
 
-    let vpn_watcher = vpn.clone();
-    tokio::spawn(async move {
-        match vpn_watcher.watch().await {
-            Ok(_) => warn!("VPN watcher exited"),
-            Err(e) => error!(error = ?e, "VPN watcher exited with error"),
-        }
-    });
+    vpn.init_watch().await?;
 
     let orchestrator = Arc::new(ChallengeOrchestrator::new(
         kube_client.clone(),
@@ -205,7 +199,8 @@ async fn init_axum(
         .with_redirect_url(app_url.parse()?)
         .with_client_id(state.settings.oidc.client_id.as_str())
         .add_scope("profile")
-        .add_scope("email");
+        .add_scope("email")
+        .add_scope("offline_access");
 
     if let Some(client_secret) = state.settings.oidc.client_secret.as_ref() {
         oidc_client = oidc_client.with_client_secret(client_secret.secret().clone());

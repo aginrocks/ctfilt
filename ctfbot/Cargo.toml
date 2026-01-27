@@ -6,7 +6,7 @@ edition = "2024"
 [dependencies]
 axum = { version = "0.8.4", features = ["macros"] }
 base64 = "0.22.1"
-color-eyre = "0.6.4"
+color-eyre = "0.6.5"
 config = "0.15.11"
 dotenvy = "0.15.7"
 gitea-client = "1.22.1"
